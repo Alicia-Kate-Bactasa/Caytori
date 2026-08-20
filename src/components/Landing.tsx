@@ -259,159 +259,161 @@ export default function Landing({
       <div className="mx-auto max-w-[1380px] px-4 sm:px-6">
         {/* Hero */}
         <section className="grid items-center gap-10 py-16 lg:grid-cols-[1.1fr_0.9fr] lg:py-24">
-        <motion.div
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6 }}
-        >
-          <h1 className="font-display text-5xl font-800 leading-[1.05] tracking-tight sm:text-6xl">
-            Centralize IT support.
-            <br />
-            <span style={{ color: "var(--primary)" }}>Resolve</span> issues
-            faster.
-          </h1>
-          <p className="mt-6 max-w-lg text-lg leading-relaxed text-muted-foreground">
-            Caytori turns scattered IT requests into one structured workflow —
-            employees report, IT resolves, and every issue is tracked from
-            creation to closure.
-          </p>
-          <div className="mt-8 flex flex-wrap items-center gap-3">
-            <Button onClick={onEnter}>Get started</Button>
-            <span className="text-sm text-muted-foreground">
-              Already have an account?{" "}
-              <button
-                onClick={onEnter}
-                className="font-500 text-primary transition-opacity hover:opacity-80"
-              >
-                Sign in
-              </button>
-            </span>
-          </div>
-        </motion.div>
-
-        <motion.div
-          initial={{ opacity: 0, scale: 0.96 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ duration: 0.6, delay: 0.15 }}
-        >
-          <Card className="p-6">
-            {/* Header */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
-                <span className="font-mono text-sm font-600 text-primary">
-                  CT-000124
-                </span>
-                <span
-                  className="rounded-md px-1.5 py-0.5 font-mono text-[11px] font-medium uppercase"
-                  style={{
-                    background:
-                      "color-mix(in srgb, var(--warning) 15%, transparent)",
-                    color: "var(--warning)",
-                  }}
+          <motion.div
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+          >
+            <h1 className="font-display text-5xl font-800 leading-[1.04] tracking-tight sm:text-6xl lg:text-7xl xl:text-[76px]">
+              Centralize IT support.
+              <br />
+              <span style={{ color: "var(--primary)" }}>Resolve</span> issues
+              faster.
+            </h1>
+            <p className="mt-6 max-w-xl text-xl sm:text-2xl leading-relaxed text-muted-foreground font-400">
+              Caytori turns scattered IT requests into one structured workflow —
+              employees report, IT resolves, and every issue is tracked from
+              creation to closure.
+            </p>
+            <div className="mt-8 flex flex-wrap items-center gap-4">
+              <Button onClick={onEnter} size="lg">
+                Get started
+              </Button>
+              <span className="text-base text-muted-foreground">
+                Already have an account?{" "}
+                <button
+                  onClick={onEnter}
+                  className="font-600 text-primary transition-opacity hover:opacity-80"
                 >
-                  High
-                </span>
-              </div>
-              <span
-                className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium"
-                style={{
-                  background:
-                    "color-mix(in srgb, var(--primary) 15%, transparent)",
-                  color: "var(--primary)",
-                }}
-              >
-                <span
-                  className="h-1.5 w-1.5 rounded-full"
-                  style={{ background: "var(--primary)" }}
-                />{" "}
-                In Progress
+                  Sign in
+                </button>
               </span>
             </div>
+          </motion.div>
 
-            <h3 className="mt-3 font-display text-lg font-600">
-              Unable to access company network
-            </h3>
-            <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-              The computer cannot connect to the company network since 9:00 AM.
-              Restarting and reconnecting to Wi-Fi did not help.
-            </p>
-
-            {/* Tags */}
-            <div className="mt-3 flex flex-wrap gap-1.5">
-              {["Finance", "Network"].map((t) => (
-                <span
-                  key={t}
-                  className="neu-flat rounded-full px-2.5 py-1 text-[11px] font-500 text-muted-foreground"
-                >
-                  {t}
-                </span>
-              ))}
-            </div>
-
-            {/* Lifecycle progress */}
-            <div className="mt-5 flex items-center gap-1.5">
-              {["Open", "In Progress", "Resolved", "Closed"].map((s, i) => (
-                <div key={s} className="flex-1">
-                  <div
-                    className="h-1.5 rounded-full"
+          <motion.div
+            initial={{ opacity: 0, scale: 0.96 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.6, delay: 0.15 }}
+          >
+            <Card className="p-7 sm:p-9">
+              {/* Header */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2.5">
+                  <span className="font-mono text-base font-700 text-primary">
+                    CT-000124
+                  </span>
+                  <span
+                    className="rounded-md px-2.5 py-0.5 font-mono text-xs font-600 uppercase"
                     style={{
-                      background: i <= 1 ? "var(--primary)" : "var(--muted)",
+                      background:
+                        "color-mix(in srgb, var(--warning) 15%, transparent)",
+                      color: "var(--warning)",
                     }}
-                  />
-                  <div
-                    className="mt-1.5 text-[10px] text-muted-foreground"
-                    style={{ color: i <= 1 ? "var(--primary)" : undefined }}
                   >
-                    {s}
-                  </div>
+                    High
+                  </span>
                 </div>
-              ))}
-            </div>
-
-            <div
-              className="my-5 h-px"
-              style={{ background: "var(--border)" }}
-            />
-
-            {/* People */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2.5">
-                <Avatar name="Maria Santos" size={34} />
-                <div>
-                  <div className="text-[11px] text-muted-foreground">
-                    Reported by
-                  </div>
-                  <div className="text-sm font-500">Maria Santos</div>
-                </div>
-              </div>
-              <ArrowRight size={16} className="text-muted-foreground" />
-              <div className="flex items-center gap-2.5">
-                <div className="text-right">
-                  <div className="text-[11px] text-muted-foreground">
-                    Assigned to
-                  </div>
-                  <div className="text-sm font-500">Vivienne Claire</div>
-                </div>
-                <Avatar name="Mark Villanueva" size={34} />
-              </div>
-            </div>
-
-            {/* Latest comment */}
-            <div className="neu-inset mt-5 rounded-2xl px-4 py-3">
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-600">Mark Villanueva</span>
-                <span className="text-[11px] text-muted-foreground">
-                  · 12 min ago
+                <span
+                  className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-600"
+                  style={{
+                    background:
+                      "color-mix(in srgb, var(--primary) 15%, transparent)",
+                    color: "var(--primary)",
+                  }}
+                >
+                  <span
+                    className="h-2 w-2 rounded-full"
+                    style={{ background: "var(--primary)" }}
+                  />{" "}
+                  In Progress
                 </span>
               </div>
-              <p className="mt-1 text-sm text-muted-foreground">
-                On it now — checking the switch port on your floor. I'll update
-                you shortly.
+
+              <h3 className="mt-4 font-display text-xl font-700 sm:text-2xl">
+                Unable to access company network
+              </h3>
+              <p className="mt-2 text-base leading-relaxed text-muted-foreground sm:text-lg">
+                The computer cannot connect to the company network since 9:00 AM.
+                Restarting and reconnecting to Wi-Fi did not help.
               </p>
-            </div>
-          </Card>
-        </motion.div>
-      </section>
+
+              {/* Tags */}
+              <div className="mt-4 flex flex-wrap gap-2">
+                {["Finance", "Network"].map((t) => (
+                  <span
+                    key={t}
+                    className="neu-flat rounded-full px-3 py-1 text-xs font-500 text-muted-foreground"
+                  >
+                    {t}
+                  </span>
+                ))}
+              </div>
+
+              {/* Lifecycle progress */}
+              <div className="mt-6 flex items-center gap-2">
+                {["Open", "In Progress", "Resolved", "Closed"].map((s, i) => (
+                  <div key={s} className="flex-1">
+                    <div
+                      className="h-2 rounded-full"
+                      style={{
+                        background: i <= 1 ? "var(--primary)" : "var(--muted)",
+                      }}
+                    />
+                    <div
+                      className="mt-1.5 text-xs font-500 text-muted-foreground"
+                      style={{ color: i <= 1 ? "var(--primary)" : undefined }}
+                    >
+                      {s}
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <div
+                className="my-6 h-px"
+                style={{ background: "var(--border)" }}
+              />
+
+              {/* People */}
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <Avatar name="Maria Santos" size={40} />
+                  <div>
+                    <div className="text-xs text-muted-foreground">
+                      Reported by
+                    </div>
+                    <div className="text-base font-600">Maria Santos</div>
+                  </div>
+                </div>
+                <ArrowRight size={18} className="text-muted-foreground" />
+                <div className="flex items-center gap-3">
+                  <div className="text-right">
+                    <div className="text-xs text-muted-foreground">
+                      Assigned to
+                    </div>
+                    <div className="text-base font-600">Vivienne Claire</div>
+                  </div>
+                  <Avatar name="Mark Villanueva" size={40} />
+                </div>
+              </div>
+
+              {/* Latest comment */}
+              <div className="neu-inset mt-6 rounded-2xl px-5 py-4">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-700">Mark Villanueva</span>
+                  <span className="text-xs text-muted-foreground">
+                    · 12 min ago
+                  </span>
+                </div>
+                <p className="mt-1.5 text-base text-muted-foreground">
+                  On it now — checking the switch port on your floor. I'll update
+                  you shortly.
+                </p>
+              </div>
+            </Card>
+          </motion.div>
+        </section>
 
       {/* Features */}
       <section className="py-16">
