@@ -125,9 +125,9 @@ export default function Landing({
   }
 
   return (
-    <div className="mx-auto max-w-[1380px] px-4 sm:px-6">
+    <div className="w-full">
       {/* Nav */}
-      <header className="flex items-center justify-between py-6">
+      <header className="mx-auto flex max-w-[1600px] items-center justify-between px-6 py-6 sm:px-10">
         <Logo />
         <div className="flex items-center gap-2">
           <div ref={demoRef} className="relative">
@@ -255,8 +255,10 @@ export default function Landing({
         </div>
       </header>
 
-      {/* Hero */}
-      <section className="grid items-center gap-10 py-16 lg:grid-cols-[1.1fr_0.9fr] lg:py-24">
+      {/* Main Content Container */}
+      <div className="mx-auto max-w-[1380px] px-4 sm:px-6">
+        {/* Hero */}
+        <section className="grid items-center gap-10 py-16 lg:grid-cols-[1.1fr_0.9fr] lg:py-24">
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
@@ -554,5 +556,6 @@ export default function Landing({
         </footer>
       </section>
     </div>
-  )
+  </div>
+)
 }
