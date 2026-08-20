@@ -71,7 +71,7 @@ export default function Dashboard({
     (t) => !t.assignee && t.status === "OPEN",
   ).length
 
-  let cards: { icon: LucideIcon label: string value: number token: string }[] =
+  let cards: { icon: LucideIcon; label: string; value: number; token: string }[] =
     []
   if (role === "platform_admin") {
     cards = [

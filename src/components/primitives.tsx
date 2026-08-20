@@ -288,7 +288,7 @@ export function PriorityBadge({ priority }: { priority: Priority }) {
   )
 }
 
-export function Avatar({ name, size = 36 }: { name: string size?: number }) {
+export function Avatar({ name, size = 36 }: { name: string; size?: number }) {
   const initials = name
     .split(" ")
     .map((n) => n[0])

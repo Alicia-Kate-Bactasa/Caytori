@@ -6,7 +6,7 @@ export type Status = "OPEN" | "IN_PROGRESS" | "RESOLVED" | "CLOSED"
 export type Priority = "Low" | "Medium" | "High" | "Critical"
 export type Category = "Hardware" | "Software" | "Network" | "Account & Access" | "Email" | "Printer" | "Security" | "Other"
 
-export const ROLES: { id: Role label: string blurb: string }[] = [
+export const ROLES: { id: Role; label: string; blurb: string }[] = [
   {
     id: "platform_admin",
     label: "Caytori Admin",
@@ -396,7 +396,7 @@ export const TICKETS: Ticket[] = [
 ]
 
 // ---------- Analytics (plain statistics) ----------
-export const statusMeta: Record<Status, { label: string token: string }> = {
+export const statusMeta: Record<Status, { label: string; token: string }> = {
   OPEN: { label: "Open", token: "var(--warning)" },
   IN_PROGRESS: { label: "In Progress", token: "var(--primary)" },
   RESOLVED: { label: "Resolved", token: "var(--accent)" },
@@ -429,7 +429,7 @@ export function avgResolution(tickets: Ticket[]): number {
   return done.reduce((s, t) => s + (t.resolutionHours ?? 0), 0) / done.length
 }
 
-export const FAQS: { q: string a: string }[] = [
+export const FAQS: { q: string; a: string }[] = [
   {
     q: "How do employees join a company?",
     a: "Employees never self-select a company. A Company Admin sends a secure email invitation; the employee sets a password and is automatically linked to the correct company and department.",
