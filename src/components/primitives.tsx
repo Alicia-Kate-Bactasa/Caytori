@@ -226,12 +226,12 @@ export function Button({
 }) {
   const pad =
     size === "sm"
-      ? "px-3.5 py-1.5 text-sm font-500"
+      ? "px-4 py-2 text-sm font-600"
       : size === "md"
-        ? "px-5 py-2.5 text-sm font-600"
+        ? "px-6 py-3 text-base font-600"
         : size === "lg"
-          ? "px-7 py-3.5 text-base font-600"
-          : "px-9 py-4 text-lg font-700"
+          ? "px-8 py-3.5 text-lg font-600"
+          : "px-10 py-4 text-xl font-700"
   const styles: Record<string, string> = {
     primary: "text-primary-foreground",
     danger: "text-white",

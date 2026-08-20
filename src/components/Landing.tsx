@@ -125,7 +125,7 @@ export default function Landing({
   }
 
   return (
-    <div className="mx-auto max-w-7xl px-6 sm:px-10 lg:px-12">
+    <div className="mx-auto max-w-[1380px] px-4 sm:px-6">
       {/* Nav */}
       <header className="flex items-center justify-between py-6">
         <Logo />
