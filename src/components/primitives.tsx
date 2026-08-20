@@ -222,9 +222,16 @@ export function Button({
   variant?: "primary" | "ghost" | "surface" | "danger"
   className?: string
   type?: "button" | "submit"
-  size?: "sm" | "md"
+  size?: "sm" | "md" | "lg" | "xl"
 }) {
-  const pad = size === "sm" ? "px-3.5 py-1.5 text-sm" : "px-5 py-2.5 text-sm"
+  const pad =
+    size === "sm"
+      ? "px-3.5 py-1.5 text-sm font-500"
+      : size === "md"
+        ? "px-5 py-2.5 text-sm font-600"
+        : size === "lg"
+          ? "px-7 py-3.5 text-base font-600"
+          : "px-9 py-4 text-lg font-700"
   const styles: Record<string, string> = {
     primary: "text-primary-foreground",
     danger: "text-white",
