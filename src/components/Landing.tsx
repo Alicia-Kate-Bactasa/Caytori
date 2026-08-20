@@ -125,9 +125,9 @@ export default function Landing({
   }
 
   return (
-    <div className="mx-auto max-w-[1440px] px-6 sm:px-10 lg:px-12 xl:px-16">
+    <div className="mx-auto max-w-7xl px-6 sm:px-10 lg:px-12">
       {/* Nav */}
-      <header className="flex items-center justify-between py-4 sm:py-5">
+      <header className="flex items-center justify-between py-6">
         <Logo />
         <div className="flex items-center gap-2">
           <div ref={demoRef} className="relative">
@@ -256,30 +256,30 @@ export default function Landing({
       </header>
 
       {/* Hero */}
-      <section className="grid items-center gap-10 py-10 sm:py-14 lg:grid-cols-[1.1fr_0.9fr] lg:gap-14 lg:py-16">
+      <section className="grid items-center gap-10 py-16 lg:grid-cols-[1.1fr_0.9fr] lg:py-24">
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
         >
-          <h1 className="font-display text-5xl font-800 leading-[1.04] tracking-tight sm:text-6xl lg:text-7xl xl:text-[80px]">
+          <h1 className="font-display text-5xl font-800 leading-[1.05] tracking-tight sm:text-6xl">
             Centralize IT support.
             <br />
             <span style={{ color: "var(--primary)" }}>Resolve</span> issues
             faster.
           </h1>
-          <p className="mt-6 max-w-2xl text-lg sm:text-xl leading-relaxed text-muted-foreground font-400">
+          <p className="mt-6 max-w-lg text-lg leading-relaxed text-muted-foreground">
             Caytori turns scattered IT requests into one structured workflow —
             employees report, IT resolves, and every issue is tracked from
             creation to closure.
           </p>
-          <div className="mt-8 flex flex-wrap items-center gap-4">
-            <Button onClick={onEnter} size="lg">Get started</Button>
-            <span className="text-base text-muted-foreground">
+          <div className="mt-8 flex flex-wrap items-center gap-3">
+            <Button onClick={onEnter}>Get started</Button>
+            <span className="text-sm text-muted-foreground">
               Already have an account?{" "}
               <button
                 onClick={onEnter}
-                className="font-600 text-primary transition-opacity hover:opacity-80"
+                className="font-500 text-primary transition-opacity hover:opacity-80"
               >
                 Sign in
               </button>
@@ -292,15 +292,15 @@ export default function Landing({
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.6, delay: 0.15 }}
         >
-          <Card className="p-7 sm:p-8">
+          <Card className="p-6">
             {/* Header */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
-                <span className="font-mono text-base font-700 text-primary">
+                <span className="font-mono text-sm font-600 text-primary">
                   CT-000124
                 </span>
                 <span
-                  className="rounded-md px-2 py-0.5 font-mono text-xs font-600 uppercase"
+                  className="rounded-md px-1.5 py-0.5 font-mono text-[11px] font-medium uppercase"
                   style={{
                     background:
                       "color-mix(in srgb, var(--warning) 15%, transparent)",
@@ -311,7 +311,7 @@ export default function Landing({
                 </span>
               </div>
               <span
-                className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-600"
+                className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-medium"
                 style={{
                   background:
                     "color-mix(in srgb, var(--primary) 15%, transparent)",
@@ -319,27 +319,27 @@ export default function Landing({
                 }}
               >
                 <span
-                  className="h-2 w-2 rounded-full"
+                  className="h-1.5 w-1.5 rounded-full"
                   style={{ background: "var(--primary)" }}
                 />{" "}
                 In Progress
               </span>
             </div>
 
-            <h3 className="mt-4 font-display text-xl font-700 sm:text-2xl">
+            <h3 className="mt-3 font-display text-lg font-600">
               Unable to access company network
             </h3>
-            <p className="mt-2 text-base leading-relaxed text-muted-foreground">
+            <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
               The computer cannot connect to the company network since 9:00 AM.
               Restarting and reconnecting to Wi-Fi did not help.
             </p>
 
             {/* Tags */}
-            <div className="mt-4 flex flex-wrap gap-2">
+            <div className="mt-3 flex flex-wrap gap-1.5">
               {["Finance", "Network"].map((t) => (
                 <span
                   key={t}
-                  className="neu-flat rounded-full px-3 py-1 text-xs font-500 text-muted-foreground"
+                  className="neu-flat rounded-full px-2.5 py-1 text-[11px] font-500 text-muted-foreground"
                 >
                   {t}
                 </span>
@@ -347,17 +347,17 @@ export default function Landing({
             </div>
 
             {/* Lifecycle progress */}
-            <div className="mt-6 flex items-center gap-2">
+            <div className="mt-5 flex items-center gap-1.5">
               {["Open", "In Progress", "Resolved", "Closed"].map((s, i) => (
                 <div key={s} className="flex-1">
                   <div
-                    className="h-2 rounded-full"
+                    className="h-1.5 rounded-full"
                     style={{
                       background: i <= 1 ? "var(--primary)" : "var(--muted)",
                     }}
                   />
                   <div
-                    className="mt-1.5 text-xs font-500 text-muted-foreground"
+                    className="mt-1.5 text-[10px] text-muted-foreground"
                     style={{ color: i <= 1 ? "var(--primary)" : undefined }}
                   >
                     {s}
@@ -367,42 +367,42 @@ export default function Landing({
             </div>
 
             <div
-              className="my-6 h-px"
+              className="my-5 h-px"
               style={{ background: "var(--border)" }}
             />
 
             {/* People */}
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <Avatar name="Maria Santos" size={40} />
+              <div className="flex items-center gap-2.5">
+                <Avatar name="Maria Santos" size={34} />
                 <div>
-                  <div className="text-xs text-muted-foreground">
+                  <div className="text-[11px] text-muted-foreground">
                     Reported by
                   </div>
-                  <div className="text-base font-600">Maria Santos</div>
+                  <div className="text-sm font-500">Maria Santos</div>
                 </div>
               </div>
-              <ArrowRight size={18} className="text-muted-foreground" />
-              <div className="flex items-center gap-3">
+              <ArrowRight size={16} className="text-muted-foreground" />
+              <div className="flex items-center gap-2.5">
                 <div className="text-right">
-                  <div className="text-xs text-muted-foreground">
+                  <div className="text-[11px] text-muted-foreground">
                     Assigned to
                   </div>
-                  <div className="text-base font-600">Mark Villanueva</div>
+                  <div className="text-sm font-500">Vivienne Claire</div>
                 </div>
-                <Avatar name="Mark Villanueva" size={40} />
+                <Avatar name="Mark Villanueva" size={34} />
               </div>
             </div>
 
             {/* Latest comment */}
-            <div className="neu-inset mt-6 rounded-2xl px-5 py-4">
+            <div className="neu-inset mt-5 rounded-2xl px-4 py-3">
               <div className="flex items-center gap-2">
-                <span className="text-sm font-700">Mark Villanueva</span>
-                <span className="text-xs text-muted-foreground">
+                <span className="text-xs font-600">Mark Villanueva</span>
+                <span className="text-[11px] text-muted-foreground">
                   · 12 min ago
                 </span>
               </div>
-              <p className="mt-1.5 text-base text-muted-foreground">
+              <p className="mt-1 text-sm text-muted-foreground">
                 On it now — checking the switch port on your floor. I'll update
                 you shortly.
               </p>
@@ -412,11 +412,11 @@ export default function Landing({
       </section>
 
       {/* Features */}
-      <section className="py-12 sm:py-16 lg:py-20">
-        <h2 className="max-w-2xl font-display text-4xl font-800 tracking-tight sm:text-5xl lg:text-6xl">
+      <section className="py-16">
+        <h2 className="max-w-xl font-display text-3xl font-700 tracking-tight sm:text-4xl">
           Everything IT support needs, nothing it doesn't
         </h2>
-        <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {features.map((f, i) => (
             <motion.div
               key={f.title}
@@ -425,17 +425,17 @@ export default function Landing({
               viewport={{ once: true, margin: "-60px" }}
               transition={{ duration: 0.45, delay: i * 0.05 }}
             >
-              <Card className="neu-hover h-full p-7 sm:p-8">
+              <Card className="neu-hover h-full p-6">
                 <div
-                  className="neu-inset grid h-14 w-14 place-items-center rounded-2xl"
+                  className="neu-inset grid h-12 w-12 place-items-center rounded-2xl"
                   style={{ color: "var(--primary)" }}
                 >
-                  <f.icon size={26} />
+                  <f.icon size={20} />
                 </div>
-                <h3 className="mt-5 font-display text-xl font-700 sm:text-2xl">
+                <h3 className="mt-5 font-display text-lg font-600">
                   {f.title}
                 </h3>
-                <p className="mt-2 text-base leading-relaxed text-muted-foreground sm:text-lg">
+                <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
                   {f.body}
                 </p>
               </Card>
@@ -445,16 +445,16 @@ export default function Landing({
       </section>
 
       {/* Lifecycle */}
-      <section className="py-12 sm:py-16 lg:py-20">
+      <section className="py-16">
         <div className="text-center">
-          <h2 className="font-display text-4xl font-800 tracking-tight sm:text-5xl lg:text-6xl">
+          <h2 className="font-display text-3xl font-700 tracking-tight sm:text-4xl">
             A ticket's journey
           </h2>
-          <p className="mx-auto mt-3 max-w-lg text-lg text-muted-foreground sm:text-xl">
+          <p className="mx-auto mt-3 max-w-md text-muted-foreground">
             Four clear stages keep everyone aligned.
           </p>
         </div>
-        <div className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {lifecycle.map((s, i) => (
             <motion.div
               key={s.step}
@@ -463,9 +463,9 @@ export default function Landing({
               viewport={{ once: true }}
               transition={{ duration: 0.4, delay: i * 0.08 }}
             >
-              <Card className="relative h-full p-7 sm:p-8">
+              <Card className="relative h-full p-6">
                 <span
-                  className="font-mono text-5xl font-700 sm:text-6xl"
+                  className="font-mono text-4xl font-600"
                   style={{
                     color:
                       "color-mix(in srgb, var(--primary) 35%, transparent)",
@@ -473,8 +473,8 @@ export default function Landing({
                 >
                   0{i + 1}
                 </span>
-                <h3 className="mt-4 font-display text-xl font-700 sm:text-2xl">{s.step}</h3>
-                <p className="mt-1.5 text-base text-muted-foreground">{s.desc}</p>
+                <h3 className="mt-3 font-display text-lg font-600">{s.step}</h3>
+                <p className="mt-1 text-sm text-muted-foreground">{s.desc}</p>
               </Card>
             </motion.div>
           ))}
@@ -482,30 +482,30 @@ export default function Landing({
       </section>
 
       {/* FAQ */}
-      <section className="py-12 sm:py-16 lg:py-20">
+      <section className="py-16">
         <div className="text-center">
-          <h2 className="font-display text-4xl font-800 tracking-tight sm:text-5xl lg:text-6xl">
+          <h2 className="font-display text-3xl font-700 tracking-tight sm:text-4xl">
             Frequently asked questions
           </h2>
-          <p className="mx-auto mt-3 max-w-lg text-lg text-muted-foreground sm:text-xl">
+          <p className="mx-auto mt-3 max-w-md text-muted-foreground">
             The essentials of how Caytori keeps IT support organized and fair.
           </p>
         </div>
 
-        <div className="mt-10 grid gap-x-6 gap-y-4 sm:grid-cols-2">
+        <div className="mt-12 grid gap-x-6 gap-y-3 sm:grid-cols-2">
           {FAQS.map((f, i) => {
             const isOpen = faq === i
             return (
               <Card key={i} className="h-max overflow-hidden">
                 <button
                   onClick={() => setFaq(isOpen ? null : i)}
-                  className="flex w-full items-center justify-between gap-4 px-6 py-5 text-left"
+                  className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left"
                 >
-                  <span className="font-display text-lg font-600 leading-snug sm:text-xl">
+                  <span className="font-display text-[15px] font-600 leading-snug">
                     {f.q}
                   </span>
                   <ChevronDown
-                    size={22}
+                    size={18}
                     className="shrink-0 transition-transform duration-300"
                     style={{
                       transform: isOpen ? "rotate(180deg)" : "none",
@@ -524,7 +524,7 @@ export default function Landing({
                   transition={{ duration: 0.3, ease: "easeInOut" }}
                   className="overflow-hidden"
                 >
-                  <p className="px-6 pb-6 text-base leading-relaxed text-muted-foreground sm:text-lg">
+                  <p className="px-5 pb-4 text-sm leading-relaxed text-muted-foreground">
                     {f.a}
                   </p>
                 </motion.div>
@@ -535,20 +535,20 @@ export default function Landing({
       </section>
 
       {/* CTA + footer */}
-      <section className="py-12 sm:py-16 lg:py-20">
-        <Card className="flex flex-col items-center gap-7 p-10 text-center sm:p-14 lg:p-16">
-          <h2 className="max-w-2xl font-display text-4xl font-800 tracking-tight sm:text-5xl lg:text-6xl">
+      <section className="py-16">
+        <Card className="flex flex-col items-center gap-6 p-12 text-center">
+          <h2 className="max-w-xl font-display text-3xl font-700 tracking-tight sm:text-4xl">
             Ready to keep business moving?
           </h2>
-          <p className="max-w-lg text-lg text-muted-foreground sm:text-xl">
+          <p className="max-w-md text-muted-foreground">
             Create your account in minutes and bring every IT request into one
             place.
           </p>
-          <Button onClick={onEnter} size="xl">Get started</Button>
+          <Button onClick={onEnter}>Get started</Button>
         </Card>
-        <footer className="flex flex-col items-center justify-between gap-4 py-8 text-base text-muted-foreground sm:flex-row sm:py-10">
+        <footer className="flex flex-col items-center justify-between gap-3 py-10 text-sm text-muted-foreground sm:flex-row">
           <span>© 2026 Caytori — Centralize IT Support.</span>
-          <span className="font-mono text-sm">
+          <span className="font-mono text-xs">
             Built with care · Multi-tenant SaaS
           </span>
         </footer>
