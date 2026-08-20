@@ -127,7 +127,7 @@ export default function Landing({
   return (
     <div className="w-full">
       {/* Nav */}
-      <header className="mx-auto flex max-w-[1480px] items-center justify-between px-6 py-6 sm:px-10">
+      <header className="mx-auto flex max-w-[1540px] items-center justify-between px-6 py-6 sm:px-10">
         <Logo />
         <div className="flex items-center gap-2">
           <div ref={demoRef} className="relative">
