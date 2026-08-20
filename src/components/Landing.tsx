@@ -125,7 +125,7 @@ export default function Landing({
   }
 
   return (
-    <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:px-8">
+    <div className="mx-auto max-w-[1440px] px-6 sm:px-10 lg:px-12 xl:px-16">
       {/* Nav */}
       <header className="flex items-center justify-between py-4 sm:py-5">
         <Logo />
@@ -268,7 +268,7 @@ export default function Landing({
             <span style={{ color: "var(--primary)" }}>Resolve</span> issues
             faster.
           </h1>
-          <p className="mt-6 max-w-lg text-lg leading-relaxed text-muted-foreground">
+          <p className="mt-6 max-w-xl text-lg leading-relaxed text-muted-foreground">
             Caytori turns scattered IT requests into one structured workflow —
             employees report, IT resolves, and every issue is tracked from
             creation to closure.
