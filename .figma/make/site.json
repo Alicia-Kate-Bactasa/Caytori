@@ -1,4 +1,7 @@
 {
   "title": "Caytori — IT Support Platform",
-  "description": "IT Services Ticketing & Support Management Platform"
+  "description": "IT Services Ticketing & Support Management Platform",
+  "icons": {
+    "icon": "/favicon.png"
+  }
 }
