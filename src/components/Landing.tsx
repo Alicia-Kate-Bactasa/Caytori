@@ -22,7 +22,7 @@ import { FAQS, type Role } from "../data"
 
 export const DEMO_KEY = "ishieSoGwapa"
 
-const DEMO_ROLES: { id: Role; label: string; scope: string; icon: LucideIcon }[] =
+const DEMO_ROLES: { id: Role label: string scope: string icon: LucideIcon }[] =
   [
     {
       id: "platform_admin",

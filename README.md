@@ -66,56 +66,6 @@ Caytori/
 
 ---
 
-## 💻 Getting Started
-
-### Prerequisites
-
-Ensure you have **Node.js 18+** installed.
-
-### Installation
-
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/your-org/caytori.git
-   cd caytori
-   ```
-
-2. Install dependencies:
-   ```bash
-   npm install
-   # or
-   pnpm install
-   ```
-
-### Development
-
-Start the local development server:
-```bash
-npm run dev
-```
-Open [http://localhost:5173](http://localhost:5173) in your browser.
-
-### Build for Production
-
-Build the production artifacts:
-```bash
-npm run build
-```
-
-Preview the production build locally:
-```bash
-npm run preview
-```
-
-### Code Formatting
-
-Format code using `oxfmt`:
-```bash
-npm run format
-```
-
----
-
 ## 🎫 Ticket Business Rules
 
 1. **Company Scope**: Every ticket belongs strictly to one company tenant.
