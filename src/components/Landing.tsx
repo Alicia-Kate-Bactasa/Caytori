@@ -417,17 +417,24 @@ export default function Landing({
 
       {/* Features */}
       <section className="py-16">
-        <h2 className="max-w-xl font-display text-3xl font-700 tracking-tight sm:text-4xl">
-          Everything IT support needs, nothing it doesn't
-        </h2>
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ amount: 0.3 }}
+          transition={{ duration: 0.5 }}
+        >
+          <h2 className="max-w-xl font-display text-3xl font-700 tracking-tight sm:text-4xl">
+            Everything IT support needs, nothing it doesn't
+          </h2>
+        </motion.div>
         <div className="mt-12 grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {features.map((f, i) => (
             <motion.div
               key={f.title}
-              initial={{ opacity: 0, y: 14 }}
+              initial={{ opacity: 0, y: 24 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-60px" }}
-              transition={{ duration: 0.45, delay: i * 0.05 }}
+              viewport={{ amount: 0.2 }}
+              transition={{ duration: 0.45, delay: i * 0.06 }}
             >
               <Card className="neu-hover h-full p-6">
                 <div
@@ -450,21 +457,27 @@ export default function Landing({
 
       {/* Lifecycle */}
       <section className="py-16">
-        <div className="text-center">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ amount: 0.3 }}
+          transition={{ duration: 0.5 }}
+          className="text-center"
+        >
           <h2 className="font-display text-3xl font-700 tracking-tight sm:text-4xl">
             A ticket's journey
           </h2>
           <p className="mx-auto mt-3 max-w-md text-muted-foreground">
             Four clear stages keep everyone aligned.
           </p>
-        </div>
+        </motion.div>
         <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
           {lifecycle.map((s, i) => (
             <motion.div
               key={s.step}
-              initial={{ opacity: 0, y: 14 }}
+              initial={{ opacity: 0, y: 24 }}
               whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
+              viewport={{ amount: 0.2 }}
               transition={{ duration: 0.4, delay: i * 0.08 }}
             >
               <Card className="relative h-full p-6">
@@ -487,52 +500,66 @@ export default function Landing({
 
       {/* FAQ */}
       <section className="py-16">
-        <div className="text-center">
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ amount: 0.3 }}
+          transition={{ duration: 0.5 }}
+          className="text-center"
+        >
           <h2 className="font-display text-3xl font-700 tracking-tight sm:text-4xl">
             Frequently asked questions
           </h2>
           <p className="mx-auto mt-3 max-w-md text-muted-foreground">
             The essentials of how Caytori keeps IT support organized and fair.
           </p>
-        </div>
+        </motion.div>
 
         <div className="mt-12 grid gap-x-6 gap-y-3 sm:grid-cols-2">
           {FAQS.map((f, i) => {
             const isOpen = faq === i
             return (
-              <Card key={i} className="h-max overflow-hidden">
-                <button
-                  onClick={() => setFaq(isOpen ? null : i)}
-                  className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left"
-                >
-                  <span className="font-display text-[15px] font-600 leading-snug">
-                    {f.q}
-                  </span>
-                  <ChevronDown
-                    size={18}
-                    className="shrink-0 transition-transform duration-300"
-                    style={{
-                      transform: isOpen ? "rotate(180deg)" : "none",
-                      color: isOpen
-                        ? "var(--primary)"
-                        : "var(--muted-foreground)",
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, y: 16 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ amount: 0.2 }}
+                transition={{ duration: 0.35, delay: i * 0.05 }}
+              >
+                <Card className="h-max overflow-hidden">
+                  <button
+                    onClick={() => setFaq(isOpen ? null : i)}
+                    className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left"
+                  >
+                    <span className="font-display text-[15px] font-600 leading-snug">
+                      {f.q}
+                    </span>
+                    <ChevronDown
+                      size={18}
+                      className="shrink-0 transition-transform duration-300"
+                      style={{
+                        transform: isOpen ? "rotate(180deg)" : "none",
+                        color: isOpen
+                          ? "var(--primary)"
+                          : "var(--muted-foreground)",
+                      }}
+                    />
+                  </button>
+                  <motion.div
+                    initial={false}
+                    animate={{
+                      height: isOpen ? "auto" : 0,
+                      opacity: isOpen ? 1 : 0,
                     }}
-                  />
-                </button>
-                <motion.div
-                  initial={false}
-                  animate={{
-                    height: isOpen ? "auto" : 0,
-                    opacity: isOpen ? 1 : 0,
-                  }}
-                  transition={{ duration: 0.3, ease: "easeInOut" }}
-                  className="overflow-hidden"
-                >
-                  <p className="px-5 pb-4 text-sm leading-relaxed text-muted-foreground">
-                    {f.a}
-                  </p>
-                </motion.div>
-              </Card>
+                    transition={{ duration: 0.3, ease: "easeInOut" }}
+                    className="overflow-hidden"
+                  >
+                    <p className="px-5 pb-4 text-sm leading-relaxed text-muted-foreground">
+                      {f.a}
+                    </p>
+                  </motion.div>
+                </Card>
+              </motion.div>
             )
           })}
         </div>
@@ -540,16 +567,23 @@ export default function Landing({
 
       {/* CTA + footer */}
       <section className="py-16">
-        <Card className="flex flex-col items-center gap-6 p-12 text-center">
-          <h2 className="max-w-xl font-display text-3xl font-700 tracking-tight sm:text-4xl">
-            Ready to keep business moving?
-          </h2>
-          <p className="max-w-md text-muted-foreground">
-            Create your account in minutes and bring every IT request into one
-            place.
-          </p>
-          <Button onClick={onEnter}>Get started</Button>
-        </Card>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.96, y: 20 }}
+          whileInView={{ opacity: 1, scale: 1, y: 0 }}
+          viewport={{ amount: 0.3 }}
+          transition={{ duration: 0.5 }}
+        >
+          <Card className="flex flex-col items-center gap-6 p-12 text-center">
+            <h2 className="max-w-xl font-display text-3xl font-700 tracking-tight sm:text-4xl">
+              Ready to keep business moving?
+            </h2>
+            <p className="max-w-md text-muted-foreground">
+              Create your account in minutes and bring every IT request into one
+              place.
+            </p>
+            <Button onClick={onEnter}>Get started</Button>
+          </Card>
+        </motion.div>
         <footer className="flex flex-col items-center justify-between gap-3 py-10 text-sm text-muted-foreground sm:flex-row">
           <span>© 2026 Caytori — Centralize IT Support.</span>
           <span className="font-mono text-xs">
