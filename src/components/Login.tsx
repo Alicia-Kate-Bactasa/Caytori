@@ -64,14 +64,14 @@ export default function Login({
         <Logo />
 
         {/* Neumorphic Segmented Tab Switcher */}
-        <div className="neu-inset mt-6 flex rounded-2xl p-1.5">
+        <div className="neu-inset mt-6 flex rounded-full p-1.5">
           <button
             type="button"
             onClick={() => {
               setMode("signin")
               setError("")
             }}
-            className="relative flex-1 py-2.5 text-xs font-600 transition-colors cursor-pointer"
+            className="relative flex-1 py-3 text-xs font-600 transition-colors cursor-pointer"
             style={{
               color: mode === "signin" ? "var(--foreground)" : "var(--muted-foreground)",
             }}
@@ -79,8 +79,8 @@ export default function Login({
             {mode === "signin" && (
               <motion.div
                 layoutId="login-tab-pill"
-                className="neu absolute inset-0 rounded-xl"
-                transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                className="neu absolute inset-0 rounded-full"
+                transition={{ type: "spring", stiffness: 350, damping: 26, mass: 0.8 }}
               />
             )}
             <span className="relative z-10 flex items-center justify-center gap-1.5">
@@ -94,7 +94,7 @@ export default function Login({
               setMode("signup")
               setError("")
             }}
-            className="relative flex-1 py-2.5 text-xs font-600 transition-colors cursor-pointer"
+            className="relative flex-1 py-3 text-xs font-600 transition-colors cursor-pointer"
             style={{
               color: mode === "signup" ? "var(--foreground)" : "var(--muted-foreground)",
             }}
@@ -102,8 +102,8 @@ export default function Login({
             {mode === "signup" && (
               <motion.div
                 layoutId="login-tab-pill"
-                className="neu absolute inset-0 rounded-xl"
-                transition={{ type: "spring", stiffness: 400, damping: 30 }}
+                className="neu absolute inset-0 rounded-full"
+                transition={{ type: "spring", stiffness: 350, damping: 26, mass: 0.8 }}
               />
             )}
             <span className="relative z-10 flex items-center justify-center gap-1.5">
