@@ -80,7 +80,7 @@ export default function Login({
               <motion.div
                 layoutId="login-tab-pill"
                 className="neu absolute inset-0 rounded-full"
-                transition={{ duration: 0.22, ease: "easeInOut" }}
+                transition={{ type: "tween", duration: 0.2, ease: "easeInOut" }}
               />
             )}
             <span className="relative z-10 flex items-center justify-center gap-1.5">
@@ -103,7 +103,7 @@ export default function Login({
               <motion.div
                 layoutId="login-tab-pill"
                 className="neu absolute inset-0 rounded-full"
-                transition={{ duration: 0.22, ease: "easeInOut" }}
+                transition={{ type: "tween", duration: 0.2, ease: "easeInOut" }}
               />
             )}
             <span className="relative z-10 flex items-center justify-center gap-1.5">
