@@ -539,21 +539,17 @@ export default function Landing({
                       }}
                     />
                   </button>
-                  <AnimatePresence initial={false}>
-                    {isOpen && (
-                      <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: "auto", opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.22, ease: "easeInOut" }}
-                        className="overflow-hidden"
-                      >
-                        <p className="px-5 pb-4 pt-1 text-sm leading-relaxed text-muted-foreground border-t border-[var(--border)] mt-1">
-                          {f.a}
-                        </p>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
+                  <div
+                    className={`grid transition-[grid-template-rows,opacity] duration-250 ease-in-out ${
+                      isOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
+                    }`}
+                  >
+                    <div className="overflow-hidden">
+                      <p className="px-5 pb-4 pt-1 text-sm leading-relaxed text-muted-foreground border-t border-[var(--border)] mt-1">
+                        {f.a}
+                      </p>
+                    </div>
+                  </div>
                 </Card>
               )
             })}
@@ -582,21 +578,17 @@ export default function Landing({
                       }}
                     />
                   </button>
-                  <AnimatePresence initial={false}>
-                    {isOpen && (
-                      <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: "auto", opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        transition={{ duration: 0.22, ease: "easeInOut" }}
-                        className="overflow-hidden"
-                      >
-                        <p className="px-5 pb-4 pt-1 text-sm leading-relaxed text-muted-foreground border-t border-[var(--border)] mt-1">
-                          {f.a}
-                        </p>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
+                  <div
+                    className={`grid transition-[grid-template-rows,opacity] duration-250 ease-in-out ${
+                      isOpen ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
+                    }`}
+                  >
+                    <div className="overflow-hidden">
+                      <p className="px-5 pb-4 pt-1 text-sm leading-relaxed text-muted-foreground border-t border-[var(--border)] mt-1">
+                        {f.a}
+                      </p>
+                    </div>
+                  </div>
                 </Card>
               )
             })}
