@@ -447,8 +447,8 @@ export const FAQS: { q: string; a: string }[] = [
     a: "Employees see only their own tickets. IT Staff work on tickets assigned to them. IT Admins view all company tickets and handle assignment and reassignment.",
   },
   {
-    q: "Does the analytics dashboard use AI?",
-    a: "No. All dashboards are built on simple, transparent statistics — counts, distributions, and averages over your real ticket data. No black-box models are involved.",
+    q: "What analytics and metrics are available?",
+    a: "Caytori provides real-time visibility into ticket volumes, status breakdowns, category distributions, and average resolution times across departments.",
   },
   {
     q: "Can a company run with just one IT person?",

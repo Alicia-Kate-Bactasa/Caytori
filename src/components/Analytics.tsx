@@ -131,37 +131,54 @@ export default function Analytics({ tickets }: { tickets: Ticket[] }) {
           title="Status distribution"
           subtitle="Live snapshot of the pipeline"
         >
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Pie
-                data={byStatus}
-                dataKey="value"
-                nameKey="name"
-                innerRadius={58}
-                outerRadius={90}
-                paddingAngle={3}
-                stroke="none"
-              >
-                {byStatus.map((d) => (
-                  <Cell key={d.name} fill={d.token} />
-                ))}
-              </Pie>
-              <Tooltip {...tip()} />
-            </PieChart>
-          </ResponsiveContainer>
-          <div className="mt-3 flex flex-wrap justify-center gap-x-5 gap-y-1.5">
-            {byStatus.map((d) => (
-              <span
-                key={d.name}
-                className="inline-flex items-center gap-1.5 text-xs text-muted-foreground"
-              >
-                <span
-                  className="h-2 w-2 rounded-full"
-                  style={{ background: d.token }}
-                />
-                {d.name} · {d.value}
-              </span>
-            ))}
+          <div className="flex h-full flex-col justify-between sm:flex-row items-center gap-4">
+            <div className="relative h-48 w-full sm:w-1/2 shrink-0">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={byStatus}
+                    dataKey="value"
+                    nameKey="name"
+                    innerRadius={48}
+                    outerRadius={70}
+                    paddingAngle={4}
+                    stroke="none"
+                  >
+                    {byStatus.map((d) => (
+                      <Cell key={d.name} fill={d.token} />
+                    ))}
+                  </Pie>
+                  <Tooltip {...tip()} />
+                </PieChart>
+              </ResponsiveContainer>
+              <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
+                <span className="font-mono text-xl font-700">{tickets.length}</span>
+                <span className="text-[10px] text-muted-foreground font-600 uppercase tracking-wider">Total</span>
+              </div>
+            </div>
+            <div className="flex w-full sm:w-1/2 flex-col justify-center gap-2">
+              {byStatus.map((d) => {
+                const pct = tickets.length > 0 ? Math.round((d.value / tickets.length) * 100) : 0
+                return (
+                  <div
+                    key={d.name}
+                    className="neu-flat flex items-center justify-between rounded-xl px-3 py-2 text-xs"
+                  >
+                    <span className="flex items-center gap-2 font-500">
+                      <span
+                        className="h-2.5 w-2.5 rounded-full shrink-0"
+                        style={{ background: d.token }}
+                      />
+                      {d.name}
+                    </span>
+                    <div className="flex items-center gap-2 font-mono">
+                      <span className="font-600">{d.value}</span>
+                      <span className="text-[10px] text-muted-foreground">({pct}%)</span>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
           </div>
         </Panel>
       </div>
