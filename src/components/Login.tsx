@@ -63,24 +63,24 @@ export default function Login({
       <div className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-6 py-16">
         <Logo />
 
-        {/* 3D Segmented Tab Switcher Track */}
-        <div className="neu-inset mt-6 flex rounded-2xl p-1.5 shadow-inner">
+        {/* Neumorphic Segmented Tab Switcher */}
+        <div className="neu-inset mt-6 flex rounded-2xl p-1.5">
           <button
             type="button"
             onClick={() => {
               setMode("signin")
               setError("")
             }}
-            className="relative flex-1 py-2.5 text-xs font-700 transition-colors cursor-pointer"
+            className="relative flex-1 py-2.5 text-xs font-600 transition-colors cursor-pointer"
             style={{
-              color: mode === "signin" ? "var(--primary)" : "var(--muted-foreground)",
+              color: mode === "signin" ? "var(--foreground)" : "var(--muted-foreground)",
             }}
           >
             {mode === "signin" && (
               <motion.div
                 layoutId="login-tab-pill"
-                className="neu-sm absolute inset-0 rounded-xl border border-[var(--border)] shadow-md"
-                transition={{ type: "spring", stiffness: 450, damping: 32 }}
+                className="neu absolute inset-0 rounded-xl"
+                transition={{ type: "spring", stiffness: 400, damping: 30 }}
               />
             )}
             <span className="relative z-10 flex items-center justify-center gap-1.5">
@@ -94,16 +94,16 @@ export default function Login({
               setMode("signup")
               setError("")
             }}
-            className="relative flex-1 py-2.5 text-xs font-700 transition-colors cursor-pointer"
+            className="relative flex-1 py-2.5 text-xs font-600 transition-colors cursor-pointer"
             style={{
-              color: mode === "signup" ? "var(--primary)" : "var(--muted-foreground)",
+              color: mode === "signup" ? "var(--foreground)" : "var(--muted-foreground)",
             }}
           >
             {mode === "signup" && (
               <motion.div
                 layoutId="login-tab-pill"
-                className="neu-sm absolute inset-0 rounded-xl border border-[var(--border)] shadow-md"
-                transition={{ type: "spring", stiffness: 450, damping: 32 }}
+                className="neu absolute inset-0 rounded-xl"
+                transition={{ type: "spring", stiffness: 400, damping: 30 }}
               />
             )}
             <span className="relative z-10 flex items-center justify-center gap-1.5">
