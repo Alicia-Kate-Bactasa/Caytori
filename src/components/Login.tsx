@@ -7,6 +7,8 @@ import {
   User,
   Building2,
   ChevronDown,
+  LogIn,
+  UserPlus,
 } from "lucide-react"
 import { Button, Logo } from "./primitives"
 import type { Role } from "../data"
@@ -61,40 +63,96 @@ export default function Login({
       <div className="mx-auto flex min-h-screen max-w-md flex-col justify-center px-6 py-16">
         <Logo />
 
-        <h1 className="mt-8 font-display text-3xl font-700 tracking-tight">
-          {isUp ? "Register your company" : "Welcome back"}
-        </h1>
-        <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
-          {isUp
-            ? "We'll set you up as your company's Admin, and you can invite your IT team and employees once you're inside."
-            : "Good to see you again — pop in your details below and we'll get you back to your tickets."}
-        </p>
+        {/* 3D Segmented Tab Switcher Track */}
+        <div className="neu-inset mt-6 flex rounded-2xl p-1.5 shadow-inner">
+          <button
+            type="button"
+            onClick={() => {
+              setMode("signin")
+              setError("")
+            }}
+            className="relative flex-1 py-2.5 text-xs font-700 transition-colors cursor-pointer"
+            style={{
+              color: mode === "signin" ? "var(--primary)" : "var(--muted-foreground)",
+            }}
+          >
+            {mode === "signin" && (
+              <motion.div
+                layoutId="login-tab-pill"
+                className="neu-sm absolute inset-0 rounded-xl border border-[var(--border)] shadow-md"
+                transition={{ type: "spring", stiffness: 450, damping: 32 }}
+              />
+            )}
+            <span className="relative z-10 flex items-center justify-center gap-1.5">
+              <LogIn size={15} />
+              Sign in
+            </span>
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setMode("signup")
+              setError("")
+            }}
+            className="relative flex-1 py-2.5 text-xs font-700 transition-colors cursor-pointer"
+            style={{
+              color: mode === "signup" ? "var(--primary)" : "var(--muted-foreground)",
+            }}
+          >
+            {mode === "signup" && (
+              <motion.div
+                layoutId="login-tab-pill"
+                className="neu-sm absolute inset-0 rounded-xl border border-[var(--border)] shadow-md"
+                transition={{ type: "spring", stiffness: 450, damping: 32 }}
+              />
+            )}
+            <span className="relative z-10 flex items-center justify-center gap-1.5">
+              <UserPlus size={15} />
+              Register company
+            </span>
+          </button>
+        </div>
 
-        <form onSubmit={submit} className="mt-8 space-y-4">
-          <AnimatePresence initial={false} mode="popLayout">
+        {/* Immediate Title & Description (No Fade Out) */}
+        <div className="mt-6">
+          <h1 className="font-display text-3xl font-700 tracking-tight">
+            {isUp ? "Register your company" : "Welcome back"}
+          </h1>
+          <p className="mt-2 text-sm leading-relaxed text-muted-foreground">
+            {isUp
+              ? "We'll set you up as your company's Admin, and you can invite your IT team and employees once you're inside."
+              : "Good to see you again — pop in your details below and we'll get you back to your tickets."}
+          </p>
+        </div>
+
+        <form onSubmit={submit} className="mt-6 space-y-4">
+          {/* Height Expansion for Registration Fields (No Fade Out) */}
+          <AnimatePresence initial={false}>
             {isUp && (
               <motion.div
                 key="up-fields"
-                initial={{ opacity: 0, y: -6 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -6 }}
-                transition={{ duration: 0.2 }}
-                className="space-y-4"
+                initial={{ height: 0, opacity: 1 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 1 }}
+                transition={{ duration: 0.26, ease: [0.16, 1, 0.3, 1] }}
+                className="overflow-hidden"
               >
-                <LabeledInput
-                  icon={User}
-                  label="Full name"
-                  value={name}
-                  onChange={setName}
-                  placeholder="Maria Santos"
-                />
-                <LabeledInput
-                  icon={Building2}
-                  label="Company name"
-                  value={company}
-                  onChange={setCompany}
-                  placeholder="Acme Corp"
-                />
+                <div className="space-y-4 pt-1 pb-1">
+                  <LabeledInput
+                    icon={User}
+                    label="Full name"
+                    value={name}
+                    onChange={setName}
+                    placeholder="Maria Santos"
+                  />
+                  <LabeledInput
+                    icon={Building2}
+                    label="Company name"
+                    value={company}
+                    onChange={setCompany}
+                    placeholder="Acme Corp"
+                  />
+                </div>
               </motion.div>
             )}
           </AnimatePresence>
@@ -116,45 +174,61 @@ export default function Login({
             type="password"
           />
 
-          <AnimatePresence initial={false} mode="popLayout">
+          {/* Height Expansion for Confirm Password Field (No Fade Out) */}
+          <AnimatePresence initial={false}>
             {isUp && (
               <motion.div
-                key="confirm"
-                initial={{ opacity: 0, y: -6 }}
-                animate={{ opacity: 1, y: 0 }}
-                exit={{ opacity: 0, y: -6 }}
-                transition={{ duration: 0.2 }}
+                key="confirm-field"
+                initial={{ height: 0, opacity: 1 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 1 }}
+                transition={{ duration: 0.26, ease: [0.16, 1, 0.3, 1] }}
+                className="overflow-hidden"
               >
-                <LabeledInput
-                  icon={Lock}
-                  label="Confirm password"
-                  value={confirm}
-                  onChange={setConfirm}
-                  placeholder="••••••••"
-                  type="password"
-                />
+                <div className="pt-1 pb-1">
+                  <LabeledInput
+                    icon={Lock}
+                    label="Confirm password"
+                    value={confirm}
+                    onChange={setConfirm}
+                    placeholder="••••••••"
+                    type="password"
+                  />
+                </div>
               </motion.div>
             )}
           </AnimatePresence>
 
-          {!isUp && (
-            <div className="flex items-center justify-between text-xs">
-              <label className="flex items-center gap-2 text-muted-foreground">
-                <input
-                  type="checkbox"
-                  defaultChecked
-                  className="accent-[var(--primary)]"
-                />{" "}
-                Remember me
-              </label>
-              <button
-                type="button"
-                className="text-primary transition-opacity hover:opacity-80"
+          {/* Remember me & Forgot password (No Fade Out) */}
+          <AnimatePresence initial={false}>
+            {!isUp && (
+              <motion.div
+                key="remember-me"
+                initial={{ height: 0, opacity: 1 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 1 }}
+                transition={{ duration: 0.2, ease: "easeInOut" }}
+                className="overflow-hidden"
               >
-                Forgot password?
-              </button>
-            </div>
-          )}
+                <div className="flex items-center justify-between text-xs pt-1 pb-1">
+                  <label className="flex items-center gap-2 text-muted-foreground cursor-pointer select-none">
+                    <input
+                      type="checkbox"
+                      defaultChecked
+                      className="accent-[var(--primary)]"
+                    />{" "}
+                    Remember me
+                  </label>
+                  <button
+                    type="button"
+                    className="text-primary transition-opacity hover:opacity-80 cursor-pointer"
+                  >
+                    Forgot password?
+                  </button>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
           {error && (
             <p className="text-sm" style={{ color: "var(--danger)" }}>
@@ -167,25 +241,12 @@ export default function Login({
           </Button>
         </form>
 
-        <p className="mt-6 text-center text-sm text-muted-foreground">
-          {isUp ? "Already have an account? " : "Starting a new company? "}
-          <button
-            type="button"
-            onClick={() => {
-              setMode(isUp ? "signin" : "signup")
-              setError("")
-            }}
-            className="font-600 text-primary transition-opacity hover:opacity-80"
-          >
-            {isUp ? "Sign in" : "Register your company"}
-          </button>
-        </p>
         {!isUp && (
-          <div className="mx-auto mt-3 w-full max-w-xs">
+          <div className="mx-auto mt-4 w-full max-w-xs overflow-hidden">
             <button
               type="button"
               onClick={() => setHelp((v) => !v)}
-              className="mx-auto flex items-center gap-1 text-[11px] text-muted-foreground transition-colors hover:text-foreground"
+              className="mx-auto flex items-center gap-1 text-[11px] text-muted-foreground transition-colors hover:text-foreground cursor-pointer"
             >
               Not sure which one to use?
               <ChevronDown
@@ -194,18 +255,21 @@ export default function Login({
                 style={{ transform: help ? "rotate(180deg)" : "none" }}
               />
             </button>
-            <motion.div
-              initial={false}
-              animate={{ height: help ? "auto" : 0, opacity: help ? 1 : 0 }}
-              transition={{ duration: 0.28, ease: "easeInOut" }}
-              className="overflow-hidden"
-            >
-              <p className="pt-2 text-center text-[11px] leading-relaxed text-muted-foreground">
-                If your team already uses Caytori, your admin will send you an
-                invite — just sign in here once you're all set. Only setting
-                things up for a brand-new company? Registering is for you.
-              </p>
-            </motion.div>
+            <AnimatePresence initial={false}>
+              {help && (
+                <motion.p
+                  initial={{ height: 0, opacity: 1 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{ height: 0, opacity: 1 }}
+                  transition={{ duration: 0.2, ease: "easeInOut" }}
+                  className="pt-2 text-center text-[11px] leading-relaxed text-muted-foreground overflow-hidden"
+                >
+                  If your team already uses Caytori, your admin will send you an
+                  invite — just sign in here once you're all set. Only setting
+                  things up for a brand-new company? Registering is for you.
+                </motion.p>
+              )}
+            </AnimatePresence>
           </div>
         )}
       </div>
