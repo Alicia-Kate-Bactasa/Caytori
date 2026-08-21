@@ -15,6 +15,8 @@ import {
   Moon,
   LogOut,
   ChevronDown,
+  ChevronLeft,
+  ChevronRight,
   Bell,
   Menu,
   X,
@@ -191,7 +193,7 @@ export default function AppShell({
       case "profile":
         return <Profile role={role} onSignOut={onSignOut} />
       case "help":
-        return <Help />
+        return <Help onNavigate={go} />
       default:
         return null
     }
@@ -241,24 +243,22 @@ export default function AppShell({
           collapsed ? "w-[86px]" : "w-[262px]"
         }`}
       >
-        <div className="flex items-center justify-between">
-          <Brand mini={collapsed} />
-        </div>
-        <NavList mini={collapsed} />
-        <button
-          onClick={() => setCollapsed((c) => !c)}
-          aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-          title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-          className={`neu-sm neu-press grid h-10 w-10 place-items-center rounded-full text-muted-foreground transition-colors hover:text-foreground ${
-            collapsed ? "self-center" : "self-end"
+        <div
+          className={`flex items-center ${
+            collapsed ? "flex-col gap-3.5" : "justify-between px-1"
           }`}
         >
-          {collapsed ? (
-            <PanelLeftOpen size={18} />
-          ) : (
-            <PanelLeftClose size={18} />
-          )}
-        </button>
+          <Brand mini={collapsed} />
+          <button
+            onClick={() => setCollapsed((c) => !c)}
+            aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+            title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+            className="neu-sm neu-press grid h-9 w-9 shrink-0 place-items-center rounded-xl text-muted-foreground transition-colors hover:text-foreground"
+          >
+            {collapsed ? <ChevronRight size={17} /> : <ChevronLeft size={17} />}
+          </button>
+        </div>
+        <NavList mini={collapsed} />
       </aside>
 
       {/* Mobile drawer */}
@@ -552,45 +552,139 @@ export default function AppShell({
   )
 }
 
-function Help() {
+function Help({ onNavigate }: { onNavigate?: (page: string) => void }) {
   const [open, setOpen] = useState<number | null>(0)
+
+  const half = Math.ceil(FAQS.length / 2)
+  const col1 = FAQS.slice(0, half)
+  const col2 = FAQS.slice(half)
+
   return (
-    <div className="max-w-3xl">
-      <h1 className="font-display text-2xl font-700 tracking-tight">
-        Help & FAQ
-      </h1>
-      <p className="mt-1 text-sm text-muted-foreground">
-        Answers to the most common questions about Caytori.
-      </p>
-      <div className="mt-6 space-y-3">
-        {FAQS.map((f, i) => (
-          <Card key={i} className="overflow-hidden">
-            <button
-              onClick={() => setOpen(open === i ? null : i)}
-              className="flex w-full items-center justify-between gap-4 px-6 py-5 text-left"
-            >
-              <span className="font-display font-600">{f.q}</span>
-              <ChevronDown
-                size={18}
-                className="shrink-0 text-muted-foreground transition-transform duration-300"
-                style={{ transform: open === i ? "rotate(180deg)" : "none" }}
-              />
-            </button>
-            <motion.div
-              initial={false}
-              animate={{
-                height: open === i ? "auto" : 0,
-                opacity: open === i ? 1 : 0,
-              }}
-              transition={{ duration: 0.35, ease: "easeInOut" }}
-              className="overflow-hidden"
-            >
-              <p className="px-6 pb-5 text-sm leading-relaxed text-muted-foreground">
-                {f.a}
-              </p>
-            </motion.div>
+    <div className="w-full space-y-6">
+      <div>
+        <h1 className="font-display text-2xl font-700 tracking-tight">
+          Help & FAQ
+        </h1>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Answers to the most common questions about Caytori.
+        </p>
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-[1fr_320px] xl:grid-cols-[1fr_340px] items-start">
+        {/* FAQs 2-column grid */}
+        <div className="grid gap-3 md:grid-cols-2 items-start">
+          <div className="flex flex-col gap-3">
+            {col1.map((f, i) => {
+              const isOpen = open === i
+              return (
+                <Card key={i} className="overflow-hidden">
+                  <button
+                    onClick={() => setOpen(isOpen ? null : i)}
+                    className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left cursor-pointer"
+                  >
+                    <span className="font-display font-600 text-sm leading-snug">{f.q}</span>
+                    <ChevronDown
+                      size={17}
+                      className="shrink-0 text-muted-foreground transition-transform duration-300"
+                      style={{
+                        transform: isOpen ? "rotate(180deg)" : "none",
+                        color: isOpen ? "var(--primary)" : undefined,
+                      }}
+                    />
+                  </button>
+                  <AnimatePresence initial={false}>
+                    {isOpen && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.22, ease: "easeInOut" }}
+                        className="overflow-hidden"
+                      >
+                        <p className="px-5 pb-4 pt-1 text-xs leading-relaxed text-muted-foreground border-t border-[var(--border)] mt-1">
+                          {f.a}
+                        </p>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </Card>
+              )
+            })}
+          </div>
+
+          <div className="flex flex-col gap-3">
+            {col2.map((f, i) => {
+              const originalIndex = i + half
+              const isOpen = open === originalIndex
+              return (
+                <Card key={originalIndex} className="overflow-hidden">
+                  <button
+                    onClick={() => setOpen(isOpen ? null : originalIndex)}
+                    className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left cursor-pointer"
+                  >
+                    <span className="font-display font-600 text-sm leading-snug">{f.q}</span>
+                    <ChevronDown
+                      size={17}
+                      className="shrink-0 text-muted-foreground transition-transform duration-300"
+                      style={{
+                        transform: isOpen ? "rotate(180deg)" : "none",
+                        color: isOpen ? "var(--primary)" : undefined,
+                      }}
+                    />
+                  </button>
+                  <AnimatePresence initial={false}>
+                    {isOpen && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.22, ease: "easeInOut" }}
+                        className="overflow-hidden"
+                      >
+                        <p className="px-5 pb-4 pt-1 text-xs leading-relaxed text-muted-foreground border-t border-[var(--border)] mt-1">
+                          {f.a}
+                        </p>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </Card>
+              )
+            })}
+          </div>
+        </div>
+
+        {/* Right Sidebar Support Card */}
+        <div className="space-y-4">
+          <Card className="p-5 space-y-3">
+            <h3 className="font-display font-600 text-base">Need more help?</h3>
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              If your issue isn't covered here, submit a ticket and our IT support team will take care of it.
+            </p>
+            {onNavigate && (
+              <Button
+                onClick={() => onNavigate("tickets_my")}
+                className="w-full mt-2"
+                size="sm"
+              >
+                Go to My Tickets
+              </Button>
+            )}
           </Card>
-        ))}
+
+          <Card className="p-5 space-y-3">
+            <h3 className="font-display font-600 text-sm">Support Hours</h3>
+            <div className="space-y-2 text-xs text-muted-foreground">
+              <div className="flex justify-between">
+                <span>Mon – Fri</span>
+                <span className="font-mono text-foreground font-500">8:00 AM – 6:00 PM</span>
+              </div>
+              <div className="flex justify-between">
+                <span>Urgent Issues</span>
+                <span className="font-mono text-primary font-500">24/7 On-Call</span>
+              </div>
+            </div>
+          </Card>
+        </div>
       </div>
     </div>
   )

@@ -69,8 +69,8 @@ const features = [
   },
   {
     icon: BarChart3,
-    title: "Simple analytics",
-    body: "Plain, transparent statistics — counts, distributions, resolution times. No AI black boxes.",
+    title: "Performance metrics",
+    body: "Track ticket volumes, resolution speeds, and status breakdowns across all departments in real time.",
   },
   {
     icon: ShieldCheck,
@@ -515,21 +515,15 @@ export default function Landing({
           </p>
         </motion.div>
 
-        <div className="mt-12 grid gap-x-6 gap-y-3 sm:grid-cols-2">
-          {FAQS.map((f, i) => {
-            const isOpen = faq === i
-            return (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, y: 16 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ amount: 0.2 }}
-                transition={{ duration: 0.35, delay: i * 0.05 }}
-              >
-                <Card className="h-max overflow-hidden">
+        <div className="mt-12 grid gap-4 sm:grid-cols-2 items-start">
+          <div className="flex flex-col gap-3">
+            {FAQS.slice(0, Math.ceil(FAQS.length / 2)).map((f, i) => {
+              const isOpen = faq === i
+              return (
+                <Card key={i} className="overflow-hidden">
                   <button
                     onClick={() => setFaq(isOpen ? null : i)}
-                    className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left"
+                    className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left cursor-pointer"
                   >
                     <span className="font-display text-[15px] font-600 leading-snug">
                       {f.q}
@@ -545,23 +539,68 @@ export default function Landing({
                       }}
                     />
                   </button>
-                  <motion.div
-                    initial={false}
-                    animate={{
-                      height: isOpen ? "auto" : 0,
-                      opacity: isOpen ? 1 : 0,
-                    }}
-                    transition={{ duration: 0.3, ease: "easeInOut" }}
-                    className="overflow-hidden"
-                  >
-                    <p className="px-5 pb-4 text-sm leading-relaxed text-muted-foreground">
-                      {f.a}
-                    </p>
-                  </motion.div>
+                  <AnimatePresence initial={false}>
+                    {isOpen && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.22, ease: "easeInOut" }}
+                        className="overflow-hidden"
+                      >
+                        <p className="px-5 pb-4 pt-1 text-sm leading-relaxed text-muted-foreground border-t border-[var(--border)] mt-1">
+                          {f.a}
+                        </p>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </Card>
-              </motion.div>
-            )
-          })}
+              )
+            })}
+          </div>
+          <div className="flex flex-col gap-3">
+            {FAQS.slice(Math.ceil(FAQS.length / 2)).map((f, i) => {
+              const originalIndex = i + Math.ceil(FAQS.length / 2)
+              const isOpen = faq === originalIndex
+              return (
+                <Card key={originalIndex} className="overflow-hidden">
+                  <button
+                    onClick={() => setFaq(isOpen ? null : originalIndex)}
+                    className="flex w-full items-center justify-between gap-4 px-5 py-4 text-left cursor-pointer"
+                  >
+                    <span className="font-display text-[15px] font-600 leading-snug">
+                      {f.q}
+                    </span>
+                    <ChevronDown
+                      size={18}
+                      className="shrink-0 transition-transform duration-300"
+                      style={{
+                        transform: isOpen ? "rotate(180deg)" : "none",
+                        color: isOpen
+                          ? "var(--primary)"
+                          : "var(--muted-foreground)",
+                      }}
+                    />
+                  </button>
+                  <AnimatePresence initial={false}>
+                    {isOpen && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        transition={{ duration: 0.22, ease: "easeInOut" }}
+                        className="overflow-hidden"
+                      >
+                        <p className="px-5 pb-4 pt-1 text-sm leading-relaxed text-muted-foreground border-t border-[var(--border)] mt-1">
+                          {f.a}
+                        </p>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </Card>
+              )
+            })}
+          </div>
         </div>
       </section>
 
