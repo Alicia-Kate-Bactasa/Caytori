@@ -1,3 +1,4 @@
+import { useState } from "react"
 import { motion } from "motion/react"
 import type { LucideIcon } from "lucide-react"
 import {
@@ -18,15 +19,16 @@ import {
   STAFF,
   avgResolution,
 } from "../data"
+import { TicketModal } from "./Tickets"
+
+const now = () => new Date().toISOString()
 
 function StatCard({
-  icon: Icon,
   label,
   value,
   token,
   delay,
 }: {
-  icon: LucideIcon
   label: string
   value: string | number
   token: string
@@ -39,16 +41,19 @@ function StatCard({
       transition={{ duration: 0.4, delay }}
     >
       <Card className="neu-hover p-5">
-        <div className="flex items-start justify-between">
-          <div
-            className="neu-inset grid h-11 w-11 place-items-center rounded-2xl"
+        <div className="flex items-center justify-between gap-2">
+          <h3
+            className="font-display text-base font-600 tracking-tight"
             style={{ color: token }}
           >
-            <Icon size={19} />
-          </div>
+            {label}
+          </h3>
+          <span
+            className="h-2.5 w-2.5 rounded-full shrink-0"
+            style={{ background: token }}
+          />
         </div>
-        <div className="mt-4 font-display text-3xl font-700">{value}</div>
-        <div className="mt-1 text-sm text-muted-foreground">{label}</div>
+        <div className="mt-3 font-display text-3xl font-700">{value}</div>
       </Card>
     </motion.div>
   )
@@ -57,11 +62,72 @@ function StatCard({
 export default function Dashboard({
   role,
   tickets,
+  onChange,
 }: {
   role: Role
   tickets: Ticket[]
+  onChange?: (t: Ticket[]) => void
 }) {
+  const [selectedTicketId, setSelectedTicketId] = useState<string | null>(null)
+  const activeTicket = tickets.find((t) => t.id === selectedTicketId) ?? null
+
   const me = CURRENT_USER[role]
+
+  function update(
+    id: string,
+    patch: Partial<Ticket>,
+    activity?: string,
+    actor = me.name,
+  ) {
+    if (!onChange) return
+    onChange(
+      tickets.map((t) =>
+        t.id === id
+          ? {
+              ...t,
+              ...patch,
+              updatedAt: now(),
+              activity: activity
+                ? [
+                    ...t.activity,
+                    {
+                      id: crypto.randomUUID(),
+                      actor,
+                      action: activity,
+                      at: now(),
+                    },
+                  ]
+                : t.activity,
+            }
+          : t,
+      ),
+    )
+  }
+
+  function addComment(id: string, text: string) {
+    if (!onChange) return
+    onChange(
+      tickets.map((t) =>
+        t.id === id
+          ? {
+              ...t,
+              updatedAt: now(),
+              comments: [
+                ...t.comments,
+                {
+                  id: crypto.randomUUID(),
+                  author: me.name,
+                  role,
+                  text,
+                  at: now(),
+                },
+              ],
+            }
+          : t,
+      ),
+    )
+  }
+
   const n = (s: Ticket["status"]) =>
     tickets.filter((t) => t.status === s).length
   const crit = tickets.filter(
@@ -100,7 +166,7 @@ export default function Dashboard({
         token: "var(--muted-foreground)",
       },
     ]
-  } else if (role === "it_admin") {
+  } else if (role === "it_head") {
     cards = [
       {
         icon: Inbox,
@@ -127,7 +193,7 @@ export default function Dashboard({
         token: "var(--muted-foreground)",
       },
     ]
-  } else if (role === "it_staff") {
+  } else if (role === "it_employee") {
     cards = [
       {
         icon: TicketIcon,
@@ -157,7 +223,7 @@ export default function Dashboard({
         token: "var(--danger)",
       },
     ]
-  } else if (role === "employee") {
+  } else {
     cards = [
       { icon: Inbox, label: "Open", value: n("OPEN"), token: "var(--warning)" },
       {
@@ -179,34 +245,15 @@ export default function Dashboard({
         token: "var(--muted-foreground)",
       },
     ]
-  } else {
-    cards = [
-      {
-        icon: TicketIcon,
-        label: "Total tickets",
-        value: tickets.length,
-        token: "var(--primary)",
-      },
-      { icon: Inbox, label: "Open", value: n("OPEN"), token: "var(--warning)" },
-      {
-        icon: PlayCircle,
-        label: "In progress",
-        value: n("IN_PROGRESS"),
-        token: "var(--accent)",
-      },
-      {
-        icon: AlertTriangle,
-        label: "Critical open",
-        value: crit,
-        token: "var(--danger)",
-      },
-    ]
   }
 
   const recent = [...tickets]
     .sort((a, b) => +new Date(b.updatedAt) - +new Date(a.updatedAt))
     .slice(0, 5)
   const avg = avgResolution(tickets)
+
+  const isEmployeeView = role === "normal_employee" || role === "normal_head"
+  const isITHead = role === "it_head" || role === "company_admin"
 
   return (
     <div>
@@ -215,7 +262,10 @@ export default function Dashboard({
           Good day, {me.name.split(" ")[0]}
         </h1>
         <p className="mt-1 text-sm text-muted-foreground">
-          Here's the state of IT support today ·{" "}
+          {isEmployeeView
+            ? "Here's the status of your reported tickets today"
+            : "Here's the state of IT support today"}{" "}
+          ·{" "}
           {new Date().toLocaleDateString(undefined, {
             weekday: "long",
             month: "long",
@@ -232,12 +282,15 @@ export default function Dashboard({
 
       <div className="mt-6 grid gap-6 lg:grid-cols-[1.5fr_1fr]">
         <Card className="p-6">
-          <h3 className="font-display text-base font-600">Recent activity</h3>
+          <h3 className="font-display text-base font-600">
+            {isEmployeeView ? "Your recent tickets" : "Recent activity"}
+          </h3>
           <div className="mt-4 space-y-2">
             {recent.map((t) => (
-              <div
+              <button
                 key={t.id}
-                className="flex flex-wrap items-center gap-x-4 gap-y-2 rounded-2xl px-2 py-2.5"
+                onClick={() => setSelectedTicketId(t.id)}
+                className="flex w-full flex-wrap items-center gap-x-4 gap-y-2 rounded-2xl px-2 py-2.5 text-left transition-colors hover:bg-[color-mix(in_srgb,var(--primary)_6%,transparent)] cursor-pointer"
               >
                 <span className="font-mono text-xs font-600 text-primary">
                   {t.id}
@@ -247,7 +300,7 @@ export default function Dashboard({
                 </span>
                 <PriorityBadge priority={t.priority} />
                 <StatusBadge status={t.status} />
-              </div>
+              </button>
             ))}
           </div>
         </Card>
@@ -256,7 +309,9 @@ export default function Dashboard({
           <Card className="p-6">
             <div className="flex items-center gap-2 text-muted-foreground">
               <Clock size={16} />
-              <span className="text-sm">Avg. resolution</span>
+              <span className="text-sm">
+                {isEmployeeView ? "Avg. fix time for your issues" : "Avg. resolution time"}
+              </span>
             </div>
             <div
               className="mt-2 font-display text-3xl font-700"
@@ -267,7 +322,7 @@ export default function Dashboard({
             </div>
           </Card>
 
-          {(role === "it_admin" || role === "company_admin") && (
+          {isITHead && (
             <Card className="p-6">
               <h3 className="font-display text-base font-600">
                 IT Staff workload
@@ -306,6 +361,14 @@ export default function Dashboard({
           )}
         </div>
       </div>
+
+      <TicketModal
+        ticket={activeTicket}
+        role={role}
+        onClose={() => setSelectedTicketId(null)}
+        onUpdate={update}
+        onComment={addComment}
+      />
     </div>
   )
 }

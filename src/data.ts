@@ -1,10 +1,24 @@
 // Caytori — mock data + pure-JS analytics (no LLM, plain statistics)
 
-export type Role = "platform_admin" | "company_admin" | "it_admin" | "it_staff" | "employee"
+export type Role =
+  | "platform_admin"
+  | "company_admin"
+  | "it_head"
+  | "normal_head"
+  | "it_employee"
+  | "normal_employee"
 
 export type Status = "OPEN" | "IN_PROGRESS" | "RESOLVED" | "CLOSED"
 export type Priority = "Low" | "Medium" | "High" | "Critical"
-export type Category = "Hardware" | "Software" | "Network" | "Account & Access" | "Email" | "Printer" | "Security" | "Other"
+export type Category =
+  | "Hardware"
+  | "Software"
+  | "Network"
+  | "Account & Access"
+  | "Email"
+  | "Printer"
+  | "Security"
+  | "Other"
 
 export const ROLES: { id: Role; label: string; blurb: string }[] = [
   {
@@ -18,12 +32,25 @@ export const ROLES: { id: Role; label: string; blurb: string }[] = [
     blurb: "Runs the company organization",
   },
   {
-    id: "it_admin",
-    label: "IT Admin / Manager",
-    blurb: "Directs IT support operations",
+    id: "it_head",
+    label: "DEPT IT (Dept Head)",
+    blurb: "Head of IT Dept — manages ticket routing & queue",
   },
-  { id: "it_staff", label: "IT Staff", blurb: "Resolves assigned tickets" },
-  { id: "employee", label: "Employee", blurb: "Reports & tracks IT issues" },
+  {
+    id: "normal_head",
+    label: "NORMAL DEPT (Dept Head)",
+    blurb: "Head of Finance Dept — views own reported issues",
+  },
+  {
+    id: "it_employee",
+    label: "IT Employee",
+    blurb: "Member of IT Dept — resolves assigned tickets",
+  },
+  {
+    id: "normal_employee",
+    label: "Normal Employee",
+    blurb: "Member of Finance Dept — reports & tracks IT issues",
+  },
 ]
 
 export const CATEGORIES: Category[] = [
@@ -53,6 +80,7 @@ export interface Person {
   role: Role
   department: string
   email: string
+  isHead?: boolean
 }
 
 export const CURRENT_USER: Record<Role, Person> = {
@@ -69,25 +97,35 @@ export const CURRENT_USER: Record<Role, Person> = {
     role: "company_admin",
     department: "Operations",
     email: "priya@abccorp.com",
+    isHead: true,
   },
-  it_admin: {
+  it_head: {
     id: "u2",
     name: "John Doe",
-    role: "it_admin",
+    role: "it_head",
     department: "IT",
     email: "john@abccorp.com",
+    isHead: true,
   },
-  it_staff: {
+  normal_head: {
+    id: "u7",
+    name: "Elena Vance",
+    role: "normal_head",
+    department: "Finance",
+    email: "elena@abccorp.com",
+    isHead: true,
+  },
+  it_employee: {
     id: "u3",
     name: "Mark Villanueva",
-    role: "it_staff",
+    role: "it_employee",
     department: "IT",
     email: "mark@abccorp.com",
   },
-  employee: {
+  normal_employee: {
     id: "u5",
     name: "Maria Santos",
-    role: "employee",
+    role: "normal_employee",
     department: "Finance",
     email: "maria@abccorp.com",
   },
@@ -418,9 +456,12 @@ export function countBy<T extends string>(items: string[], keys: T[]) {
 
 export function ticketsFor(role: Role, tickets = TICKETS): Ticket[] {
   const me = CURRENT_USER[role]
-  if (role === "employee") return tickets.filter((t) => t.reporter === me.name)
-  if (role === "it_staff") return tickets.filter((t) => t.assignee === me.name)
-  return tickets // admins see all company tickets
+  if (role === "platform_admin" || role === "company_admin" || role === "it_head")
+    return tickets
+  if (role === "it_employee")
+    return tickets.filter((t) => t.assignee === me.name)
+  // Non-IT roles (normal_head, normal_employee) only see their own submitted tickets
+  return tickets.filter((t) => t.reporter === me.name)
 }
 
 export function avgResolution(tickets: Ticket[]): number {

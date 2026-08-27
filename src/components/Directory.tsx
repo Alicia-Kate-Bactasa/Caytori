@@ -25,6 +25,7 @@ interface Row {
   name: string
   dept?: string
   email?: string
+  head?: string
   status: string
   users?: number
   tickets?: number
@@ -99,7 +100,14 @@ const INITIAL: Record<Kind, Row[]> = {
       email: "admin@northwind.com",
     },
   ],
-  departments: DEPARTMENTS.map((d) => ({ name: d, status: "Active" })),
+  departments: [
+    { name: "Finance", head: "Elena Vance", status: "Active" },
+    { name: "Human Resources", head: "Sam Ortega", status: "Active" },
+    { name: "Marketing", head: "Grace Lim", status: "Active" },
+    { name: "Operations", head: "Priya Nair", status: "Active" },
+    { name: "Sales", head: "Diego Flores", status: "Active" },
+    { name: "IT", head: "John Doe (IT Admin / Head of IT)", status: "Active" },
+  ],
 }
 
 const ACTIONS: Record<Kind, string> = {
@@ -158,11 +166,12 @@ export default function Directory({
       (form.elements.namedItem("name") as HTMLInputElement)?.value ||
       "New entry"
     const email = (form.elements.namedItem("email") as HTMLInputElement)?.value
+    const head = (form.elements.namedItem("head") as HTMLInputElement)?.value
     const newRow: Row =
       kind === "companies"
         ? { name, email, users: 0, tickets: 0, status: "Active" }
         : kind === "departments"
-          ? { name, status: "Active" }
+          ? { name, head: head || undefined, status: "Active" }
           : {
               name,
               email,
@@ -233,7 +242,7 @@ export default function Directory({
               {(kind === "companies"
                 ? ["Company", "Users", "Tickets", "Status", ""]
                 : kind === "departments"
-                  ? ["Department", "Members", "Open tickets", "Status", ""]
+                  ? ["Department", "Department Head", "Members", "Open tickets", "Status", ""]
                   : isPeople
                     ? [
                         "Name",
@@ -278,8 +287,20 @@ export default function Directory({
                     <td className="px-6 py-4 font-mono text-sm">{r.tickets}</td>
                   )}
                   {kind === "departments" && (
+                    <td className="px-6 py-4 text-sm font-500 text-foreground">
+                      {r.head ? (
+                        <span className="flex items-center gap-2">
+                          <Avatar name={r.head.split("(")[0].trim()} size={24} />
+                          {r.head}
+                        </span>
+                      ) : (
+                        <span className="text-muted-foreground text-xs italic">Unassigned</span>
+                      )}
+                    </td>
+                  )}
+                  {kind === "departments" && (
                     <td className="px-6 py-4 font-mono text-sm">
-                      {Math.floor(Math.random() * 20) + 4}
+                      {Math.floor(Math.random() * 15) + 4}
                     </td>
                   )}
                   {kind === "departments" && (
@@ -410,14 +431,23 @@ export default function Directory({
             </>
           )}
           {kind === "departments" && (
-            <Field label="Department name">
-              <input
-                name="name"
-                required
-                placeholder="e.g. Customer Success"
-                className="w-full bg-transparent text-sm outline-none"
-              />
-            </Field>
+            <>
+              <Field label="Department name">
+                <input
+                  name="name"
+                  required
+                  placeholder="e.g. Customer Success"
+                  className="w-full bg-transparent text-sm outline-none"
+                />
+              </Field>
+              <Field label="Department Head (optional)">
+                <input
+                  name="head"
+                  placeholder="e.g. Sarah Jenkins"
+                  className="w-full bg-transparent text-sm outline-none"
+                />
+              </Field>
+            </>
           )}
           {kind === "companies" && (
             <>

@@ -12,11 +12,10 @@ import {
   UserCheck,
   Clock,
 } from "lucide-react"
-import { Button, Card, Avatar, StatusBadge, PriorityBadge } from "./primitives"
+import { Modal, Button, Card, Avatar, StatusBadge, PriorityBadge } from "./primitives"
 import {
   CATEGORIES,
   PRIORITIES,
-  DEPARTMENTS,
   STAFF,
   CURRENT_USER,
   type Ticket,
@@ -128,18 +127,6 @@ export default function Tickets({
     )
   }
 
-  if (active) {
-    return (
-      <TicketDetail
-        ticket={active}
-        role={role}
-        onBack={() => setSelected(null)}
-        onUpdate={update}
-        onComment={addComment}
-      />
-    )
-  }
-
   return (
     <div>
       <div className="flex flex-wrap items-center justify-between gap-4">
@@ -203,7 +190,7 @@ export default function Tickets({
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.3, delay: i * 0.03 }}
             onClick={() => setSelected(t.id)}
-            className="block w-full text-left"
+            className="block w-full text-left cursor-pointer"
           >
             <Card className="neu-hover flex flex-wrap items-center gap-x-6 gap-y-3 p-5">
               <span className="font-mono text-sm font-600 text-primary">
@@ -225,6 +212,14 @@ export default function Tickets({
         ))}
       </div>
 
+      <TicketModal
+        ticket={active}
+        role={role}
+        onClose={() => setSelected(null)}
+        onUpdate={update}
+        onComment={addComment}
+      />
+
       <AnimatePresence>
         {creating && (
           <CreateTicket
@@ -239,6 +234,45 @@ export default function Tickets({
         )}
       </AnimatePresence>
     </div>
+  )
+}
+
+export function TicketModal({
+  ticket,
+  role,
+  onClose,
+  onUpdate,
+  onComment,
+}: {
+  ticket: Ticket | null
+  role: Role
+  onClose: () => void
+  onUpdate: (
+    id: string,
+    patch: Partial<Ticket>,
+    activity?: string,
+    actor?: string,
+  ) => void
+  onComment: (id: string, text: string) => void
+}) {
+  if (!ticket) return null
+
+  return (
+    <Modal
+      open={!!ticket}
+      onClose={onClose}
+      title={ticket.subject}
+      subtitle={`${ticket.id} · ${ticket.reporter} (${ticket.department}) · ${ticket.category}`}
+      width="max-w-3xl"
+    >
+      <TicketDetail
+        ticket={ticket}
+        role={role}
+        onBack={onClose}
+        onUpdate={onUpdate}
+        onComment={onComment}
+      />
+    </Modal>
   )
 }
 
@@ -262,9 +296,13 @@ function TicketDetail({
 }) {
   const [draft, setDraft] = useState("")
   const [assignee, setAssignee] = useState(ticket.assignee ?? STAFF[0].name)
+  const me = CURRENT_USER[role]
+  const isITHead = role === "it_head" || role === "company_admin"
+  const isITEmployee = role === "it_employee" || isITHead
+  const isReporter = me.name === ticket.reporter || role === "normal_employee" || role === "normal_head"
 
   const actions: React.ReactNode[] = []
-  if (role === "it_admin" && ticket.status === "OPEN") {
+  if (isITHead && ticket.status === "OPEN") {
     actions.push(
       <div key="assign" className="flex items-center gap-2">
         <select
@@ -294,7 +332,7 @@ function TicketDetail({
     )
   }
   if (
-    role === "it_admin" &&
+    isITHead &&
     ticket.status !== "OPEN" &&
     ticket.status !== "CLOSED"
   ) {
@@ -323,7 +361,7 @@ function TicketDetail({
       </div>,
     )
   }
-  if (role === "it_staff" && ticket.status === "IN_PROGRESS") {
+  if (isITEmployee && ticket.status === "IN_PROGRESS") {
     actions.push(
       <Button
         key="resolve"
@@ -340,7 +378,7 @@ function TicketDetail({
       </Button>,
     )
   }
-  if (role === "it_staff" && ticket.status === "OPEN") {
+  if (isITEmployee && ticket.status === "OPEN") {
     actions.push(
       <Button
         key="start"
@@ -348,7 +386,7 @@ function TicketDetail({
         onClick={() =>
           onUpdate(
             ticket.id,
-            { status: "IN_PROGRESS", assignee: CURRENT_USER.it_staff.name },
+            { status: "IN_PROGRESS", assignee: me.name },
             "started work",
           )
         }
@@ -357,7 +395,7 @@ function TicketDetail({
       </Button>,
     )
   }
-  if (role === "employee" && ticket.status === "RESOLVED") {
+  if (isReporter && ticket.status === "RESOLVED") {
     actions.push(
       <Button
         key="confirm"
@@ -545,7 +583,6 @@ function CreateTicket({
   const [description, setDescription] = useState("")
   const [category, setCategory] = useState<Category>("Hardware")
   const [priority, setPriority] = useState<Priority>("Medium")
-  const [dept, setDept] = useState(department)
   const [error, setError] = useState("")
 
   function submit(e: React.FormEvent) {
@@ -562,7 +599,7 @@ function CreateTicket({
       subject: subject.trim(),
       description: description.trim(),
       reporter,
-      department: dept,
+      department,
       category,
       priority,
       status: "OPEN",
@@ -633,17 +670,12 @@ function CreateTicket({
             </Field>
             <div className="grid grid-cols-2 gap-3">
               <Field label="Department">
-                <select
-                  value={dept}
-                  onChange={(e) => setDept(e.target.value)}
-                  className="w-full bg-transparent text-sm outline-none"
-                >
-                  {DEPARTMENTS.map((d) => (
-                    <option key={d} value={d}>
-                      {d}
-                    </option>
-                  ))}
-                </select>
+                <div className="py-0.5 text-sm font-600 text-foreground">
+                  {department}{" "}
+                  <span className="text-[11px] font-normal text-muted-foreground">
+                    (Your dept)
+                  </span>
+                </div>
               </Field>
               <Field label="Category">
                 <select

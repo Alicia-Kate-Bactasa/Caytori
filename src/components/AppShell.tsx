@@ -91,20 +91,25 @@ const NAV: Record<Role, NavItem[]> = {
     { key: "settings", label: "Company Settings", icon: SettingsIcon },
     { key: "help", label: "Help & FAQ", icon: HelpCircle },
   ],
-  it_admin: [
+  it_head: [
     { key: "dashboard", label: "Dashboard", icon: LayoutDashboard },
     { key: "tickets_all", label: "All Tickets", icon: TicketIcon },
-    { key: "tickets_unassigned", label: "Unassigned", icon: Inbox },
-    { key: "it_team", label: "IT Team", icon: UserCog },
-    { key: "reports", label: "Reports", icon: BarChart3 },
+    { key: "tickets_unassigned", label: "Unassigned Queue", icon: Inbox },
+    { key: "it_team", label: "IT Staff", icon: UserCog },
+    { key: "reports", label: "Reports & Analytics", icon: BarChart3 },
     { key: "help", label: "Help & FAQ", icon: HelpCircle },
   ],
-  it_staff: [
+  normal_head: [
     { key: "dashboard", label: "Dashboard", icon: LayoutDashboard },
     { key: "tickets_my", label: "My Tickets", icon: TicketIcon },
     { key: "help", label: "Help & FAQ", icon: HelpCircle },
   ],
-  employee: [
+  it_employee: [
+    { key: "dashboard", label: "Dashboard", icon: LayoutDashboard },
+    { key: "tickets_my", label: "My Assigned Tickets", icon: TicketIcon },
+    { key: "help", label: "Help & FAQ", icon: HelpCircle },
+  ],
+  normal_employee: [
     { key: "dashboard", label: "Dashboard", icon: LayoutDashboard },
     { key: "tickets_my", label: "My Tickets", icon: TicketIcon },
     { key: "help", label: "Help & FAQ", icon: HelpCircle },
@@ -142,7 +147,7 @@ export default function AppShell({
   function render() {
     switch (page) {
       case "dashboard":
-        return <Dashboard role={role} tickets={scoped} />
+        return <Dashboard role={role} tickets={scoped} onChange={setTickets} />
       case "tickets_all":
         return (
           <Tickets

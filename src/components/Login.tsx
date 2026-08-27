@@ -45,7 +45,7 @@ export default function Login({
       return setError("Passwords do not match.")
     setError("")
     // Registering a company makes you its Company Admin; returning users resolve their own role server-side.
-    onLogin(mode === "signup" ? "company_admin" : "employee")
+    onLogin(mode === "signup" ? "company_admin" : "normal_employee")
   }
 
   const isUp = mode === "signup"

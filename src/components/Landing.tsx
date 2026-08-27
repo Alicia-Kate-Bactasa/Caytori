@@ -36,14 +36,30 @@ const DEMO_ROLES: { id: Role; label: string; scope: string; icon: LucideIcon }[]
       scope: "One company",
       icon: Building2,
     },
-    { id: "it_admin", label: "IT Admin", scope: "Company IT", icon: Server },
     {
-      id: "it_staff",
-      label: "IT Staff",
-      scope: "Assigned tickets",
+      id: "it_head",
+      label: "DEPT IT (Dept Head)",
+      scope: "Head of IT",
+      icon: Server,
+    },
+    {
+      id: "normal_head",
+      label: "NORMAL DEPT (Dept Head)",
+      scope: "Finance Head",
+      icon: Users,
+    },
+    {
+      id: "it_employee",
+      label: "IT Employee",
+      scope: "IT Staff",
       icon: Wrench,
     },
-    { id: "employee", label: "Employee", scope: "Reports issues", icon: User },
+    {
+      id: "normal_employee",
+      label: "Normal Employee",
+      scope: "Finance Employee",
+      icon: User,
+    },
   ]
 
 const features = [

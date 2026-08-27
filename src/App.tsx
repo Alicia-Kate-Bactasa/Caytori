@@ -15,7 +15,7 @@ export default function App() {
       : "light",
   )
   const [view, setView] = useState<View>("landing")
-  const [role, setRole] = useState<Role>("employee")
+  const [role, setRole] = useState<Role>("normal_employee")
   const [demoMode, setDemoMode] = useState(false)
   const [tickets, setTickets] = useState<Ticket[]>(TICKETS)
 
