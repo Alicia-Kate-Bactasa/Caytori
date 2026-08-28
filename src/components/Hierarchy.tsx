@@ -25,6 +25,7 @@ import {
   Modal,
   Field,
   Toast,
+  InlineError,
 } from "./primitives"
 import {
   DEPARTMENTS,
@@ -33,6 +34,11 @@ import {
   type EscalationTier,
   type Role,
 } from "../data"
+import {
+  validateFullName,
+  validateUserDoesNotExist,
+  validateSlaMinutes,
+} from "../utils/validation"
 
 interface ITRoleDefinition {
   id: string
@@ -173,9 +179,28 @@ export default function Hierarchy({ role }: { role: Role }) {
     setTimeout(() => setToast(""), 3500)
   }
 
+  const [memberNameError, setMemberNameError] = useState("")
+  const [memberEmailError, setMemberEmailError] = useState("")
+  const [slaError, setSlaError] = useState("")
+
   function handleAssignMemberSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (!showAssignMember || !memberName.trim() || !memberEmail.trim()) return
+    setMemberNameError("")
+    setMemberEmailError("")
+
+    if (!showAssignMember) return
+
+    const nameVal = validateFullName(memberName)
+    if (!nameVal.valid) {
+      setMemberNameError(nameVal.error!)
+      return
+    }
+
+    const emailVal = validateUserDoesNotExist(memberEmail)
+    if (!emailVal.valid) {
+      setMemberEmailError(emailVal.error!)
+      return
+    }
 
     setItRoles(
       itRoles.map((r) =>
@@ -195,7 +220,15 @@ export default function Hierarchy({ role }: { role: Role }) {
   }
 
   function handleSaveLevel() {
+    setSlaError("")
     if (!showEditLevel) return
+
+    const slaVal = validateSlaMinutes(editSla)
+    if (!slaVal.valid) {
+      setSlaError(slaVal.error!)
+      return
+    }
+
     setLevels(
       levels.map((l) =>
         l.id === showEditLevel.id
@@ -492,10 +525,14 @@ export default function Hierarchy({ role }: { role: Role }) {
             <input
               required
               value={memberName}
-              onChange={(e) => setMemberName(e.target.value)}
+              onChange={(e) => {
+                setMemberName(e.target.value)
+                setMemberNameError("")
+              }}
               placeholder="e.g. Carlos Rivera"
               className="w-full neu-inset rounded-xl bg-transparent px-3.5 py-2.5 text-sm outline-none"
             />
+            <InlineError message={memberNameError} />
           </Field>
 
           <Field label="Work Email Address">
@@ -503,10 +540,14 @@ export default function Hierarchy({ role }: { role: Role }) {
               required
               type="email"
               value={memberEmail}
-              onChange={(e) => setMemberEmail(e.target.value)}
+              onChange={(e) => {
+                setMemberEmail(e.target.value)
+                setMemberEmailError("")
+              }}
               placeholder="e.g. carlos@abccorp.com"
               className="w-full neu-inset rounded-xl bg-transparent px-3.5 py-2.5 text-sm outline-none"
             />
+            <InlineError message={memberEmailError} />
           </Field>
 
           <div className="flex justify-end gap-3 pt-3">
@@ -532,9 +573,13 @@ export default function Hierarchy({ role }: { role: Role }) {
             <input
               type="number"
               value={editSla}
-              onChange={(e) => setEditSla(Number(e.target.value))}
+              onChange={(e) => {
+                setEditSla(Number(e.target.value))
+                setSlaError("")
+              }}
               className="w-full neu-inset rounded-xl bg-transparent px-3.5 py-2.5 text-sm outline-none font-mono"
             />
+            <InlineError message={slaError} />
           </Field>
 
           <Field label="Assigned Specialists (Comma Separated)">

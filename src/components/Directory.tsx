@@ -25,8 +25,14 @@ import {
   Toast,
   StatusBadge,
   PriorityBadge,
+  InlineError,
 } from "./primitives"
 import { DEPARTMENTS, STAFF, TICKETS } from "../data"
+import {
+  validateFullName,
+  validateUserDoesNotExist,
+  validateEmail,
+} from "../utils/validation"
 
 type Kind = "employees" | "it_team" | "departments" | "companies"
 
@@ -893,9 +899,33 @@ function DepartmentDetailModal({
     setTimeout(() => setModalToast(""), 3500)
   }
 
+  const [inviteNameError, setInviteNameError] = useState("")
+  const [inviteEmailError, setInviteEmailError] = useState("")
+
   function handleInvite(e: React.FormEvent) {
     e.preventDefault()
-    if (!inviteName.trim() || !inviteEmail.trim()) return
+    setInviteNameError("")
+    setInviteEmailError("")
+
+    const nameVal = validateFullName(inviteName)
+    if (!nameVal.valid) {
+      setInviteNameError(nameVal.error!)
+      return
+    }
+
+    const emailVal = validateUserDoesNotExist(inviteEmail)
+    if (!emailVal.valid) {
+      setInviteEmailError(emailVal.error!)
+      return
+    }
+
+    const existingInDept = allEmployees.some(
+      (e) => e.email?.toLowerCase() === inviteEmail.trim().toLowerCase(),
+    )
+    if (existingInDept) {
+      setInviteEmailError("User with this email is already registered in the company.")
+      return
+    }
 
     const newMember: Row = {
       name: inviteName.trim(),
@@ -1213,10 +1243,14 @@ function DepartmentDetailModal({
                     <input
                       required
                       value={inviteName}
-                      onChange={(e) => setInviteName(e.target.value)}
+                      onChange={(e) => {
+                        setInviteName(e.target.value)
+                        setInviteNameError("")
+                      }}
                       placeholder="e.g. Carlos Mendoza"
                       className="w-full neu-inset rounded-xl bg-transparent px-3.5 py-2.5 text-sm outline-none"
                     />
+                    <InlineError message={inviteNameError} />
                   </Field>
 
                   <Field label="Work Email Address">
@@ -1224,10 +1258,14 @@ function DepartmentDetailModal({
                       required
                       type="email"
                       value={inviteEmail}
-                      onChange={(e) => setInviteEmail(e.target.value)}
+                      onChange={(e) => {
+                        setInviteEmail(e.target.value)
+                        setInviteEmailError("")
+                      }}
                       placeholder="e.g. carlos@abccorp.com"
                       className="w-full neu-inset rounded-xl bg-transparent px-3.5 py-2.5 text-sm outline-none"
                     />
+                    <InlineError message={inviteEmailError} />
                   </Field>
 
                   {/* Invitation Link Generator */}

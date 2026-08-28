@@ -16,7 +16,7 @@ import {
   Ticket as TicketIcon,
   Lock,
 } from "lucide-react"
-import { Modal, Button, Card, Avatar, StatusBadge, PriorityBadge } from "./primitives"
+import { Modal, Button, Card, Avatar, StatusBadge, PriorityBadge, InlineError } from "./primitives"
 import {
   CATEGORIES,
   PRIORITIES,
@@ -31,6 +31,7 @@ import {
   type EscalationTier,
   type Person,
 } from "../data"
+import { validateEscalationReason } from "../utils/validation"
 
 const STATUS_FILTERS: (Status | "ALL")[] = [
   "ALL",
@@ -387,6 +388,19 @@ export function EscalateModal({
     }
   }, [selectedTier, eligibleTechs])
 
+  const [reasonError, setReasonError] = useState("")
+
+  function handleEscalateSubmit() {
+    setReasonError("")
+    const val = validateEscalationReason(reason)
+    if (!val.valid) {
+      setReasonError(val.error!)
+      return
+    }
+    onEscalate(selectedTier, targetAssignee, reason.trim(), priority)
+    onClose()
+  }
+
   if (!open) return null
 
   return (
@@ -498,10 +512,14 @@ export function EscalateModal({
           </label>
           <textarea
             value={reason}
-            onChange={(e) => setReason(e.target.value)}
+            onChange={(e) => {
+              setReason(e.target.value)
+              setReasonError("")
+            }}
             placeholder="Explain why this issue is being escalated..."
             className="w-full neu-inset rounded-2xl bg-transparent p-3 text-sm outline-none h-20 resize-none"
           />
+          <InlineError message={reasonError} />
         </div>
 
         {/* Actions */}
@@ -509,13 +527,7 @@ export function EscalateModal({
           <Button variant="ghost" onClick={onClose}>
             Cancel
           </Button>
-          <Button
-            disabled={!reason.trim()}
-            onClick={() => {
-              onEscalate(selectedTier, targetAssignee, reason.trim(), priority)
-              onClose()
-            }}
-          >
+          <Button onClick={handleEscalateSubmit}>
             Escalate Ticket
           </Button>
         </div>

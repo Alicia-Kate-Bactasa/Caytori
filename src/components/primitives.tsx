@@ -1,5 +1,5 @@
 import { motion, AnimatePresence } from "motion/react"
-import { X } from "lucide-react"
+import { X, AlertCircle } from "lucide-react"
 import type { ReactNode } from "react"
 import type { Status, Priority } from "../data"
 import { statusMeta, priorityMeta } from "../data"
@@ -333,5 +333,14 @@ export function Card({
     >
       {children}
     </div>
+  )
+}
+
+export function InlineError({ message }: { message?: string }) {
+  if (!message) return null
+  return (
+    <p className="text-xs text-danger font-500 mt-1 flex items-center gap-1.5 leading-snug">
+      <AlertCircle size={13} className="shrink-0" /> {message}
+    </p>
   )
 }
