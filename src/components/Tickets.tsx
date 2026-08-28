@@ -14,6 +14,7 @@ import {
   AlertTriangle,
   Inbox,
   Ticket as TicketIcon,
+  Lock,
 } from "lucide-react"
 import { Modal, Button, Card, Avatar, StatusBadge, PriorityBadge } from "./primitives"
 import {
@@ -361,7 +362,9 @@ export function EscalateModal({
 
   const eligibleTechs = useMemo(() => {
     const all = [...STAFF, CURRENT_USER.it_head]
-    return all.filter((s) => (s.tier ?? "L1") === selectedTier)
+    if (selectedTier === "LEAD") return [CURRENT_USER.it_head]
+    const matched = all.filter((s) => (s.tier ?? "L1") === selectedTier)
+    return matched.length > 0 ? matched : [CURRENT_USER.it_head]
   }, [selectedTier])
 
   const [targetAssignee, setTargetAssignee] = useState<string>(
@@ -394,6 +397,16 @@ export function EscalateModal({
       subtitle={`Hand over ticket ${ticket.id} to a higher support level`}
     >
       <div className="space-y-4 pt-2">
+        {/* Company Isolation Badge */}
+        <div className="neu-flat rounded-xl p-3 text-xs flex items-center justify-between text-muted-foreground">
+          <span className="font-600 text-foreground flex items-center gap-1.5">
+            <Lock size={13} className="text-accent" /> Company Isolated Handoff
+          </span>
+          <span className="font-mono text-[11px] font-600 text-primary">
+            ABC Corporation IT Dept
+          </span>
+        </div>
+
         {/* Tier Visual Pathway */}
         <div className="rounded-2xl p-4 neu-inset">
           <span className="text-xs font-600 text-muted-foreground uppercase tracking-wider font-mono">

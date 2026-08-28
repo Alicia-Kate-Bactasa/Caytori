@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react"
+import { useState } from "react"
 import { motion, AnimatePresence } from "motion/react"
 import {
   ShieldCheck,
@@ -6,19 +6,17 @@ import {
   Users,
   Building2,
   AlertTriangle,
-  ChevronRight,
   UserCheck,
   UserX,
   Edit3,
   Sliders,
-  Sparkles,
-  ArrowRight,
   Check,
-  X,
   Plus,
   Clock,
-  Briefcase,
-  Layers,
+  Lock,
+  Headphones,
+  Wrench,
+  Crown,
 } from "lucide-react"
 import {
   Card,
@@ -28,14 +26,6 @@ import {
   Field,
   Toast,
 } from "./primitives"
-
-function Pill({ text }: { text: string }) {
-  return (
-    <span className="neu-inset rounded-full px-2.5 py-0.5 font-mono text-[11px] font-700 text-primary">
-      {text}
-    </span>
-  )
-}
 import {
   DEPARTMENTS,
   STAFF,
@@ -44,66 +34,71 @@ import {
   type Role,
 } from "../data"
 
-interface AdminUser {
+interface ITRoleDefinition {
   id: string
-  name: string
-  email: string
   title: string
-  role: "Head of IT" | "Co-Admin" | "IT Security Lead" | "IT Dispatcher"
-  department: string
-  assignedAt: string
-  isPrimary?: boolean
+  levelLabel: string
+  badgeColor: string
+  icon: typeof Crown
+  description: string
+  handlesWhat: string
+  members: { name: string; email: string; isPrimary?: boolean }[]
 }
 
-const INITIAL_ADMINS: AdminUser[] = [
+const INITIAL_IT_ROLES: ITRoleDefinition[] = [
   {
-    id: "adm-1",
-    name: "John Doe",
-    email: "john.doe@abccorp.com",
-    title: "Head of IT & Platform Administrator",
-    role: "Head of IT",
-    department: "IT",
-    assignedAt: "2025-01-15",
-    isPrimary: true,
+    id: "head",
+    title: "Head of IT",
+    levelLabel: "Level 4 — Lead Executive",
+    badgeColor: "var(--danger)",
+    icon: Crown,
+    description: "Overall IT department leader and company administrator.",
+    handlesWhat: "Handles critical outages, security breaches, and Level 4 escalations.",
+    members: [{ name: "John Doe", email: "john@abccorp.com", isPrimary: true }],
   },
   {
-    id: "adm-2",
-    name: "Elena Vance",
-    email: "elena.vance@abccorp.com",
-    title: "VP of Finance & Co-Admin",
-    role: "Co-Admin",
-    department: "Finance",
-    assignedAt: "2025-03-01",
+    id: "senior",
+    title: "Senior IT Systems Engineer",
+    levelLabel: "Level 2 & Level 3 — Senior Support",
+    badgeColor: "var(--warning)",
+    icon: Wrench,
+    description: "Advanced technical specialist for servers, networks, and databases.",
+    handlesWhat: "Handles Level 2 & Level 3 complex escalations and infrastructure alerts.",
+    members: [
+      { name: "Anna Cruz", email: "anna@abccorp.com" },
+      { name: "Leo Tan", email: "leo@abccorp.com" },
+    ],
   },
   {
-    id: "adm-3",
-    name: "Mark Villanueva",
-    email: "mark.v@abccorp.com",
-    title: "Senior IT Infrastructure Lead",
-    role: "IT Security Lead",
-    department: "IT",
-    assignedAt: "2025-04-10",
+    id: "helpdesk",
+    title: "IT Help Desk Specialist",
+    levelLabel: "Level 1 — Frontline Support",
+    badgeColor: "var(--primary)",
+    icon: Headphones,
+    description: "First point of contact for employee IT requests.",
+    handlesWhat: "Handles Level 1 initial triage, password resets, and account access.",
+    members: [{ name: "Mark Villanueva", email: "mark@abccorp.com" }],
   },
 ]
 
-interface TierConfig {
+interface LevelConfig {
   id: EscalationTier
   name: string
   level: number
   slaMinutes: number
   description: string
-  specialists: string[]
+  assignedStaff: string[]
   color: string
 }
 
-const INITIAL_TIERS: TierConfig[] = [
+const INITIAL_LEVELS: LevelConfig[] = [
   {
     id: "L1",
     name: "Level 1 — Basic Support",
     level: 1,
     slaMinutes: 15,
-    description: "Password resets, account access, and general help.",
-    specialists: ["Mark Villanueva", "Leo Tan"],
+    description: "Password resets, account access, and general user help.",
+    assignedStaff: ["Mark Villanueva"],
     color: "var(--primary)",
   },
   {
@@ -112,7 +107,7 @@ const INITIAL_TIERS: TierConfig[] = [
     level: 2,
     slaMinutes: 45,
     description: "Software glitches, hardware diagnostics, and network issues.",
-    specialists: ["Elena Vance", "John Doe"],
+    assignedStaff: ["Anna Cruz"],
     color: "var(--accent)",
   },
   {
@@ -121,7 +116,7 @@ const INITIAL_TIERS: TierConfig[] = [
     level: 3,
     slaMinutes: 120,
     description: "Complex system problems, databases, and security alerts.",
-    specialists: ["John Doe", "Sam Ortega"],
+    assignedStaff: ["Leo Tan"],
     color: "var(--warning)",
   },
   {
@@ -130,7 +125,7 @@ const INITIAL_TIERS: TierConfig[] = [
     level: 4,
     slaMinutes: 30,
     description: "Urgent company outages and high-priority escalation.",
-    specialists: ["John Doe"],
+    assignedStaff: ["John Doe (Head of IT)"],
     color: "var(--danger)",
   },
 ]
@@ -139,41 +134,38 @@ interface DeptHead {
   department: string
   headName: string
   email: string
-  membersCount: number
 }
 
 const INITIAL_DEPT_HEADS: DeptHead[] = [
-  { department: "Finance", headName: "Elena Vance", email: "elena.vance@abccorp.com", membersCount: 9 },
-  { department: "Human Resources", headName: "Sam Ortega", email: "sam.ortega@abccorp.com", membersCount: 4 },
-  { department: "Marketing", headName: "Grace Lim", email: "grace.lim@abccorp.com", membersCount: 7 },
-  { department: "Operations", headName: "Priya Nair", email: "priya.nair@abccorp.com", membersCount: 9 },
-  { department: "Sales", headName: "Diego Flores", email: "diego.flores@abccorp.com", membersCount: 15 },
-  { department: "IT", headName: "John Doe", email: "john.doe@abccorp.com", membersCount: 9 },
+  { department: "Finance", headName: "Elena Vance", email: "elena.vance@abccorp.com" },
+  { department: "Human Resources", headName: "Sam Ortega", email: "sam.ortega@abccorp.com" },
+  { department: "Marketing", headName: "Grace Lim", email: "grace.lim@abccorp.com" },
+  { department: "Operations", headName: "Priya Nair", email: "priya.nair@abccorp.com" },
+  { department: "Sales", headName: "Diego Flores", email: "diego.flores@abccorp.com" },
+  { department: "IT", headName: "John Doe", email: "john.doe@abccorp.com" },
 ]
 
 export default function Hierarchy({ role }: { role: Role }) {
-  const [tab, setTab] = useState<"admins" | "matrix" | "departments">("admins")
-  const [admins, setAdmins] = useState<AdminUser[]>(INITIAL_ADMINS)
-  const [tiers, setTiers] = useState<TierConfig[]>(INITIAL_TIERS)
+  const [tab, setTab] = useState<"roles" | "levels" | "departments">("roles")
+  const [itRoles, setItRoles] = useState<ITRoleDefinition[]>(INITIAL_IT_ROLES)
+  const [levels, setLevels] = useState<LevelConfig[]>(INITIAL_LEVELS)
   const [deptHeads, setDeptHeads] = useState<DeptHead[]>(INITIAL_DEPT_HEADS)
 
   // Modal states
-  const [showAddAdmin, setShowAddAdmin] = useState(false)
-  const [showEditTier, setShowEditTier] = useState<TierConfig | null>(null)
+  const [showAssignMember, setShowAssignMember] = useState<ITRoleDefinition | null>(null)
+  const [showEditLevel, setShowEditLevel] = useState<LevelConfig | null>(null)
   const [showChangeHead, setShowChangeHead] = useState<DeptHead | null>(null)
   const [toast, setToast] = useState("")
 
   // Form states
-  const [newAdminName, setNewAdminName] = useState("")
-  const [newAdminEmail, setNewAdminEmail] = useState("")
-  const [newAdminRole, setNewAdminRole] = useState<AdminUser["role"]>("Co-Admin")
-  const [newAdminDept, setNewAdminDept] = useState("IT")
+  const [memberName, setMemberName] = useState("")
+  const [memberEmail, setMemberEmail] = useState("")
 
-  // Edit tier form state
+  // Edit level state
   const [editSla, setEditSla] = useState(15)
-  const [editSpecialistInput, setEditSpecialistInput] = useState("")
+  const [editStaffInput, setEditStaffInput] = useState("")
 
-  // Edit Dept head state
+  // Edit Head state
   const [newHeadName, setNewHeadName] = useState("")
 
   function flash(msg: string) {
@@ -181,59 +173,44 @@ export default function Hierarchy({ role }: { role: Role }) {
     setTimeout(() => setToast(""), 3500)
   }
 
-  function handleAddAdmin(e: React.FormEvent) {
+  function handleAssignMemberSubmit(e: React.FormEvent) {
     e.preventDefault()
-    if (!newAdminName.trim() || !newAdminEmail.trim()) return
+    if (!showAssignMember || !memberName.trim() || !memberEmail.trim()) return
 
-    const newAdmin: AdminUser = {
-      id: `adm-${Date.now()}`,
-      name: newAdminName.trim(),
-      email: newAdminEmail.trim(),
-      title: `${newAdminRole} — ${newAdminDept}`,
-      role: newAdminRole,
-      department: newAdminDept,
-      assignedAt: new Date().toISOString().split("T")[0],
-    }
-
-    if (newAdminRole === "Head of IT") {
-      // Reassign primary Head of IT
-      const updated: AdminUser[] = admins.map((a) =>
-        a.role === "Head of IT" ? { ...a, role: "Co-Admin" as const, isPrimary: false } : a,
-      )
-      setAdmins([{ ...newAdmin, isPrimary: true }, ...updated])
-      flash(`${newAdminName} was appointed as the new Head of IT!`)
-    } else {
-      setAdmins([newAdmin, ...admins])
-      flash(`${newAdminName} was appointed as ${newAdminRole}.`)
-    }
-
-    setShowAddAdmin(false)
-    setNewAdminName("")
-    setNewAdminEmail("")
-  }
-
-  function handleDemoteAdmin(id: string, name: string) {
-    setAdmins(admins.filter((a) => a.id !== id))
-    flash(`${name}'s admin privileges were revoked.`)
-  }
-
-  function handleSaveTierSla() {
-    if (!showEditTier) return
-    setTiers(
-      tiers.map((t) =>
-        t.id === showEditTier.id
+    setItRoles(
+      itRoles.map((r) =>
+        r.id === showAssignMember.id
           ? {
-              ...t,
-              slaMinutes: editSla,
-              specialists: editSpecialistInput.trim()
-                ? editSpecialistInput.split(",").map((s) => s.trim())
-                : t.specialists,
+              ...r,
+              members: [...r.members, { name: memberName.trim(), email: memberEmail.trim() }],
             }
-          : t,
+          : r,
       ),
     )
-    flash(`Settings for ${showEditTier.name} updated successfully!`)
-    setShowEditTier(null)
+
+    flash(`${memberName.trim()} assigned as ${showAssignMember.title}!`)
+    setShowAssignMember(null)
+    setMemberName("")
+    setMemberEmail("")
+  }
+
+  function handleSaveLevel() {
+    if (!showEditLevel) return
+    setLevels(
+      levels.map((l) =>
+        l.id === showEditLevel.id
+          ? {
+              ...l,
+              slaMinutes: editSla,
+              assignedStaff: editStaffInput.trim()
+                ? editStaffInput.split(",").map((s) => s.trim())
+                : l.assignedStaff,
+            }
+          : l,
+      ),
+    )
+    flash(`Settings for ${showEditLevel.name} updated!`)
+    setShowEditLevel(null)
   }
 
   function handleChangeHeadSubmit(e: React.FormEvent) {
@@ -252,7 +229,7 @@ export default function Hierarchy({ role }: { role: Role }) {
       ),
     )
 
-    flash(`${newHeadName.trim()} is now the Head of ${showChangeHead.department}!`)
+    flash(`${newHeadName.trim()} is now Head of ${showChangeHead.department}!`)
     setShowChangeHead(null)
     setNewHeadName("")
   }
@@ -264,47 +241,49 @@ export default function Hierarchy({ role }: { role: Role }) {
       transition={{ duration: 0.35 }}
       className="w-full space-y-6"
     >
-      {/* Header Banner */}
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <h1 className="font-display text-2xl font-700 tracking-tight">
-            Roles & IT Support Levels
-          </h1>
-          <p className="mt-1 text-sm text-muted-foreground">
-            Manage admins, support escalation levels, and department heads.
-          </p>
-        </div>
+      {/* Header & Multi-Tenant Isolation Banner */}
+      <div className="space-y-3">
+        <div className="flex flex-wrap items-center justify-between gap-4">
+          <div>
+            <h1 className="font-display text-2xl font-700 tracking-tight">
+              IT Roles & Support Escalations
+            </h1>
+            <p className="mt-1 text-sm text-muted-foreground">
+              Clear IT role designations and automated support escalation pathways.
+            </p>
+          </div>
 
-        <div className="flex items-center gap-2">
-          <Button size="sm" onClick={() => setShowAddAdmin(true)}>
-            <UserPlus size={15} /> Add Admin
-          </Button>
+          <div className="flex items-center gap-2">
+            <span className="neu-flat rounded-full px-3.5 py-1.5 text-xs font-mono font-600 text-primary flex items-center gap-1.5">
+              <Lock size={13} className="text-accent" /> Company Isolated: ABC Corporation
+            </span>
+          </div>
         </div>
       </div>
 
-      {/* Top Segmented Navigation Tabs */}
+      {/* Top Navigation Tabs */}
       <div className="flex items-center gap-1 neu-inset rounded-full p-1.5 text-xs max-w-fit">
         <button
           type="button"
-          onClick={() => setTab("admins")}
+          onClick={() => setTab("roles")}
           className={`rounded-full px-5 py-2 font-600 transition-all cursor-pointer ${
-            tab === "admins"
+            tab === "roles"
               ? "neu-flat text-primary font-700 shadow-sm"
               : "text-muted-foreground hover:text-foreground"
           }`}
         >
-          Admins & IT Leaders ({admins.length})
+          👑 IT Roles & Designations
         </button>
         <button
           type="button"
-          onClick={() => setTab("matrix")}
+          onClick={() => setTab("levels")}
           className={`rounded-full px-5 py-2 font-600 transition-all cursor-pointer ${
-            tab === "matrix"
+            tab === "levels"
               ? "neu-flat text-primary font-700 shadow-sm"
               : "text-muted-foreground hover:text-foreground"
           }`}
         >
-          Support Levels (4 Levels)
+          ⚡ Support Escalation Pathways (Levels 1–4)
         </button>
         <button
           type="button"
@@ -315,109 +294,123 @@ export default function Hierarchy({ role }: { role: Role }) {
               : "text-muted-foreground hover:text-foreground"
           }`}
         >
-          Department Heads ({deptHeads.length})
+          🏢 Department Heads
         </button>
       </div>
 
-      {/* TAB 1: Company Admins & IT Leaders */}
-      {tab === "admins" && (
+      {/* TAB 1: IT Roles & Responsibilities */}
+      {tab === "roles" && (
         <div className="space-y-4">
-          <div className="neu-flat rounded-2xl p-5 border border-[var(--border)] space-y-4">
-            <div className="flex items-center justify-between">
-              <div>
-                <h3 className="font-display font-700 text-base">Company Administrators</h3>
-                <p className="text-xs text-muted-foreground">
-                  Head of IT and designated company administrators.
-                </p>
-              </div>
-              <Button size="sm" variant="surface" onClick={() => setShowAddAdmin(true)}>
-                <Plus size={14} /> Add Co-Admin
-              </Button>
-            </div>
+          <div className="grid gap-4 md:grid-cols-3">
+            {itRoles.map((roleDef) => {
+              const IconComp = roleDef.icon
+              return (
+                <div key={roleDef.id} className="neu-flat rounded-2xl p-5 border border-[var(--border)] space-y-4 flex flex-col justify-between">
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div className="neu-inset rounded-xl p-2.5">
+                        <IconComp size={20} className="text-primary" />
+                      </div>
+                      <span
+                        className="neu-inset rounded-full px-2.5 py-0.5 font-mono text-[10px] font-700"
+                        style={{ color: roleDef.badgeColor }}
+                      >
+                        {roleDef.levelLabel}
+                      </span>
+                    </div>
 
-            <div className="grid gap-3 md:grid-cols-2 lg:grid-cols-3">
-              {admins.map((adm) => (
-                <div key={adm.id} className="neu-inset rounded-2xl p-4 space-y-3 relative">
-                  <div className="flex items-start justify-between gap-3">
-                    <div className="flex items-center gap-3">
-                      <Avatar name={adm.name} size={36} />
-                      <div>
-                        <div className="font-600 text-foreground font-display text-sm flex items-center gap-1.5">
-                          {adm.name}
-                          {adm.isPrimary && (
-                            <span className="neu-flat text-[10px] font-700 font-mono px-2 py-0.5 rounded-full text-accent">
-                              Head of IT
-                            </span>
-                          )}
-                        </div>
-                        <div className="text-xs text-muted-foreground">{adm.email}</div>
+                    <div>
+                      <h3 className="font-display font-700 text-base text-foreground">{roleDef.title}</h3>
+                      <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                        {roleDef.description}
+                      </p>
+                    </div>
+
+                    <div className="neu-inset rounded-xl p-3 text-xs leading-relaxed text-foreground">
+                      <span className="font-600 text-primary block mb-0.5">What they handle:</span>
+                      {roleDef.handlesWhat}
+                    </div>
+
+                    <div className="pt-2 border-t border-[var(--border)] space-y-2">
+                      <span className="text-[11px] font-600 text-muted-foreground block">
+                        Assigned Staff Members ({roleDef.members.length}):
+                      </span>
+                      <div className="space-y-1.5">
+                        {roleDef.members.map((m) => (
+                          <div key={m.name} className="flex items-center justify-between neu-inset rounded-xl p-2 text-xs">
+                            <div className="flex items-center gap-2">
+                              <Avatar name={m.name} size={24} />
+                              <div>
+                                <span className="font-600 text-foreground">{m.name}</span>
+                                <span className="text-[10px] text-muted-foreground block">{m.email}</span>
+                              </div>
+                            </div>
+                            {m.isPrimary && (
+                              <span className="text-[10px] font-700 text-accent font-mono">
+                                Primary Admin
+                              </span>
+                            )}
+                          </div>
+                        ))}
                       </div>
                     </div>
                   </div>
 
-                  <div className="pt-2 border-t border-[var(--border)] flex items-center justify-between text-xs">
-                    <div>
-                      <span className="text-[11px] text-muted-foreground block">Role</span>
-                      <span className="font-700 text-primary font-display">{adm.role}</span>
-                    </div>
-                    {!adm.isPrimary && (
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        className="text-[11px] text-muted-foreground hover:text-danger p-1 h-auto"
-                        onClick={() => handleDemoteAdmin(adm.id, adm.name)}
-                      >
-                        <UserX size={13} className="mr-1 text-danger" /> Remove Admin
-                      </Button>
-                    )}
-                  </div>
+                  <Button
+                    size="sm"
+                    variant="surface"
+                    onClick={() => setShowAssignMember(roleDef)}
+                    className="w-full text-xs mt-3"
+                  >
+                    <UserPlus size={14} /> Add Member to {roleDef.title}
+                  </Button>
                 </div>
-              ))}
-            </div>
+              )
+            })}
           </div>
         </div>
       )}
 
-      {/* TAB 2: IT Escalation Levels */}
-      {tab === "matrix" && (
+      {/* TAB 2: Support Escalation Pathways */}
+      {tab === "levels" && (
         <div className="space-y-4">
           <div className="neu-flat rounded-2xl p-5 border border-[var(--border)] space-y-4">
             <div>
-              <h3 className="font-display font-700 text-base">IT Support Escalation Levels</h3>
+              <h3 className="font-display font-700 text-base">Support Escalation Pathway (Levels 1–4)</h3>
               <p className="text-xs text-muted-foreground">
-                Automatic response levels from Level 1 to Head of IT.
+                When a ticket cannot be resolved at a lower level, it is escalated to the next specialist level.
               </p>
             </div>
 
             <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-              {tiers.map((t) => (
-                <div key={t.id} className="neu-inset rounded-2xl p-4 flex flex-col justify-between space-y-4">
+              {levels.map((lvl) => (
+                <div key={lvl.id} className="neu-inset rounded-2xl p-4 flex flex-col justify-between space-y-4">
                   <div className="space-y-3">
                     <div className="flex items-center justify-between">
                       <span
                         className="neu-flat rounded-full px-3 py-1 font-mono text-xs font-800"
-                        style={{ color: t.color }}
+                        style={{ color: lvl.color }}
                       >
-                        {t.id}
+                        {lvl.id}
                       </span>
                       <div className="flex items-center gap-1 font-mono text-xs text-muted-foreground">
-                        <Clock size={13} /> {t.slaMinutes}m SLA
+                        <Clock size={13} /> {lvl.slaMinutes}m SLA
                       </div>
                     </div>
 
                     <div>
-                      <h4 className="font-display font-700 text-sm text-foreground">{t.name}</h4>
+                      <h4 className="font-display font-700 text-sm text-foreground">{lvl.name}</h4>
                       <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
-                        {t.description}
+                        {lvl.description}
                       </p>
                     </div>
 
                     <div className="pt-2 border-t border-[var(--border)]">
                       <span className="text-[11px] font-600 text-muted-foreground block mb-1">
-                        Assigned Staff:
+                        Assigned Specialists:
                       </span>
                       <div className="flex flex-wrap gap-1.5">
-                        {t.specialists.map((s) => (
+                        {lvl.assignedStaff.map((s) => (
                           <span key={s} className="neu-flat rounded-full px-2.5 py-1 text-[11px] font-500 text-foreground">
                             {s}
                           </span>
@@ -430,13 +423,13 @@ export default function Hierarchy({ role }: { role: Role }) {
                     size="sm"
                     variant="surface"
                     onClick={() => {
-                      setShowEditTier(t)
-                      setEditSla(t.slaMinutes)
-                      setEditSpecialistInput(t.specialists.join(", "))
+                      setShowEditLevel(lvl)
+                      setEditSla(lvl.slaMinutes)
+                      setEditStaffInput(lvl.assignedStaff.join(", "))
                     }}
                     className="w-full text-xs"
                   >
-                    <Sliders size={13} /> Edit Support Level
+                    <Sliders size={13} /> Edit Level & SLA
                   </Button>
                 </div>
               ))}
@@ -445,14 +438,14 @@ export default function Hierarchy({ role }: { role: Role }) {
         </div>
       )}
 
-      {/* TAB 3: Department Heads Roster */}
+      {/* TAB 3: Department Heads */}
       {tab === "departments" && (
         <div className="space-y-4">
           <div className="neu-flat rounded-2xl p-5 border border-[var(--border)] space-y-4">
             <div>
               <h3 className="font-display font-700 text-base">Department Heads</h3>
               <p className="text-xs text-muted-foreground">
-                Assigned leaders for each department.
+                Assigned leaders for each company department in ABC Corporation.
               </p>
             </div>
 
@@ -487,87 +480,52 @@ export default function Hierarchy({ role }: { role: Role }) {
         </div>
       )}
 
-      {/* Add / Promote Admin Modal */}
+      {/* Assign Member to Role Modal */}
       <Modal
-        open={showAddAdmin}
-        onClose={() => setShowAddAdmin(false)}
-        title="Assign / Promote Company Admin"
-        subtitle="Appoint a new administrator or assign the Head of IT leadership role."
+        open={!!showAssignMember}
+        onClose={() => setShowAssignMember(null)}
+        title={`Assign Member to ${showAssignMember?.title}`}
+        subtitle={`Add an IT staff member to ${showAssignMember?.title}`}
       >
-        <form onSubmit={handleAddAdmin} className="space-y-4 pt-2">
-          <Field label="Full Name">
+        <form onSubmit={handleAssignMemberSubmit} className="space-y-4 pt-2">
+          <Field label="Staff Member Full Name">
             <input
               required
-              value={newAdminName}
-              onChange={(e) => setNewAdminName(e.target.value)}
-              placeholder="e.g. Maria Santos"
+              value={memberName}
+              onChange={(e) => setMemberName(e.target.value)}
+              placeholder="e.g. Carlos Rivera"
               className="w-full neu-inset rounded-xl bg-transparent px-3.5 py-2.5 text-sm outline-none"
             />
           </Field>
 
-          <Field label="Work Email">
+          <Field label="Work Email Address">
             <input
               required
               type="email"
-              value={newAdminEmail}
-              onChange={(e) => setNewAdminEmail(e.target.value)}
-              placeholder="e.g. maria@abccorp.com"
+              value={memberEmail}
+              onChange={(e) => setMemberEmail(e.target.value)}
+              placeholder="e.g. carlos@abccorp.com"
               className="w-full neu-inset rounded-xl bg-transparent px-3.5 py-2.5 text-sm outline-none"
             />
           </Field>
 
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-xs font-500 text-muted-foreground mb-1">Administrative Role</label>
-              <div className="neu-inset rounded-xl p-1">
-                <select
-                  value={newAdminRole}
-                  onChange={(e) => setNewAdminRole(e.target.value as any)}
-                  className="w-full bg-transparent px-2 py-2 text-xs outline-none font-600"
-                >
-                  <option value="Head of IT">Head of IT (Primary)</option>
-                  <option value="Co-Admin">Co-Administrator</option>
-                  <option value="IT Security Lead">IT Security Lead</option>
-                  <option value="IT Dispatcher">IT Dispatcher</option>
-                </select>
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-xs font-500 text-muted-foreground mb-1">Department</label>
-              <div className="neu-inset rounded-xl p-1">
-                <select
-                  value={newAdminDept}
-                  onChange={(e) => setNewAdminDept(e.target.value)}
-                  className="w-full bg-transparent px-2 py-2 text-xs outline-none font-600"
-                >
-                  {DEPARTMENTS.map((d) => (
-                    <option key={d} value={d}>
-                      {d}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            </div>
-          </div>
-
           <div className="flex justify-end gap-3 pt-3">
-            <Button type="button" variant="ghost" onClick={() => setShowAddAdmin(false)}>
+            <Button type="button" variant="ghost" onClick={() => setShowAssignMember(null)}>
               Cancel
             </Button>
             <Button type="submit">
-              <UserCheck size={15} /> Confirm & Appoint Admin
+              <UserCheck size={15} /> Confirm Assignment
             </Button>
           </div>
         </form>
       </Modal>
 
-      {/* Edit Tier SLA & Specialists Modal */}
+      {/* Edit Level Modal */}
       <Modal
-        open={!!showEditTier}
-        onClose={() => setShowEditTier(null)}
-        title={`Configure ${showEditTier?.name}`}
-        subtitle="Set SLA response targets and assigned tier specialists."
+        open={!!showEditLevel}
+        onClose={() => setShowEditLevel(null)}
+        title={`Configure ${showEditLevel?.name}`}
+        subtitle="Set SLA response time target and assigned specialists."
       >
         <div className="space-y-4 pt-2">
           <Field label="SLA Target (Minutes)">
@@ -579,21 +537,21 @@ export default function Hierarchy({ role }: { role: Role }) {
             />
           </Field>
 
-          <Field label="Designated Tier Specialists (Comma Separated)">
+          <Field label="Assigned Specialists (Comma Separated)">
             <input
-              value={editSpecialistInput}
-              onChange={(e) => setEditSpecialistInput(e.target.value)}
-              placeholder="e.g. John Doe, Mark Villanueva"
+              value={editStaffInput}
+              onChange={(e) => setEditStaffInput(e.target.value)}
+              placeholder="e.g. Mark Villanueva, Leo Tan"
               className="w-full neu-inset rounded-xl bg-transparent px-3.5 py-2.5 text-sm outline-none"
             />
           </Field>
 
           <div className="flex justify-end gap-3 pt-3">
-            <Button type="button" variant="ghost" onClick={() => setShowEditTier(null)}>
+            <Button type="button" variant="ghost" onClick={() => setShowEditLevel(null)}>
               Cancel
             </Button>
-            <Button onClick={handleSaveTierSla}>
-              <Check size={15} /> Save Tier Configurations
+            <Button onClick={handleSaveLevel}>
+              <Check size={15} /> Save Level Settings
             </Button>
           </div>
         </div>
@@ -603,11 +561,11 @@ export default function Hierarchy({ role }: { role: Role }) {
       <Modal
         open={!!showChangeHead}
         onClose={() => setShowChangeHead(null)}
-        title={`Reassign Department Head — ${showChangeHead?.department}`}
-        subtitle="Appoint a new department head to oversee members and ticket approvals."
+        title={`Reassign Head of ${showChangeHead?.department}`}
+        subtitle="Appoint a new department head."
       >
         <form onSubmit={handleChangeHeadSubmit} className="space-y-4 pt-2">
-          <Field label="New Department Head Full Name">
+          <Field label="New Head Full Name">
             <input
               required
               value={newHeadName}
@@ -622,7 +580,7 @@ export default function Hierarchy({ role }: { role: Role }) {
               Cancel
             </Button>
             <Button type="submit">
-              <UserCheck size={15} /> Reassign Head
+              <UserCheck size={15} /> Confirm Head Reassignment
             </Button>
           </div>
         </form>
