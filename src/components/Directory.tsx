@@ -978,7 +978,7 @@ function DepartmentDetailModal({
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
-              👥 Members ({activeDeptMembers.length})
+              Members ({activeDeptMembers.length})
             </button>
             <button
               type="button"
@@ -989,7 +989,7 @@ function DepartmentDetailModal({
                   : "text-muted-foreground hover:text-foreground"
               }`}
             >
-              🎫 IT Tickets ({deptTickets.length})
+              IT Tickets ({deptTickets.length})
             </button>
           </div>
         </div>
