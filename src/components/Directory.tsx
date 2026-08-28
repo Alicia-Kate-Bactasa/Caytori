@@ -11,6 +11,9 @@ import {
   Copy,
   Check,
   Link as LinkIcon,
+  UserX,
+  UserCheck,
+  Archive,
 } from "lucide-react"
 import {
   Card,
@@ -66,6 +69,18 @@ const INITIAL: Record<Kind, Row[]> = {
       dept: "Human Resources",
       email: "sam@abccorp.com",
       status: "Invited",
+    },
+    {
+      name: "Carlos Rivera",
+      dept: "Finance",
+      email: "carlos@abccorp.com",
+      status: "Inactive",
+    },
+    {
+      name: "Rachel Green",
+      dept: "Marketing",
+      email: "rachel@abccorp.com",
+      status: "Inactive",
     },
   ],
   it_team: STAFF.map((s) => ({
@@ -157,6 +172,13 @@ export default function Directory({
   const [confirm, setConfirm] = useState<Row | null>(null)
   const [detail, setDetail] = useState<Row | null>(null)
   const [toast, setToast] = useState("")
+  const [showInactiveModal, setShowInactiveModal] = useState(false)
+
+  const [allEmployees, setAllEmployees] = useState<Row[]>(INITIAL.employees)
+  const inactiveEmployees = useMemo(
+    () => allEmployees.filter((e) => e.status === "Inactive"),
+    [allEmployees],
+  )
 
   function flash(msg: string) {
     setToast(msg)
@@ -228,6 +250,8 @@ export default function Directory({
     return (
       <DepartmentDetailModal
         department={detail}
+        allEmployees={allEmployees}
+        onUpdateEmployees={setAllEmployees}
         onClose={() => setDetail(null)}
         onToggleStatus={() => toggleStatus(detail)}
       />
@@ -246,7 +270,23 @@ export default function Directory({
         <h1 className="font-display text-2xl font-700 tracking-tight">
           {title}
         </h1>
-        <Button onClick={() => setCreating(true)}>{ACTIONS[kind]}</Button>
+        <div className="flex items-center gap-2">
+          {kind === "departments" && (
+            <Button
+              variant="surface"
+              onClick={() => setShowInactiveModal(true)}
+              className="relative"
+            >
+              <Archive size={15} /> Inactive Accounts
+              {inactiveEmployees.length > 0 && (
+                <span className="ml-1.5 neu-inset rounded-full px-2 py-0.5 font-mono text-[10px] font-700 text-warning">
+                  {inactiveEmployees.length}
+                </span>
+              )}
+            </Button>
+          )}
+          <Button onClick={() => setCreating(true)}>{ACTIONS[kind]}</Button>
+        </div>
       </div>
 
       {kind === "departments" ? (
@@ -586,6 +626,67 @@ export default function Directory({
         </p>
       </Modal>
 
+      {/* Inactive Member Accounts Archive Modal */}
+      <Modal
+        open={showInactiveModal}
+        onClose={() => setShowInactiveModal(false)}
+        title="Inactive Member Accounts Archive"
+        subtitle="Deactivated employee accounts archived across all departments."
+        width="max-w-2xl"
+      >
+        <div className="space-y-4 pt-2">
+          <div className="space-y-2 max-h-80 overflow-y-auto neu-inset rounded-2xl p-3">
+            {inactiveEmployees.length > 0 ? (
+              inactiveEmployees.map((m) => (
+                <div
+                  key={m.name}
+                  className="flex items-center justify-between p-3 rounded-xl neu-flat text-xs"
+                >
+                  <div className="flex items-center gap-3">
+                    <Avatar name={m.name} size={32} />
+                    <div>
+                      <div className="font-600 text-foreground font-display text-sm">
+                        {m.name}
+                      </div>
+                      <div className="text-[11px] text-muted-foreground">
+                        {m.email} · {m.dept} Department
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <Pill text="Inactive" />
+                    <Button
+                      size="sm"
+                      variant="surface"
+                      onClick={() => {
+                        setAllEmployees(
+                          allEmployees.map((x) =>
+                            x.name === m.name ? { ...x, status: "Active" } : x,
+                          ),
+                        )
+                        flash(`${m.name}'s account has been reactivated.`)
+                      }}
+                    >
+                      <UserCheck size={14} className="text-accent" /> Reactivate
+                    </Button>
+                  </div>
+                </div>
+              ))
+            ) : (
+              <div className="p-6 text-center text-xs text-muted-foreground italic">
+                No deactivated employee accounts currently archived.
+              </div>
+            )}
+          </div>
+
+          <div className="flex justify-end pt-2 border-t border-[var(--border)]">
+            <Button size="sm" onClick={() => setShowInactiveModal(false)}>
+              Close Archive
+            </Button>
+          </div>
+        </div>
+      </Modal>
+
       <Toast text={toast} />
     </motion.div>
   )
@@ -743,34 +844,48 @@ function CompanyDetail({
 
 function DepartmentDetailModal({
   department,
+  allEmployees,
+  onUpdateEmployees,
   onClose,
   onToggleStatus,
 }: {
   department: Row
+  allEmployees: Row[]
+  onUpdateEmployees: (rows: Row[]) => void
   onClose: () => void
   onToggleStatus: () => void
 }) {
   const [ticketTab, setTicketTab] = useState<"ACTIVE" | "RESOLVED" | "CLOSED" | "ALL">("ACTIVE")
   const [inviting, setInviting] = useState(false)
+  const [showDeptInactiveDrawer, setShowDeptInactiveDrawer] = useState(false)
   const [inviteName, setInviteName] = useState("")
   const [inviteEmail, setInviteEmail] = useState("")
   const [copiedLink, setCopiedLink] = useState(false)
   const [modalToast, setModalToast] = useState("")
 
-  const [memberList, setMemberList] = useState<Row[]>(() => {
-    return INITIAL.employees
+  const deptMembers = useMemo(() => {
+    return allEmployees
       .filter((e) => e.dept === department.name)
       .concat(
         department.name === "IT"
           ? STAFF.map((s) => ({
               name: s.name,
-              dept: "IT Staff",
+              dept: "IT",
               email: s.email,
               status: "Active",
-            }))
+            })).filter((s) => !allEmployees.some((e) => e.name === s.name))
           : [],
       )
-  })
+  }, [allEmployees, department.name])
+
+  const activeDeptMembers = useMemo(
+    () => deptMembers.filter((m) => m.status !== "Inactive"),
+    [deptMembers],
+  )
+  const inactiveDeptMembers = useMemo(
+    () => deptMembers.filter((m) => m.status === "Inactive"),
+    [deptMembers],
+  )
 
   const deptTickets = TICKETS.filter((t) => t.department === department.name)
   const activeTickets = deptTickets.filter((t) => t.status === "OPEN" || t.status === "IN_PROGRESS")
@@ -800,11 +915,22 @@ function DepartmentDetailModal({
       status: "Invited",
     }
 
-    setMemberList([newMember, ...memberList])
+    onUpdateEmployees([newMember, ...allEmployees])
     setInviting(false)
     flashModalToast(`Invitation email & link generated for ${inviteEmail.trim()} in ${department.name}!`)
     setInviteName("")
     setInviteEmail("")
+  }
+
+  function setMemberStatus(memberName: string, status: string) {
+    onUpdateEmployees(
+      allEmployees.map((e) => (e.name === memberName ? { ...e, status } : e)),
+    )
+    flashModalToast(
+      status === "Inactive"
+        ? `${memberName}'s account was deactivated and moved to Inactive Accounts.`
+        : `${memberName}'s account was reactivated successfully.`,
+    )
   }
 
   const generatedInviteLink = `https://caytori.com/invite?dept=${encodeURIComponent(
@@ -825,8 +951,8 @@ function DepartmentDetailModal({
         {/* Metric Cards Banner */}
         <div className="grid grid-cols-3 gap-3">
           <div className="neu-inset rounded-2xl p-4 text-center">
-            <div className="text-xs font-600 text-muted-foreground">Department Members</div>
-            <div className="mt-1 font-display text-2xl font-800">{memberList.length > 0 ? memberList.length : 8}</div>
+            <div className="text-xs font-600 text-muted-foreground">Active Members</div>
+            <div className="mt-1 font-display text-2xl font-800">{activeDeptMembers.length}</div>
           </div>
           <div className="neu-inset rounded-2xl p-4 text-center">
             <div className="text-xs font-600 text-muted-foreground font-mono">Active IT Tickets</div>
@@ -838,33 +964,55 @@ function DepartmentDetailModal({
           </div>
         </div>
 
-        {/* Department Members List with Invite Button */}
+        {/* Department Members List with Deactivate & Invite Controls */}
         <div>
-          <div className="flex items-center justify-between gap-2 mb-2.5">
+          <div className="flex flex-wrap items-center justify-between gap-2 mb-2.5">
             <h4 className="font-display text-sm font-700">
-              Department Members ({memberList.length})
+              Department Members ({activeDeptMembers.length})
             </h4>
-            <Button size="sm" onClick={() => setInviting(true)}>
-              <UserPlus size={14} /> Invite Member
-            </Button>
+            <div className="flex items-center gap-2">
+              {inactiveDeptMembers.length > 0 && (
+                <Button
+                  size="sm"
+                  variant="surface"
+                  onClick={() => setShowDeptInactiveDrawer(true)}
+                >
+                  <Archive size={14} /> Inactive ({inactiveDeptMembers.length})
+                </Button>
+              )}
+              <Button size="sm" onClick={() => setInviting(true)}>
+                <UserPlus size={14} /> Invite Member
+              </Button>
+            </div>
           </div>
+
           <div className="neu-flat rounded-2xl p-3 space-y-2 max-h-48 overflow-y-auto">
-            {memberList.length > 0 ? (
-              memberList.map((m) => (
+            {activeDeptMembers.length > 0 ? (
+              activeDeptMembers.map((m) => (
                 <div key={m.name} className="flex items-center justify-between p-2.5 rounded-xl neu-inset text-xs">
-                  <div className="flex items-center gap-2.5">
+                  <div className="flex items-center gap-2.5 min-w-0 pr-2">
                     <Avatar name={m.name} size={28} />
-                    <div>
-                      <div className="font-600 text-foreground">{m.name}</div>
-                      <div className="text-[11px] text-muted-foreground">{m.email}</div>
+                    <div className="min-w-0">
+                      <div className="font-600 text-foreground truncate">{m.name}</div>
+                      <div className="text-[11px] text-muted-foreground truncate">{m.email}</div>
                     </div>
                   </div>
-                  <Pill text={m.status} />
+                  <div className="flex items-center gap-2 shrink-0">
+                    <Pill text={m.status} />
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      className="text-[11px] text-muted-foreground hover:text-danger p-1.5 h-auto"
+                      onClick={() => setMemberStatus(m.name, "Inactive")}
+                    >
+                      <UserX size={13} className="mr-1 text-danger" /> Deactivate
+                    </Button>
+                  </div>
                 </div>
               ))
             ) : (
-              <div className="text-xs text-muted-foreground p-3 text-center">
-                Standard department members assigned (8 active staff)
+              <div className="text-xs text-muted-foreground p-3 text-center italic">
+                No active members in this department.
               </div>
             )}
           </div>
@@ -998,6 +1146,53 @@ function DepartmentDetailModal({
             </Button>
           </div>
         </form>
+      </Modal>
+
+      {/* Department Inactive Accounts Drawer Modal */}
+      <Modal
+        open={showDeptInactiveDrawer}
+        onClose={() => setShowDeptInactiveDrawer(false)}
+        title={`Inactive Accounts — ${department.name}`}
+        subtitle="Deactivated member accounts for this department."
+      >
+        <div className="space-y-4 pt-2">
+          <div className="space-y-2 max-h-60 overflow-y-auto neu-inset rounded-2xl p-3">
+            {inactiveDeptMembers.length > 0 ? (
+              inactiveDeptMembers.map((m) => (
+                <div
+                  key={m.name}
+                  className="flex items-center justify-between p-2.5 rounded-xl neu-flat text-xs"
+                >
+                  <div className="flex items-center gap-2.5">
+                    <Avatar name={m.name} size={28} />
+                    <div>
+                      <div className="font-600 text-foreground">{m.name}</div>
+                      <div className="text-[11px] text-muted-foreground">{m.email}</div>
+                    </div>
+                  </div>
+                  <Button
+                    size="sm"
+                    variant="surface"
+                    onClick={() => {
+                      setMemberStatus(m.name, "Active")
+                    }}
+                  >
+                    <UserCheck size={13} className="text-accent" /> Reactivate Account
+                  </Button>
+                </div>
+              ))
+            ) : (
+              <div className="p-4 text-center text-xs text-muted-foreground italic">
+                No inactive member accounts found in this department.
+              </div>
+            )}
+          </div>
+          <div className="flex justify-end pt-2 border-t border-[var(--border)]">
+            <Button size="sm" onClick={() => setShowDeptInactiveDrawer(false)}>
+              Close
+            </Button>
+          </div>
+        </div>
       </Modal>
 
       <Toast text={modalToast} />
