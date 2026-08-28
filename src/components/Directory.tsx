@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import { motion } from "motion/react"
 import {
   ArrowLeft,
@@ -220,6 +220,16 @@ export default function Directory({
     )
   }
 
+  if (detail && kind === "departments") {
+    return (
+      <DepartmentDetailModal
+        department={detail}
+        onClose={() => setDetail(null)}
+        onToggleStatus={() => toggleStatus(detail)}
+      />
+    )
+  }
+
   const isPeople = kind === "employees" || kind === "it_team"
 
   return (
@@ -235,121 +245,172 @@ export default function Directory({
         <Button onClick={() => setCreating(true)}>{ACTIONS[kind]}</Button>
       </div>
 
-      <Card className="mt-6 overflow-hidden">
-        <table className="w-full text-left">
-          <thead>
-            <tr className="border-b" style={{ borderColor: "var(--border)" }}>
-              {(kind === "companies"
-                ? ["Company", "Users", "Tickets", "Status", ""]
-                : kind === "departments"
-                  ? ["Department", "Department Head", "Members", "Open tickets", "Status", ""]
-                  : isPeople
-                    ? [
-                        "Name",
-                        kind === "it_team" ? "Role" : "Department",
-                        "Email",
-                        "Status",
-                        "",
-                      ]
-                    : []
-              ).map((h, i) => (
-                <th
-                  key={i}
-                  className="px-6 py-4 text-xs font-500 uppercase tracking-wide text-muted-foreground"
-                >
-                  {h}
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((r) => {
-              const clickable = kind === "companies"
-              return (
-                <tr
-                  key={r.name}
-                  onClick={clickable ? () => setDetail(r) : undefined}
-                  className={`border-b transition-colors last:border-0 hover:bg-[color-mix(in_srgb,var(--primary)_5%,transparent)] ${
-                    clickable ? "cursor-pointer" : ""
-                  }`}
-                  style={{ borderColor: "var(--border)" }}
-                >
-                  <td className="px-6 py-4">
-                    <span className="flex items-center gap-3">
-                      <Avatar name={r.name} size={32} />
-                      <span className="font-500">{r.name}</span>
-                    </span>
-                  </td>
-                  {kind === "companies" && (
-                    <td className="px-6 py-4 font-mono text-sm">{r.users}</td>
-                  )}
-                  {kind === "companies" && (
-                    <td className="px-6 py-4 font-mono text-sm">{r.tickets}</td>
-                  )}
-                  {kind === "departments" && (
-                    <td className="px-6 py-4 text-sm font-500 text-foreground">
+      {kind === "departments" ? (
+        /* Departments Gallery Card Grid */
+        <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {rows.map((r) => {
+            const openTicketsCount = TICKETS.filter(
+              (t) => t.department === r.name && t.status !== "CLOSED",
+            ).length
+            const memberCount =
+              r.name === "Finance"
+                ? 9
+                : r.name === "Human Resources"
+                ? 4
+                : r.name === "Marketing"
+                ? 7
+                : r.name === "Operations"
+                ? 9
+                : r.name === "Sales"
+                ? 15
+                : 9
+
+            return (
+              <Card key={r.name} className="neu-hover p-6 flex flex-col justify-between space-y-4">
+                <div>
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                      <div className="grid h-10 w-10 place-items-center rounded-2xl neu-inset font-display font-700 text-primary text-base">
+                        {r.name.charAt(0)}
+                      </div>
+                      <div>
+                        <h3 className="font-display font-700 text-base text-foreground">{r.name}</h3>
+                        <div className="mt-0.5 text-xs text-muted-foreground">Department</div>
+                      </div>
+                    </div>
+                    <Pill text={r.status} />
+                  </div>
+
+                  <div className="mt-5 space-y-2.5">
+                    <div className="text-xs text-muted-foreground">
+                      <span className="font-600 text-foreground block mb-1">Department Head:</span>
                       {r.head ? (
-                        <span className="flex items-center gap-2">
+                        <div className="flex items-center gap-2 text-foreground font-500 neu-flat rounded-xl p-2">
                           <Avatar name={r.head.split("(")[0].trim()} size={24} />
-                          {r.head}
-                        </span>
+                          <span className="truncate">{r.head}</span>
+                        </div>
                       ) : (
-                        <span className="text-muted-foreground text-xs italic">Unassigned</span>
+                        <span className="italic">Unassigned</span>
+                      )}
+                    </div>
+
+                    <div className="flex items-center gap-2 pt-1">
+                      <span className="neu-inset flex-1 rounded-xl px-3 py-2 text-center text-xs font-600 font-mono">
+                        <Users size={13} className="inline mr-1 text-primary" /> {memberCount} Members
+                      </span>
+                      <span className="neu-inset flex-1 rounded-xl px-3 py-2 text-center text-xs font-600 font-mono">
+                        <Ticket size={13} className="inline mr-1 text-warning" /> {openTicketsCount} Open Tickets
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between gap-2 pt-2 border-t border-[var(--border)]">
+                  <Button size="sm" variant="surface" className="flex-1" onClick={() => setDetail(r)}>
+                    View Details
+                  </Button>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    onClick={() => setConfirm(r)}
+                    className="text-xs text-muted-foreground hover:text-danger"
+                  >
+                    {r.status === "Active" ? "Deactivate" : "Activate"}
+                  </Button>
+                </div>
+              </Card>
+            )
+          })}
+        </div>
+      ) : (
+        /* Table View for Companies, Employees, IT Team */
+        <Card className="mt-6 overflow-hidden">
+          <table className="w-full text-left">
+            <thead>
+              <tr className="border-b" style={{ borderColor: "var(--border)" }}>
+                {(kind === "companies"
+                  ? ["Company", "Users", "Tickets", "Status", ""]
+                  : isPeople
+                  ? [
+                      "Name",
+                      kind === "it_team" ? "Role" : "Department",
+                      "Email",
+                      "Status",
+                      "",
+                    ]
+                  : []
+                ).map((h, i) => (
+                  <th
+                    key={i}
+                    className="px-6 py-4 text-xs font-500 uppercase tracking-wide text-muted-foreground"
+                  >
+                    {h}
+                  </th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((r) => {
+                const clickable = kind === "companies"
+                return (
+                  <tr
+                    key={r.name}
+                    onClick={clickable ? () => setDetail(r) : undefined}
+                    className={`border-b transition-colors last:border-0 hover:bg-[color-mix(in_srgb,var(--primary)_5%,transparent)] ${
+                      clickable ? "cursor-pointer" : ""
+                    }`}
+                    style={{ borderColor: "var(--border)" }}
+                  >
+                    <td className="px-6 py-4">
+                      <span className="flex items-center gap-3">
+                        <Avatar name={r.name} size={32} />
+                        <span className="font-500">{r.name}</span>
+                      </span>
+                    </td>
+                    {kind === "companies" && (
+                      <td className="px-6 py-4 font-mono text-sm">{r.users}</td>
+                    )}
+                    {kind === "companies" && (
+                      <td className="px-6 py-4 font-mono text-sm">{r.tickets}</td>
+                    )}
+                    {isPeople && (
+                      <td className="px-6 py-4 text-sm text-muted-foreground">
+                        {r.dept}
+                      </td>
+                    )}
+                    {isPeople && (
+                      <td className="px-6 py-4 text-sm text-muted-foreground">
+                        {r.email}
+                      </td>
+                    )}
+                    <td className="px-6 py-4">
+                      <Pill text={r.status} />
+                    </td>
+                    <td className="px-6 py-4 text-right">
+                      {clickable ? (
+                        <ChevronRight
+                          size={16}
+                          className="ml-auto text-muted-foreground"
+                        />
+                      ) : (
+                        <Button
+                          size="sm"
+                          variant="surface"
+                          onClick={() => setConfirm(r)}
+                        >
+                          {r.status === "Active" || r.status === "Invited"
+                            ? "Deactivate"
+                            : "Activate"}
+                        </Button>
                       )}
                     </td>
-                  )}
-                  {kind === "departments" && (
-                    <td className="px-6 py-4 font-mono text-sm">
-                      {Math.floor(Math.random() * 15) + 4}
-                    </td>
-                  )}
-                  {kind === "departments" && (
-                    <td className="px-6 py-4 font-mono text-sm">
-                      {
-                        TICKETS.filter(
-                          (t) =>
-                            t.department === r.name && t.status !== "CLOSED",
-                        ).length
-                      }
-                    </td>
-                  )}
-                  {isPeople && (
-                    <td className="px-6 py-4 text-sm text-muted-foreground">
-                      {r.dept}
-                    </td>
-                  )}
-                  {isPeople && (
-                    <td className="px-6 py-4 text-sm text-muted-foreground">
-                      {r.email}
-                    </td>
-                  )}
-                  <td className="px-6 py-4">
-                    <Pill text={r.status} />
-                  </td>
-                  <td className="px-6 py-4 text-right">
-                    {clickable ? (
-                      <ChevronRight
-                        size={16}
-                        className="ml-auto text-muted-foreground"
-                      />
-                    ) : (
-                      <Button
-                        size="sm"
-                        variant="surface"
-                        onClick={() => setConfirm(r)}
-                      >
-                        {r.status === "Active" || r.status === "Invited"
-                          ? "Deactivate"
-                          : "Activate"}
-                      </Button>
-                    )}
-                  </td>
-                </tr>
-              )
-            })}
-          </tbody>
-        </table>
-      </Card>
+                  </tr>
+                )
+              })}
+            </tbody>
+          </table>
+        </Card>
+      )}
 
       {/* Create / invite modal */}
       <Modal
@@ -673,5 +734,159 @@ function CompanyDetail({
 
       <Toast text={toast} />
     </motion.div>
+  )
+}
+
+function DepartmentDetailModal({
+  department,
+  onClose,
+  onToggleStatus,
+}: {
+  department: Row
+  onClose: () => void
+  onToggleStatus: () => void
+}) {
+  const [ticketTab, setTicketTab] = useState<"ACTIVE" | "RESOLVED" | "CLOSED" | "ALL">("ACTIVE")
+
+  const deptTickets = TICKETS.filter((t) => t.department === department.name)
+  const activeTickets = deptTickets.filter((t) => t.status === "OPEN" || t.status === "IN_PROGRESS")
+  const resolvedTickets = deptTickets.filter((t) => t.status === "RESOLVED")
+  const closedTickets = deptTickets.filter((t) => t.status === "CLOSED")
+
+  const displayTickets = useMemo(() => {
+    if (ticketTab === "ACTIVE") return activeTickets
+    if (ticketTab === "RESOLVED") return resolvedTickets
+    if (ticketTab === "CLOSED") return closedTickets
+    return deptTickets
+  }, [deptTickets, activeTickets, resolvedTickets, closedTickets, ticketTab])
+
+  const members = INITIAL.employees
+    .filter((e) => e.dept === department.name)
+    .concat(
+      department.name === "IT"
+        ? STAFF.map((s) => ({
+            name: s.name,
+            dept: "IT Staff",
+            email: s.email,
+            status: "Active",
+          }))
+        : [],
+    )
+
+  return (
+    <Modal
+      open={true}
+      onClose={onClose}
+      title={`${department.name} Department`}
+      subtitle={`Department Head: ${department.head ?? "Unassigned"}`}
+      width="max-w-3xl"
+    >
+      <div className="space-y-6 pt-2">
+        {/* Metric Cards Banner */}
+        <div className="grid grid-cols-3 gap-3">
+          <div className="neu-inset rounded-2xl p-4 text-center">
+            <div className="text-xs font-600 text-muted-foreground">Department Members</div>
+            <div className="mt-1 font-display text-2xl font-800">{members.length > 0 ? members.length : 8}</div>
+          </div>
+          <div className="neu-inset rounded-2xl p-4 text-center">
+            <div className="text-xs font-600 text-muted-foreground font-mono">Active IT Tickets</div>
+            <div className="mt-1 font-display text-2xl font-800 text-warning">{activeTickets.length}</div>
+          </div>
+          <div className="neu-inset rounded-2xl p-4 text-center">
+            <div className="text-xs font-600 text-muted-foreground">Department Status</div>
+            <div className="mt-1 font-display text-sm font-700 text-primary">{department.status}</div>
+          </div>
+        </div>
+
+        {/* Department Members List */}
+        <div>
+          <h4 className="font-display text-sm font-700 mb-2.5">Department Members</h4>
+          <div className="neu-flat rounded-2xl p-3 space-y-2 max-h-44 overflow-y-auto">
+            {members.length > 0 ? (
+              members.map((m) => (
+                <div key={m.name} className="flex items-center justify-between p-2.5 rounded-xl neu-inset text-xs">
+                  <div className="flex items-center gap-2.5">
+                    <Avatar name={m.name} size={28} />
+                    <div>
+                      <div className="font-600 text-foreground">{m.name}</div>
+                      <div className="text-[11px] text-muted-foreground">{m.email}</div>
+                    </div>
+                  </div>
+                  <Pill text={m.status} />
+                </div>
+              ))
+            ) : (
+              <div className="text-xs text-muted-foreground p-3 text-center">
+                Standard department members assigned (8 active staff)
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Categorized Department IT Tickets */}
+        <div>
+          <div className="flex flex-wrap items-center justify-between gap-2 mb-2.5">
+            <h4 className="font-display text-sm font-700">Associated IT Tickets ({deptTickets.length})</h4>
+
+            {/* Neumorphic Categorization Pills */}
+            <div className="flex items-center gap-1 neu-inset rounded-full p-1 text-[11px]">
+              {[
+                { key: "ACTIVE", label: `Active (${activeTickets.length})` },
+                { key: "RESOLVED", label: `Resolved (${resolvedTickets.length})` },
+                { key: "CLOSED", label: `Closed (${closedTickets.length})` },
+                { key: "ALL", label: `All (${deptTickets.length})` },
+              ].map((tab) => (
+                <button
+                  key={tab.key}
+                  type="button"
+                  onClick={() => setTicketTab(tab.key as any)}
+                  className={`rounded-full px-3 py-1 font-600 transition-all duration-200 cursor-pointer ${
+                    ticketTab === tab.key
+                      ? "neu-flat text-primary font-700"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="space-y-2 max-h-48 overflow-y-auto pt-1">
+            {displayTickets.length > 0 ? (
+              displayTickets.map((t) => (
+                <div
+                  key={t.id}
+                  className="neu-flat rounded-xl p-3 flex items-center justify-between text-xs hover:bg-[color-mix(in_srgb,var(--primary)_4%,transparent)] transition-colors"
+                >
+                  <div className="min-w-0 pr-2">
+                    <span className="font-mono font-700 text-primary mr-2">{t.id}</span>
+                    <span className="font-600 text-foreground">{t.subject}</span>
+                    <div className="mt-0.5 text-[11px] text-muted-foreground">
+                      Reported by {t.reporter} · Category: {t.category} · Priority: {t.priority}
+                    </div>
+                  </div>
+                  <StatusBadge status={t.status} />
+                </div>
+              ))
+            ) : (
+              <div className="text-xs text-muted-foreground neu-inset rounded-xl p-4 text-center italic">
+                No {ticketTab.toLowerCase()} tickets found for this department.
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Footer controls */}
+        <div className="flex justify-between items-center pt-3 border-t border-[var(--border)]">
+          <Button variant="surface" size="sm" onClick={onToggleStatus}>
+            {department.status === "Active" ? "Deactivate Department" : "Activate Department"}
+          </Button>
+          <Button size="sm" onClick={onClose}>
+            Close
+          </Button>
+        </div>
+      </div>
+    </Modal>
   )
 }

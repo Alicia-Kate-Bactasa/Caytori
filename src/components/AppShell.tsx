@@ -552,9 +552,15 @@ export default function AppShell({
   )
 }
 
-function Help({ onNavigate }: { onNavigate?: (page: string) => void }) {
+function Help({
+  onNavigate,
+  role,
+}: {
+  onNavigate?: (key: string) => void
+  role?: Role
+}) {
   const [open, setOpen] = useState<number | null>(0)
-
+  const isIT = role === "it_head" || role === "it_employee"
   const half = Math.ceil(FAQS.length / 2)
   const col1 = FAQS.slice(0, half)
   const col2 = FAQS.slice(half)
@@ -570,7 +576,13 @@ function Help({ onNavigate }: { onNavigate?: (page: string) => void }) {
         </p>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-[1fr_320px] xl:grid-cols-[1fr_340px] items-start">
+      <div
+        className={
+          isIT
+            ? "w-full"
+            : "grid gap-6 lg:grid-cols-[1fr_320px] xl:grid-cols-[1fr_340px] items-start"
+        }
+      >
         {/* FAQs 2-column grid */}
         <div className="grid gap-3 md:grid-cols-2 items-start">
           <div className="flex flex-col gap-3">
@@ -645,38 +657,40 @@ function Help({ onNavigate }: { onNavigate?: (page: string) => void }) {
           </div>
         </div>
 
-        {/* Right Sidebar Support Card */}
-        <div className="space-y-4">
-          <Card className="p-5 space-y-3">
-            <h3 className="font-display font-600 text-base">Need more help?</h3>
-            <p className="text-xs text-muted-foreground leading-relaxed">
-              If your issue isn't covered here, submit a ticket and our IT support team will take care of it.
-            </p>
-            {onNavigate && (
-              <Button
-                onClick={() => onNavigate("tickets_my")}
-                className="w-full mt-2"
-                size="sm"
-              >
-                Go to My Tickets
-              </Button>
-            )}
-          </Card>
+        {/* Right Sidebar Support Card (Hidden for IT Dept Roles) */}
+        {!isIT && (
+          <div className="space-y-4">
+            <Card className="p-5 space-y-3">
+              <h3 className="font-display font-600 text-base">Need more help?</h3>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                If your issue isn't covered here, submit a ticket and our IT support team will take care of it.
+              </p>
+              {onNavigate && (
+                <Button
+                  onClick={() => onNavigate("tickets_my")}
+                  className="w-full mt-2"
+                  size="sm"
+                >
+                  Go to My Tickets
+                </Button>
+              )}
+            </Card>
 
-          <Card className="p-5 space-y-3">
-            <h3 className="font-display font-600 text-sm">Support Hours</h3>
-            <div className="space-y-2 text-xs text-muted-foreground">
-              <div className="flex justify-between">
-                <span>Mon – Fri</span>
-                <span className="font-mono text-foreground font-500">8:00 AM – 6:00 PM</span>
+            <Card className="p-5 space-y-3">
+              <h3 className="font-display font-600 text-sm">Support Hours</h3>
+              <div className="space-y-2 text-xs text-muted-foreground">
+                <div className="flex justify-between">
+                  <span>Mon – Fri</span>
+                  <span className="font-mono text-foreground font-500">8:00 AM – 6:00 PM</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Urgent Issues</span>
+                  <span className="font-mono text-primary font-500">24/7 On-Call</span>
+                </div>
               </div>
-              <div className="flex justify-between">
-                <span>Urgent Issues</span>
-                <span className="font-mono text-primary font-500">24/7 On-Call</span>
-              </div>
-            </div>
-          </Card>
-        </div>
+            </Card>
+          </div>
+        )}
       </div>
     </div>
   )
