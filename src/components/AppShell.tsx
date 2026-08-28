@@ -93,15 +93,9 @@ const NAV: Record<Role, NavItem[]> = {
   ],
   it_head: [
     { key: "dashboard", label: "Dashboard", icon: LayoutDashboard },
-    { key: "tickets_all", label: "All Tickets", icon: TicketIcon },
-    { key: "tickets_unassigned", label: "Unassigned Queue", icon: Inbox },
+    { key: "tickets", label: "Ticket Queue", icon: TicketIcon },
     { key: "it_team", label: "IT Staff", icon: UserCog },
     { key: "reports", label: "Reports & Analytics", icon: BarChart3 },
-    { key: "help", label: "Help & FAQ", icon: HelpCircle },
-  ],
-  normal_head: [
-    { key: "dashboard", label: "Dashboard", icon: LayoutDashboard },
-    { key: "tickets_my", label: "My Tickets", icon: TicketIcon },
     { key: "help", label: "Help & FAQ", icon: HelpCircle },
   ],
   it_employee: [
@@ -122,6 +116,8 @@ export default function AppShell({
   toggleTheme,
   tickets,
   setTickets,
+  allowSelfReg = true,
+  onToggleSelfReg,
   onSignOut,
   onSwitchRole,
   demoMode = false,
@@ -131,6 +127,8 @@ export default function AppShell({
   toggleTheme: () => void
   tickets: Ticket[]
   setTickets: (t: Ticket[]) => void
+  allowSelfReg?: boolean
+  onToggleSelfReg?: (val: boolean) => void
   onSignOut: () => void
   onSwitchRole: (r: Role) => void
   demoMode?: boolean
@@ -148,30 +146,21 @@ export default function AppShell({
     switch (page) {
       case "dashboard":
         return <Dashboard role={role} tickets={scoped} onChange={setTickets} />
+      case "tickets":
       case "tickets_all":
-        return (
-          <Tickets
-            tickets={scoped}
-            role={role}
-            title="All Tickets"
-            onChange={setTickets}
-          />
-        )
       case "tickets_my":
-        return (
-          <Tickets
-            tickets={scoped}
-            role={role}
-            title="My Tickets"
-            onChange={setTickets}
-          />
-        )
       case "tickets_unassigned":
         return (
           <Tickets
-            tickets={scoped.filter((t) => !t.assignee)}
+            tickets={scoped}
             role={role}
-            title="Unassigned Tickets"
+            title={
+              role === "it_head"
+                ? "Ticket Queue & Dispatch"
+                : role === "it_employee"
+                ? "My Assigned Tickets"
+                : "My Tickets"
+            }
             onChange={setTickets}
           />
         )
@@ -180,9 +169,9 @@ export default function AppShell({
         return (
           <div>
             <h1 className="mb-6 font-display text-2xl font-700 tracking-tight">
-              Reports & Analytics
+              {role === "platform_admin" ? "Caytori Platform Reports & Analytics" : "Reports & Analytics"}
             </h1>
-            <Analytics tickets={scoped} />
+            <Analytics tickets={scoped} role={role} />
           </div>
         )
       case "companies":
@@ -194,7 +183,13 @@ export default function AppShell({
       case "departments":
         return <Directory kind="departments" title="Departments" />
       case "settings":
-        return <Settings role={role} />
+        return (
+          <Settings
+            role={role}
+            allowSelfReg={allowSelfReg}
+            onToggleSelfReg={onToggleSelfReg}
+          />
+        )
       case "profile":
         return <Profile role={role} onSignOut={onSignOut} />
       case "help":

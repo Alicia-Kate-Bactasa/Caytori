@@ -216,6 +216,7 @@ export function Button({
   className = "",
   type = "button",
   size = "md",
+  disabled = false,
 }: {
   children: ReactNode
   onClick?: () => void
@@ -223,6 +224,7 @@ export function Button({
   className?: string
   type?: "button" | "submit"
   size?: "sm" | "md" | "lg" | "xl"
+  disabled?: boolean
 }) {
   const pad =
     size === "sm"
@@ -248,10 +250,13 @@ export function Button({
     <motion.button
       type={type}
       onClick={onClick}
-      whileTap={{ scale: 0.96 }}
+      disabled={disabled}
+      whileTap={disabled ? undefined : { scale: 0.96 }}
       style={bg}
-      className={`inline-flex items-center justify-center gap-2 rounded-full font-medium cursor-pointer transition-all duration-300 ${pad} ${styles[variant]} ${
-        variant === "primary" || variant === "danger"
+      className={`inline-flex items-center justify-center gap-2 rounded-full font-medium transition-all duration-300 ${
+        disabled ? "opacity-50 cursor-not-allowed pointer-events-none" : "cursor-pointer"
+      } ${pad} ${styles[variant]} ${
+        (variant === "primary" || variant === "danger") && !disabled
           ? "shadow-lg hover:brightness-110"
           : ""
       } ${className}`}

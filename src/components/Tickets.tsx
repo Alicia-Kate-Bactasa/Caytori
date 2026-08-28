@@ -11,6 +11,9 @@ import {
   PlayCircle,
   UserCheck,
   Clock,
+  AlertTriangle,
+  Inbox,
+  Ticket as TicketIcon,
 } from "lucide-react"
 import { Modal, Button, Card, Avatar, StatusBadge, PriorityBadge } from "./primitives"
 import {
@@ -56,6 +59,15 @@ export default function Tickets({
   const [query, setQuery] = useState("")
   const [status, setStatus] = useState<Status | "ALL">("ALL")
   const [creating, setCreating] = useState(false)
+  const [queueTab, setQueueTab] = useState<"all" | "unassigned">("all")
+
+  const isITManager =
+    role === "it_head" || role === "company_admin" || role === "platform_admin"
+
+  const unassignedCount = useMemo(
+    () => tickets.filter((t) => !t.assignee).length,
+    [tickets],
+  )
 
   const filtered = useMemo(
     () =>
@@ -66,9 +78,10 @@ export default function Tickets({
           t.subject.toLowerCase().includes(q) ||
           t.id.toLowerCase().includes(q)
         const matchesS = status === "ALL" || t.status === status
-        return matchesQ && matchesS
+        const matchesQueue = queueTab === "all" || !t.assignee
+        return matchesQ && matchesS && matchesQueue
       }),
-    [tickets, query, status],
+    [tickets, query, status, queueTab],
   )
 
   const active = tickets.find((t) => t.id === selected) ?? null
@@ -138,12 +151,65 @@ export default function Tickets({
             {filtered.length} of {tickets.length} tickets
           </p>
         </div>
-        {role === "employee" && (
+        {role === "normal_employee" && (
           <Button onClick={() => setCreating(true)}>
             <Plus size={16} /> New ticket
           </Button>
         )}
       </div>
+
+      {/* Sliding Panel Switcher for All Tickets vs Unassigned Queue */}
+      {isITManager && (
+        <div className="neu-inset relative mt-5 flex rounded-full p-1.5 select-none overflow-hidden max-w-md">
+          <div className="absolute inset-1.5 pointer-events-none">
+            <motion.div
+              className="neu h-full w-1/2 rounded-full"
+              initial={false}
+              animate={{
+                x: queueTab === "all" ? "0%" : "100%",
+              }}
+              transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+            />
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setQueueTab("all")}
+            className={`relative z-10 flex-1 py-2.5 text-xs font-600 transition-colors duration-300 cursor-pointer ${
+              queueTab === "all" ? "text-foreground font-700" : "text-muted-foreground"
+            }`}
+          >
+            <span className="flex items-center justify-center gap-2">
+              <TicketIcon size={14} />
+              All Tickets ({tickets.length})
+            </span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setQueueTab("unassigned")}
+            className={`relative z-10 flex-1 py-2.5 text-xs font-600 transition-colors duration-300 cursor-pointer ${
+              queueTab === "unassigned" ? "text-foreground font-700" : "text-muted-foreground"
+            }`}
+          >
+            <span className="flex items-center justify-center gap-2">
+              <Inbox size={14} />
+              Unassigned Queue
+              {unassignedCount > 0 && (
+                <span
+                  className="rounded-full px-2 py-0.5 font-mono text-[10px] font-700"
+                  style={{
+                    background: "color-mix(in srgb, var(--warning) 20%, transparent)",
+                    color: "var(--warning)",
+                  }}
+                >
+                  {unassignedCount}
+                </span>
+              )}
+            </span>
+          </button>
+        </div>
+      )}
 
       <div className="mt-6 flex flex-wrap items-center gap-3">
         <div className="neu-inset flex flex-1 items-center gap-2.5 rounded-full px-4 py-2.5 min-w-[220px]">
@@ -299,7 +365,7 @@ function TicketDetail({
   const me = CURRENT_USER[role]
   const isITHead = role === "it_head" || role === "company_admin"
   const isITEmployee = role === "it_employee" || isITHead
-  const isReporter = me.name === ticket.reporter || role === "normal_employee" || role === "normal_head"
+  const isReporter = me.name === ticket.reporter || role === "normal_employee"
 
   const actions: React.ReactNode[] = []
   if (isITHead && ticket.status === "OPEN") {
@@ -322,11 +388,11 @@ function TicketDetail({
             onUpdate(
               ticket.id,
               { assignee, status: "IN_PROGRESS" },
-              `assigned to ${assignee}`,
+              `reviewed ticket, prioritized as ${ticket.priority}, and assigned to ${assignee}`,
             )
           }
         >
-          <UserCheck size={15} /> Assign
+          <UserCheck size={15} /> Assign & Review
         </Button>
       </div>,
     )
@@ -370,11 +436,25 @@ function TicketDetail({
           onUpdate(
             ticket.id,
             { status: "RESOLVED", resolutionHours: 2.0 },
-            "marked as RESOLVED",
+            "investigated & marked as RESOLVED",
           )
         }
       >
         <CheckCircle2 size={15} /> Mark resolved
+      </Button>,
+      <Button
+        key="escalate"
+        size="sm"
+        variant="surface"
+        onClick={() =>
+          onUpdate(
+            ticket.id,
+            { priority: "Critical" },
+            "escalated issue to Senior IT Specialist (Tier-2)",
+          )
+        }
+      >
+        <AlertTriangle size={15} /> Escalate issue
       </Button>,
     )
   }
@@ -387,7 +467,7 @@ function TicketDetail({
           onUpdate(
             ticket.id,
             { status: "IN_PROGRESS", assignee: me.name },
-            "started work",
+            "started work & investigation",
           )
         }
       >
@@ -404,7 +484,7 @@ function TicketDetail({
           onUpdate(
             ticket.id,
             { status: "CLOSED" },
-            "confirmed resolution — CLOSED",
+            "confirmed resolution — CLOSED & recorded for performance analysis",
           )
         }
       >
@@ -415,7 +495,7 @@ function TicketDetail({
         size="sm"
         variant="surface"
         onClick={() =>
-          onUpdate(ticket.id, { status: "IN_PROGRESS" }, "reopened — not fixed")
+          onUpdate(ticket.id, { status: "IN_PROGRESS" }, "reopened — issue persists")
         }
       >
         <RotateCcw size={15} /> Not fixed
