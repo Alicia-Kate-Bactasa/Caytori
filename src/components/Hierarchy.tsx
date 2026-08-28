@@ -272,7 +272,7 @@ export default function Hierarchy({ role }: { role: Role }) {
               : "text-muted-foreground hover:text-foreground"
           }`}
         >
-          👑 IT Roles & Designations
+          IT Roles & Designations
         </button>
         <button
           type="button"
@@ -283,7 +283,7 @@ export default function Hierarchy({ role }: { role: Role }) {
               : "text-muted-foreground hover:text-foreground"
           }`}
         >
-          ⚡ Support Escalation Pathways (Levels 1–4)
+          Support Escalation Pathways (Levels 1–4)
         </button>
         <button
           type="button"
@@ -294,7 +294,7 @@ export default function Hierarchy({ role }: { role: Role }) {
               : "text-muted-foreground hover:text-foreground"
           }`}
         >
-          🏢 Department Heads
+          Department Heads
         </button>
       </div>
 
