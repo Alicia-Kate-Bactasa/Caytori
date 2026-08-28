@@ -2,7 +2,7 @@ import { useState } from "react"
 import { motion } from "motion/react"
 import { Plus, X, ShieldCheck, CheckCircle2, Info } from "lucide-react"
 import { Button, Card, Field, Section, SettingRow, Toggle, Toast } from "./primitives"
-import { CATEGORIES, type Role } from "../data"
+import { CATEGORIES, IT_HIERARCHY_TIERS, type Role } from "../data"
 
 export default function Settings({
   role,
@@ -176,6 +176,43 @@ export default function Settings({
                   <Button variant="surface" onClick={addCat}>
                     <Plus size={15} /> Add
                   </Button>
+                </div>
+              </Section>
+
+              <Section
+                title="IT Support Escalation Hierarchy Matrix"
+                description="Universal IT Support Escalation levels pre-configured for your organization."
+              >
+                <div className="space-y-3">
+                  {IT_HIERARCHY_TIERS.map((tier) => (
+                    <div
+                      key={tier.id}
+                      className="neu-flat rounded-2xl p-4 flex flex-wrap items-center justify-between gap-3"
+                    >
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span
+                            className="px-2 py-0.5 rounded-full font-mono text-[10px] font-700 uppercase"
+                            style={{
+                              background: `color-mix(in srgb, ${tier.token} 15%, transparent)`,
+                              color: tier.token,
+                            }}
+                          >
+                            {tier.label}
+                          </span>
+                          <span className="font-display text-sm font-600 text-foreground">
+                            {tier.title.split(" — ")[1] ?? tier.title}
+                          </span>
+                        </div>
+                        <p className="mt-1 text-xs text-muted-foreground">
+                          {tier.description}
+                        </p>
+                      </div>
+                      <span className="neu-inset rounded-full px-3 py-1 text-[11px] font-mono font-600 text-muted-foreground">
+                        Level {tier.level} Target
+                      </span>
+                    </div>
+                  ))}
                 </div>
               </Section>
 

@@ -68,6 +68,52 @@ export const DEPARTMENTS = [
   "IT",
 ]
 
+export type EscalationTier = "L1" | "L2" | "L3" | "LEAD"
+
+export interface ITTierConfig {
+  id: EscalationTier
+  level: number
+  label: string
+  title: string
+  description: string
+  token: string
+}
+
+export const IT_HIERARCHY_TIERS: ITTierConfig[] = [
+  {
+    id: "L1",
+    level: 1,
+    label: "Tier 1",
+    title: "Tier 1 — Help Desk & General Triage",
+    description: "First line of support. Basic troubleshooting, account resets, and initial triage.",
+    token: "var(--primary)",
+  },
+  {
+    id: "L2",
+    level: 2,
+    label: "Tier 2",
+    title: "Tier 2 — Senior Tech & Infrastructure",
+    description: "Advanced troubleshooting, network hardware, server configs, and application diagnostics.",
+    token: "var(--accent)",
+  },
+  {
+    id: "L3",
+    level: 3,
+    label: "Tier 3",
+    title: "Tier 3 — Systems Architect & Security Specialist",
+    description: "Specialized infrastructure, database anomalies, cyber security, and root-cause engineering.",
+    token: "var(--warning)",
+  },
+  {
+    id: "LEAD",
+    level: 4,
+    label: "IT Lead",
+    title: "Tier 4 — IT Help Desk Lead & Management",
+    description: "Executive IT decision-making, vendor management, and high-impact incident escalation.",
+    token: "var(--danger)",
+  },
+]
+
 export interface Person {
   id: string
   name: string
@@ -75,6 +121,8 @@ export interface Person {
   department: string
   email: string
   isHead?: boolean
+  tier?: EscalationTier
+  specialty?: string
 }
 
 export const CURRENT_USER: Record<Role, Person> = {
@@ -100,6 +148,8 @@ export const CURRENT_USER: Record<Role, Person> = {
     department: "IT",
     email: "john@abccorp.com",
     isHead: true,
+    tier: "LEAD",
+    specialty: "IT Help Desk Management & Security Lead",
   },
   it_employee: {
     id: "u3",
@@ -107,6 +157,8 @@ export const CURRENT_USER: Record<Role, Person> = {
     role: "it_employee",
     department: "IT",
     email: "mark@abccorp.com",
+    tier: "L1",
+    specialty: "Help Desk Triage & User Support",
   },
   normal_employee: {
     id: "u5",
@@ -124,6 +176,8 @@ export const STAFF: Person[] = [
     role: "it_employee",
     department: "IT",
     email: "mark@abccorp.com",
+    tier: "L1",
+    specialty: "Help Desk Triage & T1 Support",
   },
   {
     id: "u4",
@@ -131,6 +185,8 @@ export const STAFF: Person[] = [
     role: "it_employee",
     department: "IT",
     email: "anna@abccorp.com",
+    tier: "L2",
+    specialty: "Network & Systems Engineer",
   },
   {
     id: "u6",
@@ -138,6 +194,8 @@ export const STAFF: Person[] = [
     role: "it_employee",
     department: "IT",
     email: "leo@abccorp.com",
+    tier: "L3",
+    specialty: "Cybersecurity & Database Specialist",
   },
 ]
 
@@ -230,6 +288,9 @@ export interface Ticket {
   priority: Priority
   status: Status
   assignee: string | null
+  escalationTier?: EscalationTier
+  escalatedBy?: string
+  escalationReason?: string
   createdAt: string
   updatedAt: string
   resolutionHours: number | null // null while unresolved

@@ -66,7 +66,7 @@ const INITIAL: Record<Kind, Row[]> = {
   ],
   it_team: STAFF.map((s) => ({
     name: s.name,
-    dept: "IT Staff",
+    dept: `IT Support ${s.tier ?? "Tier 1"} · ${s.specialty ?? "General Triage"}`,
     email: s.email,
     status: "Active",
   })),

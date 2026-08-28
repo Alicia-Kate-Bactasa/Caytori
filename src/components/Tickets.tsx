@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react"
+import { useEffect, useMemo, useState } from "react"
 import { motion, AnimatePresence } from "motion/react"
 import {
   Search,
@@ -21,11 +21,14 @@ import {
   PRIORITIES,
   STAFF,
   CURRENT_USER,
+  IT_HIERARCHY_TIERS,
   type Ticket,
   type Role,
   type Status,
   type Priority,
   type Category,
+  type EscalationTier,
+  type Person,
 } from "../data"
 
 const STATUS_FILTERS: (Status | "ALL")[] = [
@@ -60,6 +63,7 @@ export default function Tickets({
   const [status, setStatus] = useState<Status | "ALL">("ALL")
   const [creating, setCreating] = useState(false)
   const [queueTab, setQueueTab] = useState<"all" | "unassigned">("all")
+  const [escalating, setEscalating] = useState(false)
 
   const isITManager =
     role === "it_head" || role === "company_admin" || role === "platform_admin"
@@ -284,7 +288,35 @@ export default function Tickets({
         onClose={() => setSelected(null)}
         onUpdate={update}
         onComment={addComment}
+        onOpenEscalate={() => setEscalating(true)}
       />
+
+      {active && (
+        <EscalateModal
+          open={escalating}
+          ticket={active}
+          onClose={() => setEscalating(false)}
+          onEscalate={(targetTier, assigneeName, reason, priority) => {
+            const tierObj = IT_HIERARCHY_TIERS.find((t) => t.id === targetTier)
+            update(
+              active.id,
+              {
+                escalationTier: targetTier,
+                escalatedBy: me.name,
+                escalationReason: reason,
+                assignee: assigneeName,
+                priority,
+                status: "IN_PROGRESS",
+              },
+              `escalated ticket to ${tierObj?.label ?? targetTier} (${assigneeName})`,
+            )
+            addComment(
+              active.id,
+              `[ESCALATION HANDOVER — ${tierObj?.label ?? targetTier}]\nEscalated to ${assigneeName}.\nTechnical Handover Notes: ${reason}`,
+            )
+          }}
+        />
+      )}
 
       <AnimatePresence>
         {creating && (
@@ -303,12 +335,189 @@ export default function Tickets({
   )
 }
 
+export function EscalateModal({
+  open,
+  ticket,
+  onClose,
+  onEscalate,
+}: {
+  open: boolean
+  ticket: Ticket
+  onClose: () => void
+  onEscalate: (
+    targetTier: EscalationTier,
+    assigneeName: string,
+    reason: string,
+    priority: Priority,
+  ) => void
+}) {
+  const currentTierLevel =
+    IT_HIERARCHY_TIERS.find((t) => t.id === (ticket.escalationTier ?? "L1"))?.level ?? 1
+
+  const defaultNextTier =
+    IT_HIERARCHY_TIERS.find((t) => t.level === Math.min(currentTierLevel + 1, 4))?.id ?? "L2"
+
+  const [selectedTier, setSelectedTier] = useState<EscalationTier>(defaultNextTier)
+
+  const eligibleTechs = useMemo(() => {
+    const all = [...STAFF, CURRENT_USER.it_head]
+    return all.filter((s) => (s.tier ?? "L1") === selectedTier)
+  }, [selectedTier])
+
+  const [targetAssignee, setTargetAssignee] = useState<string>(
+    eligibleTechs[0]?.name ?? CURRENT_USER.it_head.name,
+  )
+  const [reason, setReason] = useState("")
+  const [priority, setPriority] = useState<Priority>(
+    ticket.priority === "Low"
+      ? "Medium"
+      : ticket.priority === "Medium"
+      ? "High"
+      : "Critical",
+  )
+
+  useEffect(() => {
+    if (eligibleTechs.length > 0) {
+      setTargetAssignee(eligibleTechs[0].name)
+    } else {
+      setTargetAssignee(CURRENT_USER.it_head.name)
+    }
+  }, [selectedTier, eligibleTechs])
+
+  if (!open) return null
+
+  return (
+    <Modal
+      open={open}
+      onClose={onClose}
+      title="Escalate IT Support Issue"
+      subtitle={`Hand over ticket ${ticket.id} to a higher IT Support Tier`}
+    >
+      <div className="space-y-4 pt-2">
+        {/* Tier Visual Pathway */}
+        <div className="rounded-2xl p-4 neu-inset">
+          <span className="text-xs font-600 text-muted-foreground uppercase tracking-wider font-mono">
+            IT Support Escalation Pathway
+          </span>
+          <div className="mt-3 grid grid-cols-4 gap-2 text-center">
+            {IT_HIERARCHY_TIERS.map((t) => {
+              const isCurrent = (ticket.escalationTier ?? "L1") === t.id
+              const isSelected = selectedTier === t.id
+              return (
+                <button
+                  type="button"
+                  key={t.id}
+                  onClick={() => setSelectedTier(t.id)}
+                  className={`rounded-xl p-2 text-xs transition-all duration-300 cursor-pointer ${
+                    isSelected
+                      ? "neu-flat text-foreground font-700 ring-2 ring-primary"
+                      : isCurrent
+                      ? "neu-inset text-primary font-600"
+                      : "neu-sm text-muted-foreground"
+                  }`}
+                >
+                  <div className="font-mono text-[10px] font-700">{t.label}</div>
+                  <div className="truncate text-[11px] font-500 mt-0.5">
+                    {t.title.split(" — ")[1] ?? t.label}
+                  </div>
+                </button>
+              )
+            })}
+          </div>
+        </div>
+
+        {/* Selected Tier Description */}
+        {(() => {
+          const tierInfo = IT_HIERARCHY_TIERS.find((t) => t.id === selectedTier)
+          return (
+            <div className="text-xs text-muted-foreground neu-flat rounded-xl p-3">
+              <span className="font-600 text-foreground">{tierInfo?.title}:</span>{" "}
+              {tierInfo?.description}
+            </div>
+          )
+        })()}
+
+        {/* Target Specialist Assignment */}
+        <div>
+          <label className="block text-xs font-600 text-muted-foreground mb-1.5">
+            Assign Designated Specialist ({selectedTier})
+          </label>
+          <select
+            value={targetAssignee}
+            onChange={(e) => setTargetAssignee(e.target.value)}
+            className="w-full neu-inset rounded-2xl bg-transparent px-4 py-3 text-sm outline-none font-500"
+          >
+            {eligibleTechs.map((s) => (
+              <option key={s.id} value={s.name}>
+                {s.name} ({s.specialty ?? s.role})
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {/* Adjust Priority */}
+        <div>
+          <label className="block text-xs font-600 text-muted-foreground mb-1.5">
+            Escalated Priority Level
+          </label>
+          <div className="flex gap-2">
+            {PRIORITIES.map((p) => (
+              <button
+                type="button"
+                key={p}
+                onClick={() => setPriority(p)}
+                className={`flex-1 py-2 rounded-xl text-xs font-600 transition-all cursor-pointer ${
+                  priority === p
+                    ? "neu-inset text-primary font-700"
+                    : "neu-sm text-muted-foreground"
+                }`}
+              >
+                {p}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Escalation Handover Note */}
+        <div>
+          <label className="block text-xs font-600 text-muted-foreground mb-1.5">
+            Escalation Handover Reason & Technical Notes *
+          </label>
+          <textarea
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+            placeholder="Describe technical troubleshooting performed, findings, and why this requires higher-tier intervention..."
+            className="w-full neu-inset rounded-2xl bg-transparent p-3 text-sm outline-none h-24 resize-none"
+          />
+        </div>
+
+        {/* Actions */}
+        <div className="flex justify-end gap-3 pt-3">
+          <Button variant="ghost" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button
+            disabled={!reason.trim()}
+            onClick={() => {
+              onEscalate(selectedTier, targetAssignee, reason.trim(), priority)
+              onClose()
+            }}
+          >
+            Confirm Escalation & Handoff
+          </Button>
+        </div>
+      </div>
+    </Modal>
+  )
+}
+
 export function TicketModal({
   ticket,
   role,
   onClose,
   onUpdate,
   onComment,
+  onOpenEscalate,
 }: {
   ticket: Ticket | null
   role: Role
@@ -320,9 +529,9 @@ export function TicketModal({
     actor?: string,
   ) => void
   onComment: (id: string, text: string) => void
+  onOpenEscalate?: () => void
 }) {
   if (!ticket) return null
-
   return (
     <Modal
       open={!!ticket}
@@ -337,6 +546,7 @@ export function TicketModal({
         onBack={onClose}
         onUpdate={onUpdate}
         onComment={onComment}
+        onOpenEscalate={onOpenEscalate}
       />
     </Modal>
   )
@@ -348,6 +558,7 @@ function TicketDetail({
   onBack,
   onUpdate,
   onComment,
+  onOpenEscalate,
 }: {
   ticket: Ticket
   role: Role
@@ -359,6 +570,7 @@ function TicketDetail({
     actor?: string,
   ) => void
   onComment: (id: string, text: string) => void
+  onOpenEscalate?: () => void
 }) {
   const [draft, setDraft] = useState("")
   const [assignee, setAssignee] = useState(ticket.assignee ?? STAFF[0].name)
@@ -446,13 +658,7 @@ function TicketDetail({
         key="escalate"
         size="sm"
         variant="surface"
-        onClick={() =>
-          onUpdate(
-            ticket.id,
-            { priority: "Critical" },
-            "escalated issue to Senior IT Specialist (Tier-2)",
-          )
-        }
+        onClick={onOpenEscalate}
       >
         <AlertTriangle size={15} /> Escalate issue
       </Button>,
@@ -534,6 +740,25 @@ function TicketDetail({
             <p className="mt-3 leading-relaxed text-muted-foreground">
               {ticket.description}
             </p>
+
+            {ticket.escalationTier && (
+              <div className="mt-4 neu-flat rounded-2xl p-3.5 flex items-start gap-3 border-l-4 border-[var(--warning)]">
+                <AlertTriangle size={18} className="text-warning shrink-0 mt-0.5" />
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-2">
+                    <span className="text-xs font-700 text-foreground font-display">Escalated Support Level:</span>
+                    <span className="neu-inset rounded-full px-2.5 py-0.5 font-mono text-[11px] font-700 text-warning">
+                      {IT_HIERARCHY_TIERS.find((t) => t.id === ticket.escalationTier)?.title ?? ticket.escalationTier}
+                    </span>
+                  </div>
+                  {ticket.escalationReason && (
+                    <p className="mt-1 text-xs text-muted-foreground leading-relaxed italic">
+                      "{ticket.escalationReason}" — Handover by {ticket.escalatedBy ?? "IT Staff"}
+                    </p>
+                  )}
+                </div>
+              </div>
+            )}
             {actions.length > 0 && (
               <div
                 className="mt-5 flex flex-wrap items-center gap-2.5 border-t pt-5"
