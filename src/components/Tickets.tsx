@@ -538,7 +538,7 @@ export function TicketModal({
       onClose={onClose}
       title={ticket.subject}
       subtitle={`${ticket.id} · ${ticket.reporter} (${ticket.department}) · ${ticket.category}`}
-      width="max-w-3xl"
+      width="max-w-5xl"
     >
       <TicketDetail
         ticket={ticket}

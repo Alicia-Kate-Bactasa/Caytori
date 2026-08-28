@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react"
-import { motion } from "motion/react"
+import { AnimatePresence, motion } from "motion/react"
 import {
   ArrowLeft,
   Building2,
@@ -14,6 +14,7 @@ import {
   UserX,
   UserCheck,
   Archive,
+  X,
 } from "lucide-react"
 import {
   Card,
@@ -947,179 +948,250 @@ function DepartmentDetailModal({
       onClose={onClose}
       title={`${department.name} Department`}
       subtitle={`Department Head: ${department.head ?? "Unassigned"}`}
-      width="max-w-3xl"
+      width="max-w-5xl"
     >
-      <div className="space-y-5 pt-1">
-        {/* Clean Segmented Header Switcher */}
-        <div className="neu-flat rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="grid h-12 w-12 place-items-center rounded-2xl neu-inset font-display font-800 text-primary text-xl">
-              {department.name.charAt(0)}
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h3 className="font-display text-lg font-700 text-foreground">{department.name}</h3>
-                <Pill text={department.status} />
+      <div className="relative overflow-hidden min-h-[420px] -mx-7 -my-6 p-7">
+        <div className="space-y-5 pt-1">
+          {/* Clean Segmented Header Switcher */}
+          <div className="neu-flat rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="grid h-12 w-12 place-items-center rounded-2xl neu-inset font-display font-800 text-primary text-xl">
+                {department.name.charAt(0)}
               </div>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                Department Head: <span className="font-600 text-foreground">{department.head ?? "Unassigned"}</span>
-              </p>
+              <div>
+                <div className="flex items-center gap-2">
+                  <h3 className="font-display text-lg font-700 text-foreground">{department.name}</h3>
+                  <Pill text={department.status} />
+                </div>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Department Head: <span className="font-600 text-foreground">{department.head ?? "Unassigned"}</span>
+                </p>
+              </div>
+            </div>
+
+            {/* Segmented Main Navigation Tabs */}
+            <div className="flex items-center gap-1 neu-inset rounded-full p-1 text-xs">
+              <button
+                type="button"
+                onClick={() => setMainTab("members")}
+                className={`rounded-full px-4 py-1.5 font-600 transition-all cursor-pointer ${
+                  mainTab === "members"
+                    ? "neu-flat text-primary font-700"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                Members ({activeDeptMembers.length})
+              </button>
+              <button
+                type="button"
+                onClick={() => setMainTab("tickets")}
+                className={`rounded-full px-4 py-1.5 font-600 transition-all cursor-pointer ${
+                  mainTab === "tickets"
+                    ? "neu-flat text-primary font-700"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                IT Tickets ({deptTickets.length})
+              </button>
             </div>
           </div>
 
-          {/* Segmented Main Navigation Tabs */}
-          <div className="flex items-center gap-1 neu-inset rounded-full p-1 text-xs">
-            <button
-              type="button"
-              onClick={() => setMainTab("members")}
-              className={`rounded-full px-4 py-1.5 font-600 transition-all cursor-pointer ${
-                mainTab === "members"
-                  ? "neu-flat text-primary font-700"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              Members ({activeDeptMembers.length})
-            </button>
-            <button
-              type="button"
-              onClick={() => setMainTab("tickets")}
-              className={`rounded-full px-4 py-1.5 font-600 transition-all cursor-pointer ${
-                mainTab === "tickets"
-                  ? "neu-flat text-primary font-700"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              IT Tickets ({deptTickets.length})
-            </button>
+          {/* Tab 1: Members View */}
+          {mainTab === "members" && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between gap-2">
+                <span className="text-xs font-600 text-muted-foreground uppercase tracking-wider font-mono">
+                  Active Department Members ({activeDeptMembers.length})
+                </span>
+                <div className="flex items-center gap-2">
+                  {inactiveDeptMembers.length > 0 && (
+                    <Button
+                      size="sm"
+                      variant="surface"
+                      onClick={() => setShowDeptInactiveDrawer(true)}
+                    >
+                      <Archive size={13} /> Inactive ({inactiveDeptMembers.length})
+                    </Button>
+                  )}
+                  <Button size="sm" onClick={() => setInviting(true)}>
+                    <UserPlus size={14} /> Invite Member
+                  </Button>
+                </div>
+              </div>
+
+              <div className="space-y-2 max-h-72 overflow-y-auto">
+                {activeDeptMembers.length > 0 ? (
+                  activeDeptMembers.map((m) => (
+                    <div key={m.name} className="flex items-center justify-between p-3 rounded-2xl neu-flat text-xs">
+                      <div className="flex items-center gap-3">
+                        <Avatar name={m.name} size={32} />
+                        <div>
+                          <div className="font-600 text-foreground font-display text-sm">{m.name}</div>
+                          <div className="text-xs text-muted-foreground">{m.email}</div>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Pill text={m.status} />
+                        <Button
+                          size="sm"
+                          variant="ghost"
+                          className="text-xs text-muted-foreground hover:text-danger cursor-pointer"
+                          onClick={() => setMemberStatus(m.name, "Inactive")}
+                        >
+                          <UserX size={13} className="mr-1 text-danger" /> Deactivate
+                        </Button>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="neu-inset rounded-2xl p-6 text-center text-xs text-muted-foreground italic">
+                    No active members in this department.
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Tab 2: IT Tickets View */}
+          {mainTab === "tickets" && (
+            <div className="space-y-4">
+              <div className="flex flex-wrap items-center justify-between gap-2">
+                <span className="text-xs font-600 text-muted-foreground uppercase tracking-wider font-mono">
+                  Department IT Tickets ({deptTickets.length})
+                </span>
+                <div className="flex items-center gap-1 neu-inset rounded-full p-1 text-[11px]">
+                  {[
+                    { key: "ACTIVE", label: `Active (${activeTickets.length})` },
+                    { key: "RESOLVED", label: `Resolved (${resolvedTickets.length})` },
+                    { key: "CLOSED", label: `Closed (${closedTickets.length})` },
+                    { key: "ALL", label: `All (${deptTickets.length})` },
+                  ].map((tab) => (
+                    <button
+                      key={tab.key}
+                      type="button"
+                      onClick={() => setTicketTab(tab.key as any)}
+                      className={`rounded-full px-3 py-1 font-600 transition-all duration-200 cursor-pointer ${
+                        ticketTab === tab.key
+                          ? "neu-flat text-primary font-700"
+                          : "text-muted-foreground hover:text-foreground"
+                      }`}
+                    >
+                      {tab.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-2.5 max-h-72 overflow-y-auto">
+                {displayTickets.length > 0 ? (
+                  displayTickets.map((t) => (
+                    <div
+                      key={t.id}
+                      className="neu-flat rounded-2xl p-3.5 flex items-center justify-between text-xs hover:bg-[color-mix(in_srgb,var(--primary)_4%,transparent)] transition-colors"
+                    >
+                      <div className="min-w-0 pr-2 space-y-1">
+                        <div className="flex items-center gap-2">
+                          <span className="font-mono font-700 text-primary">{t.id}</span>
+                          <span className="font-600 text-foreground font-display text-sm">{t.subject}</span>
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          Reported by <span className="font-500 text-foreground">{t.reporter}</span> · Category: {t.category}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <PriorityBadge priority={t.priority} />
+                        <StatusBadge status={t.status} />
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="neu-inset rounded-2xl p-6 text-center text-xs text-muted-foreground italic">
+                    No {ticketTab.toLowerCase()} tickets found for this department.
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Footer controls */}
+          <div className="flex justify-between items-center pt-3 border-t border-[var(--border)]">
+            <Button variant="surface" size="sm" onClick={onToggleStatus}>
+              {department.status === "Active" ? "Deactivate Department" : "Activate Department"}
+            </Button>
+            <Button size="sm" onClick={onClose}>
+              Close
+            </Button>
           </div>
         </div>
 
-        {/* Tab 1: Members View */}
-        {mainTab === "members" && (
-          <div className="space-y-4">
-            <div className="flex items-center justify-between gap-2">
-              <span className="text-xs font-600 text-muted-foreground uppercase tracking-wider font-mono">
-                Active Department Members ({activeDeptMembers.length})
-              </span>
-              <div className="flex items-center gap-2">
-                {inactiveDeptMembers.length > 0 && (
-                  <Button
-                    size="sm"
-                    variant="surface"
-                    onClick={() => setShowDeptInactiveDrawer(true)}
-                  >
-                    <Archive size={13} /> Inactive ({inactiveDeptMembers.length})
-                  </Button>
-                )}
-                <Button size="sm" onClick={() => setInviting(true)}>
-                  <UserPlus size={14} /> Invite Member
-                </Button>
+        {/* Sliding Vertical Drawer Panel for Inactive Accounts (Height matches modal, right side) */}
+        <AnimatePresence>
+          {showDeptInactiveDrawer && (
+            <motion.div
+              initial={{ x: "100%", opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: "100%", opacity: 0 }}
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              className="absolute inset-y-0 right-0 w-80 sm:w-96 neu bg-[var(--background)] z-30 p-6 flex flex-col border-l border-[var(--border)] shadow-2xl rounded-r-[var(--radius)]"
+            >
+              <div className="flex items-center justify-between gap-3 pb-3 border-b border-[var(--border)] shrink-0">
+                <div>
+                  <h3 className="font-display font-700 text-sm text-foreground">
+                    Inactive Accounts
+                  </h3>
+                  <p className="text-[11px] text-muted-foreground">
+                    {department.name} Department ({inactiveDeptMembers.length})
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowDeptInactiveDrawer(false)}
+                  className="neu-sm neu-press grid h-7 w-7 place-items-center rounded-full text-muted-foreground hover:text-foreground cursor-pointer"
+                >
+                  <X size={14} />
+                </button>
               </div>
-            </div>
 
-            <div className="space-y-2 max-h-64 overflow-y-auto">
-              {activeDeptMembers.length > 0 ? (
-                activeDeptMembers.map((m) => (
-                  <div key={m.name} className="flex items-center justify-between p-3 rounded-2xl neu-flat text-xs">
-                    <div className="flex items-center gap-3">
-                      <Avatar name={m.name} size={32} />
-                      <div>
-                        <div className="font-600 text-foreground font-display text-sm">{m.name}</div>
-                        <div className="text-xs text-muted-foreground">{m.email}</div>
+              {/* Scrollable list of inactive members */}
+              <div className="flex-1 overflow-y-auto space-y-2.5 py-4 pr-1">
+                {inactiveDeptMembers.length > 0 ? (
+                  inactiveDeptMembers.map((m) => (
+                    <div
+                      key={m.name}
+                      className="flex items-center justify-between p-3 rounded-2xl neu-inset text-xs"
+                    >
+                      <div className="flex items-center gap-2.5 min-w-0 pr-2">
+                        <Avatar name={m.name} size={30} />
+                        <div className="min-w-0">
+                          <div className="font-600 text-foreground truncate">{m.name}</div>
+                          <div className="text-[11px] text-muted-foreground truncate">{m.email}</div>
+                        </div>
                       </div>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Pill text={m.status} />
                       <Button
                         size="sm"
-                        variant="ghost"
-                        className="text-xs text-muted-foreground hover:text-danger"
-                        onClick={() => setMemberStatus(m.name, "Inactive")}
+                        variant="surface"
+                        onClick={() => setMemberStatus(m.name, "Active")}
+                        className="shrink-0 text-[11px] cursor-pointer"
                       >
-                        <UserX size={13} className="mr-1 text-danger" /> Deactivate
+                        <UserCheck size={13} className="text-accent" /> Reactivate
                       </Button>
                     </div>
+                  ))
+                ) : (
+                  <div className="p-6 text-center text-xs text-muted-foreground italic neu-inset rounded-2xl">
+                    No inactive member accounts found in this department.
                   </div>
-                ))
-              ) : (
-                <div className="neu-inset rounded-2xl p-6 text-center text-xs text-muted-foreground italic">
-                  No active members in this department.
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* Tab 2: IT Tickets View */}
-        {mainTab === "tickets" && (
-          <div className="space-y-4">
-            <div className="flex flex-wrap items-center justify-between gap-2">
-              <span className="text-xs font-600 text-muted-foreground uppercase tracking-wider font-mono">
-                Department IT Tickets ({deptTickets.length})
-              </span>
-              <div className="flex items-center gap-1 neu-inset rounded-full p-1 text-[11px]">
-                {[
-                  { key: "ACTIVE", label: `Active (${activeTickets.length})` },
-                  { key: "RESOLVED", label: `Resolved (${resolvedTickets.length})` },
-                  { key: "CLOSED", label: `Closed (${closedTickets.length})` },
-                  { key: "ALL", label: `All (${deptTickets.length})` },
-                ].map((tab) => (
-                  <button
-                    key={tab.key}
-                    type="button"
-                    onClick={() => setTicketTab(tab.key as any)}
-                    className={`rounded-full px-3 py-1 font-600 transition-all duration-200 cursor-pointer ${
-                      ticketTab === tab.key
-                        ? "neu-flat text-primary font-700"
-                        : "text-muted-foreground hover:text-foreground"
-                    }`}
-                  >
-                    {tab.label}
-                  </button>
-                ))}
+                )}
               </div>
-            </div>
 
-            <div className="space-y-2.5 max-h-64 overflow-y-auto">
-              {displayTickets.length > 0 ? (
-                displayTickets.map((t) => (
-                  <div
-                    key={t.id}
-                    className="neu-flat rounded-2xl p-3.5 flex items-center justify-between text-xs hover:bg-[color-mix(in_srgb,var(--primary)_4%,transparent)] transition-colors"
-                  >
-                    <div className="min-w-0 pr-2 space-y-1">
-                      <div className="flex items-center gap-2">
-                        <span className="font-mono font-700 text-primary">{t.id}</span>
-                        <span className="font-600 text-foreground font-display text-sm">{t.subject}</span>
-                      </div>
-                      <div className="text-xs text-muted-foreground">
-                        Reported by <span className="font-500 text-foreground">{t.reporter}</span> · Category: {t.category}
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2 shrink-0">
-                      <PriorityBadge priority={t.priority} />
-                      <StatusBadge status={t.status} />
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div className="neu-inset rounded-2xl p-6 text-center text-xs text-muted-foreground italic">
-                  No {ticketTab.toLowerCase()} tickets found for this department.
-                </div>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* Footer controls */}
-        <div className="flex justify-between items-center pt-3 border-t border-[var(--border)]">
-          <Button variant="surface" size="sm" onClick={onToggleStatus}>
-            {department.status === "Active" ? "Deactivate Department" : "Activate Department"}
-          </Button>
-          <Button size="sm" onClick={onClose}>
-            Close
-          </Button>
-        </div>
+              <div className="pt-3 border-t border-[var(--border)] flex justify-end shrink-0">
+                <Button size="sm" variant="ghost" onClick={() => setShowDeptInactiveDrawer(false)}>
+                  Close Drawer
+                </Button>
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
 
       {/* Invite Member Modal */}
@@ -1185,53 +1257,6 @@ function DepartmentDetailModal({
             </Button>
           </div>
         </form>
-      </Modal>
-
-      {/* Department Inactive Accounts Drawer Modal */}
-      <Modal
-        open={showDeptInactiveDrawer}
-        onClose={() => setShowDeptInactiveDrawer(false)}
-        title={`Inactive Accounts — ${department.name}`}
-        subtitle="Deactivated member accounts for this department."
-      >
-        <div className="space-y-4 pt-2">
-          <div className="space-y-2 max-h-60 overflow-y-auto neu-inset rounded-2xl p-3">
-            {inactiveDeptMembers.length > 0 ? (
-              inactiveDeptMembers.map((m) => (
-                <div
-                  key={m.name}
-                  className="flex items-center justify-between p-2.5 rounded-xl neu-flat text-xs"
-                >
-                  <div className="flex items-center gap-2.5">
-                    <Avatar name={m.name} size={28} />
-                    <div>
-                      <div className="font-600 text-foreground">{m.name}</div>
-                      <div className="text-[11px] text-muted-foreground">{m.email}</div>
-                    </div>
-                  </div>
-                  <Button
-                    size="sm"
-                    variant="surface"
-                    onClick={() => {
-                      setMemberStatus(m.name, "Active")
-                    }}
-                  >
-                    <UserCheck size={13} className="text-accent" /> Reactivate Account
-                  </Button>
-                </div>
-              ))
-            ) : (
-              <div className="p-4 text-center text-xs text-muted-foreground italic">
-                No inactive member accounts found in this department.
-              </div>
-            )}
-          </div>
-          <div className="flex justify-end pt-2 border-t border-[var(--border)]">
-            <Button size="sm" onClick={() => setShowDeptInactiveDrawer(false)}>
-              Close
-            </Button>
-          </div>
-        </div>
       </Modal>
 
       <Toast text={modalToast} />
