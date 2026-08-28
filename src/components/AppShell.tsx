@@ -85,7 +85,7 @@ const NAV: Record<Role, NavItem[]> = {
   ],
   company_admin: [
     { key: "dashboard", label: "Dashboard", icon: LayoutDashboard },
-    { key: "departments", label: "Departments & Employees", icon: Network },
+    { key: "departments", label: "Departments", icon: Network },
     { key: "it_team", label: "IT Team", icon: UserCog },
     { key: "settings", label: "Company Settings", icon: SettingsIcon },
     { key: "help", label: "Help & FAQ", icon: HelpCircle },
@@ -177,7 +177,7 @@ export default function AppShell({
         return <Directory kind="companies" title="Companies" />
       case "employees":
       case "departments":
-        return <Directory kind="departments" title="Departments & Employees" />
+        return <Directory kind="departments" title="Departments" />
       case "it_team":
         return <Directory kind="it_team" title="IT Team" />
       case "settings":
