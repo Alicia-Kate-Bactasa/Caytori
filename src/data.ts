@@ -27,12 +27,12 @@ export const ROLES: { id: Role; label: string; blurb: string }[] = [
   },
   {
     id: "company_admin",
-    label: "Company Admin",
-    blurb: "Runs the company organization & departments",
+    label: "Head of IT / Company Admin",
+    blurb: "Runs company organization, departments & IT hierarchy",
   },
   {
     id: "it_head",
-    label: "IT Help Desk Lead",
+    label: "IT Team Lead",
     blurb: "Reviews, prioritizes & assigns tickets to IT technicians",
   },
   {

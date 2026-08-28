@@ -24,6 +24,7 @@ import {
   PanelLeftOpen,
   Settings as SettingsIcon,
   UserCircle,
+  ShieldCheck,
 } from "lucide-react"
 import { Avatar, Button, Card, Logo } from "./primitives"
 import Dashboard from "./Dashboard"
@@ -32,6 +33,7 @@ import Analytics from "./Analytics"
 import Directory from "./Directory"
 import Settings from "./Settings"
 import Profile from "./Profile"
+import Hierarchy from "./Hierarchy"
 import {
   ROLES,
   CURRENT_USER,
@@ -87,6 +89,7 @@ const NAV: Record<Role, NavItem[]> = {
     { key: "dashboard", label: "Dashboard", icon: LayoutDashboard },
     { key: "departments", label: "Departments", icon: Network },
     { key: "it_team", label: "IT Team", icon: UserCog },
+    { key: "hierarchy", label: "Roles & Hierarchy", icon: ShieldCheck },
     { key: "settings", label: "Company Settings", icon: SettingsIcon },
     { key: "help", label: "Help & FAQ", icon: HelpCircle },
   ],
@@ -94,6 +97,7 @@ const NAV: Record<Role, NavItem[]> = {
     { key: "dashboard", label: "Dashboard", icon: LayoutDashboard },
     { key: "tickets", label: "Ticket Queue", icon: TicketIcon },
     { key: "it_team", label: "IT Staff", icon: UserCog },
+    { key: "hierarchy", label: "Roles & Hierarchy", icon: ShieldCheck },
     { key: "reports", label: "Reports & Analytics", icon: BarChart3 },
     { key: "help", label: "Help & FAQ", icon: HelpCircle },
   ],
@@ -180,6 +184,8 @@ export default function AppShell({
         return <Directory kind="departments" title="Departments" />
       case "it_team":
         return <Directory kind="it_team" title="IT Team" />
+      case "hierarchy":
+        return <Hierarchy role={role} />
       case "settings":
         return (
           <Settings
