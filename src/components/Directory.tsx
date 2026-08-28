@@ -7,6 +7,10 @@ import {
   Users,
   Power,
   ChevronRight,
+  UserPlus,
+  Copy,
+  Check,
+  Link as LinkIcon,
 } from "lucide-react"
 import {
   Card,
@@ -747,6 +751,26 @@ function DepartmentDetailModal({
   onToggleStatus: () => void
 }) {
   const [ticketTab, setTicketTab] = useState<"ACTIVE" | "RESOLVED" | "CLOSED" | "ALL">("ACTIVE")
+  const [inviting, setInviting] = useState(false)
+  const [inviteName, setInviteName] = useState("")
+  const [inviteEmail, setInviteEmail] = useState("")
+  const [copiedLink, setCopiedLink] = useState(false)
+  const [modalToast, setModalToast] = useState("")
+
+  const [memberList, setMemberList] = useState<Row[]>(() => {
+    return INITIAL.employees
+      .filter((e) => e.dept === department.name)
+      .concat(
+        department.name === "IT"
+          ? STAFF.map((s) => ({
+              name: s.name,
+              dept: "IT Staff",
+              email: s.email,
+              status: "Active",
+            }))
+          : [],
+      )
+  })
 
   const deptTickets = TICKETS.filter((t) => t.department === department.name)
   const activeTickets = deptTickets.filter((t) => t.status === "OPEN" || t.status === "IN_PROGRESS")
@@ -760,18 +784,34 @@ function DepartmentDetailModal({
     return deptTickets
   }, [deptTickets, activeTickets, resolvedTickets, closedTickets, ticketTab])
 
-  const members = INITIAL.employees
-    .filter((e) => e.dept === department.name)
-    .concat(
-      department.name === "IT"
-        ? STAFF.map((s) => ({
-            name: s.name,
-            dept: "IT Staff",
-            email: s.email,
-            status: "Active",
-          }))
-        : [],
-    )
+  function flashModalToast(msg: string) {
+    setModalToast(msg)
+    setTimeout(() => setModalToast(""), 3500)
+  }
+
+  function handleInvite(e: React.FormEvent) {
+    e.preventDefault()
+    if (!inviteName.trim() || !inviteEmail.trim()) return
+
+    const newMember: Row = {
+      name: inviteName.trim(),
+      dept: department.name,
+      email: inviteEmail.trim(),
+      status: "Invited",
+    }
+
+    setMemberList([newMember, ...memberList])
+    setInviting(false)
+    flashModalToast(`Invitation email & link generated for ${inviteEmail.trim()} in ${department.name}!`)
+    setInviteName("")
+    setInviteEmail("")
+  }
+
+  const generatedInviteLink = `https://caytori.com/invite?dept=${encodeURIComponent(
+    department.name.toLowerCase(),
+  )}&token=inv-${(inviteName || "new-member").toLowerCase().replace(/\W+/g, "")}-${Math.random()
+    .toString(36)
+    .substring(2, 7)}`
 
   return (
     <Modal
@@ -786,7 +826,7 @@ function DepartmentDetailModal({
         <div className="grid grid-cols-3 gap-3">
           <div className="neu-inset rounded-2xl p-4 text-center">
             <div className="text-xs font-600 text-muted-foreground">Department Members</div>
-            <div className="mt-1 font-display text-2xl font-800">{members.length > 0 ? members.length : 8}</div>
+            <div className="mt-1 font-display text-2xl font-800">{memberList.length > 0 ? memberList.length : 8}</div>
           </div>
           <div className="neu-inset rounded-2xl p-4 text-center">
             <div className="text-xs font-600 text-muted-foreground font-mono">Active IT Tickets</div>
@@ -798,12 +838,19 @@ function DepartmentDetailModal({
           </div>
         </div>
 
-        {/* Department Members List */}
+        {/* Department Members List with Invite Button */}
         <div>
-          <h4 className="font-display text-sm font-700 mb-2.5">Department Members</h4>
-          <div className="neu-flat rounded-2xl p-3 space-y-2 max-h-44 overflow-y-auto">
-            {members.length > 0 ? (
-              members.map((m) => (
+          <div className="flex items-center justify-between gap-2 mb-2.5">
+            <h4 className="font-display text-sm font-700">
+              Department Members ({memberList.length})
+            </h4>
+            <Button size="sm" onClick={() => setInviting(true)}>
+              <UserPlus size={14} /> Invite Member
+            </Button>
+          </div>
+          <div className="neu-flat rounded-2xl p-3 space-y-2 max-h-48 overflow-y-auto">
+            {memberList.length > 0 ? (
+              memberList.map((m) => (
                 <div key={m.name} className="flex items-center justify-between p-2.5 rounded-xl neu-inset text-xs">
                   <div className="flex items-center gap-2.5">
                     <Avatar name={m.name} size={28} />
@@ -887,6 +934,73 @@ function DepartmentDetailModal({
           </Button>
         </div>
       </div>
+
+      {/* Invite Member Modal */}
+      <Modal
+        open={inviting}
+        onClose={() => setInviting(false)}
+        title={`Invite Member to ${department.name}`}
+        subtitle="Send an invitation email and generate a shareable registration link for this department."
+      >
+        <form onSubmit={handleInvite} className="space-y-4 pt-2">
+          <Field label="Employee Full Name">
+            <input
+              required
+              value={inviteName}
+              onChange={(e) => setInviteName(e.target.value)}
+              placeholder="e.g. Carlos Mendoza"
+              className="w-full neu-inset rounded-xl bg-transparent px-3.5 py-2.5 text-sm outline-none"
+            />
+          </Field>
+
+          <Field label="Work Email Address">
+            <input
+              required
+              type="email"
+              value={inviteEmail}
+              onChange={(e) => setInviteEmail(e.target.value)}
+              placeholder="e.g. carlos@abccorp.com"
+              className="w-full neu-inset rounded-xl bg-transparent px-3.5 py-2.5 text-sm outline-none"
+            />
+          </Field>
+
+          {/* Invitation Link Generator */}
+          <div>
+            <label className="block text-xs font-600 text-muted-foreground mb-1.5">
+              Generated Shareable Invitation Link
+            </label>
+            <div className="neu-inset rounded-xl p-2.5 flex items-center justify-between gap-2">
+              <span className="font-mono text-xs text-primary truncate">
+                {generatedInviteLink}
+              </span>
+              <Button
+                type="button"
+                size="sm"
+                variant="surface"
+                onClick={() => {
+                  navigator.clipboard?.writeText(generatedInviteLink)
+                  setCopiedLink(true)
+                  setTimeout(() => setCopiedLink(false), 2000)
+                }}
+              >
+                {copiedLink ? <Check size={14} className="text-accent" /> : <Copy size={14} />}
+                {copiedLink ? "Copied!" : "Copy Link"}
+              </Button>
+            </div>
+          </div>
+
+          <div className="flex justify-end gap-3 pt-3">
+            <Button type="button" variant="ghost" onClick={() => setInviting(false)}>
+              Cancel
+            </Button>
+            <Button type="submit">
+              <UserPlus size={15} /> Send Invite & Add Member
+            </Button>
+          </div>
+        </form>
+      </Modal>
+
+      <Toast text={modalToast} />
     </Modal>
   )
 }
