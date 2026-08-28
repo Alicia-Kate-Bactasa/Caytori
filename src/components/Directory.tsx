@@ -1110,7 +1110,7 @@ function DepartmentDetailModal({
           </div>
         </div>
 
-        {/* Sliding Vertical Drawer Panel for Inactive Accounts (Full height, rounded-2xl border radius) */}
+        {/* Sliding Vertical Drawer Panel for Inactive Accounts (Spacious width, rounded-2xl border radius) */}
         <AnimatePresence>
           {showDeptInactiveDrawer && (
             <motion.div
@@ -1118,7 +1118,7 @@ function DepartmentDetailModal({
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: "100%", opacity: 0 }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              className="absolute inset-y-0 right-0 w-80 sm:w-96 neu bg-[var(--background)] z-30 p-6 flex flex-col border-l border-[var(--border)] shadow-2xl rounded-2xl"
+              className="absolute inset-y-0 right-0 w-full sm:w-[480px] max-w-full neu bg-[var(--background)] z-30 p-6 flex flex-col border-l border-[var(--border)] shadow-2xl rounded-2xl"
             >
               <div className="flex items-center justify-between gap-3 pb-3 border-b border-[var(--border)] shrink-0">
                 <div>
@@ -1179,7 +1179,7 @@ function DepartmentDetailModal({
           )}
         </AnimatePresence>
 
-        {/* Sliding Vertical Drawer Panel for Invite Member (Full height, rounded-2xl border radius) */}
+        {/* Sliding Vertical Drawer Panel for Invite Member (Spacious width, rounded-2xl border radius) */}
         <AnimatePresence>
           {inviting && (
             <motion.div
@@ -1187,7 +1187,7 @@ function DepartmentDetailModal({
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: "100%", opacity: 0 }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              className="absolute inset-y-0 right-0 w-80 sm:w-[420px] neu bg-[var(--background)] z-30 p-6 flex flex-col border-l border-[var(--border)] shadow-2xl rounded-2xl"
+              className="absolute inset-y-0 right-0 w-full sm:w-[520px] max-w-full neu bg-[var(--background)] z-30 p-6 flex flex-col border-l border-[var(--border)] shadow-2xl rounded-2xl"
             >
               <div className="flex items-center justify-between gap-3 pb-3 border-b border-[var(--border)] shrink-0">
                 <div>
