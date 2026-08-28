@@ -18,6 +18,7 @@ export default function App() {
   const [role, setRole] = useState<Role>("normal_employee")
   const [demoMode, setDemoMode] = useState(false)
   const [tickets, setTickets] = useState<Ticket[]>(TICKETS)
+  const [allowSelfReg, setAllowSelfReg] = useState(true)
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", theme === "dark")
@@ -58,6 +59,7 @@ export default function App() {
           >
             <Login
               onBack={() => setView("landing")}
+              allowSelfReg={allowSelfReg}
               onLogin={(r) => {
                 setRole(r)
                 setDemoMode(false)
@@ -80,6 +82,8 @@ export default function App() {
               toggleTheme={toggleTheme}
               tickets={tickets}
               setTickets={setTickets}
+              allowSelfReg={allowSelfReg}
+              onToggleSelfReg={setAllowSelfReg}
               onSignOut={() => setView("landing")}
               onSwitchRole={setRole}
               demoMode={demoMode}

@@ -10,6 +10,7 @@ import {
   ResponsiveContainer,
   CartesianGrid,
 } from "recharts"
+import { Building2, Users, Ticket as TicketIcon, ShieldCheck } from "lucide-react"
 import { Card } from "./primitives"
 import {
   CATEGORIES,
@@ -20,6 +21,7 @@ import {
   avgResolution,
   type Ticket,
   type Status,
+  type Role,
 } from "../data"
 
 const STATUSES: Status[] = ["OPEN", "IN_PROGRESS", "RESOLVED", "CLOSED"]
@@ -58,7 +60,158 @@ function Panel({
   )
 }
 
-export default function Analytics({ tickets }: { tickets: Ticket[] }) {
+function PlatformAnalytics({ tickets }: { tickets: Ticket[] }) {
+  const platformKPIs = [
+    { label: "Tenant Companies", value: "12", sub: "11 Active · Free Tier", icon: Building2, token: "var(--primary)" },
+    { label: "Total Platform Users", value: "587", sub: "Aggregated accounts", icon: Users, token: "var(--accent)" },
+    { label: "System Tickets Logged", value: "3,180", sub: "Platform-wide volume", icon: TicketIcon, token: "var(--warning)" },
+    { label: "Platform SLA Uptime", value: "99.98%", sub: "18ms avg API latency", icon: ShieldCheck, token: "var(--primary)" },
+  ]
+
+  const trafficData = [
+    { hour: "08:00", requests: 420 },
+    { hour: "10:00", requests: 1280 },
+    { hour: "12:00", requests: 940 },
+    { hour: "14:00", requests: 1420 },
+    { hour: "16:00", requests: 1100 },
+    { hour: "18:00", requests: 510 },
+  ]
+
+  const systemStatusData = [
+    { name: "Open", value: 570, color: "var(--warning)" },
+    { name: "In Progress", value: 1018, color: "var(--primary)" },
+    { name: "Resolved", value: 795, color: "var(--accent)" },
+    { name: "Closed", value: 797, color: "var(--muted-foreground)" },
+  ]
+
+  return (
+    <div className="space-y-6">
+      {/* Platform Executive Summary Grid */}
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {platformKPIs.map((kpi) => (
+          <Card key={kpi.label} className="p-5 neu-hover">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-600 text-muted-foreground">{kpi.label}</span>
+              <span
+                className="grid h-9 w-9 place-items-center rounded-xl neu-inset"
+                style={{ color: kpi.token }}
+              >
+                <kpi.icon size={18} />
+              </span>
+            </div>
+            <div className="mt-3 font-display text-3xl font-800">{kpi.value}</div>
+            <div className="mt-1 text-[11px] text-muted-foreground font-500">{kpi.sub}</div>
+          </Card>
+        ))}
+      </div>
+
+      {/* Non-Sensitive Platform Traffic & System Pipeline */}
+      <div className="grid gap-6 lg:grid-cols-2 [&>*]:min-w-0">
+        <Panel
+          title="Platform API Throughput & Traffic Load"
+          subtitle="Aggregated system-wide hourly request volume (non-sensitive telemetry)"
+        >
+          <ResponsiveContainer width="100%" height="100%">
+            <BarChart data={trafficData} margin={{ top: 4, right: 4, left: -18, bottom: 0 }}>
+              <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
+              <XAxis dataKey="hour" tick={{ fill: "var(--muted-foreground)", fontSize: 11 }} tickLine={false} axisLine={false} />
+              <YAxis tick={{ fill: "var(--muted-foreground)", fontSize: 11 }} tickLine={false} axisLine={false} />
+              <Tooltip {...tip()} />
+              <Bar dataKey="requests" fill="var(--primary)" radius={[6, 6, 0, 0]} maxBarSize={38} />
+            </BarChart>
+          </ResponsiveContainer>
+        </Panel>
+
+        <Panel
+          title="Aggregated System Ticket Lifecycle"
+          subtitle="Platform-wide status throughput without tenant-identifying details"
+        >
+          <div className="flex h-full flex-col justify-between items-center gap-4 sm:flex-row">
+            <div className="relative h-44 w-full sm:w-1/2 shrink-0">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={systemStatusData}
+                    dataKey="value"
+                    nameKey="name"
+                    innerRadius={44}
+                    outerRadius={68}
+                    paddingAngle={4}
+                    stroke="none"
+                  >
+                    {systemStatusData.map((d) => (
+                      <Cell key={d.name} fill={d.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip {...tip()} />
+                </PieChart>
+              </ResponsiveContainer>
+              <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
+                <span className="font-mono text-xl font-700">3,180</span>
+                <span className="text-[10px] text-muted-foreground font-600 uppercase tracking-wider">Volume</span>
+              </div>
+            </div>
+            <div className="flex w-full sm:w-1/2 flex-col justify-center gap-2">
+              {systemStatusData.map((d) => (
+                <div
+                  key={d.name}
+                  className="neu-flat flex items-center justify-between rounded-xl px-3 py-2 text-xs"
+                >
+                  <span className="flex items-center gap-2 font-500">
+                    <span className="h-2.5 w-2.5 rounded-full shrink-0" style={{ background: d.color }} />
+                    {d.name}
+                  </span>
+                  <span className="font-mono font-600">{d.value}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </Panel>
+      </div>
+
+      {/* Platform Architecture & Data Isolation Controls */}
+      <Card className="p-6">
+        <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+          <div>
+            <h3 className="font-display text-base font-600">Platform Security & Privacy Safeguards</h3>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Caytori multi-tenant architecture enforces strict data isolation and privacy protection
+            </p>
+          </div>
+          <span className="neu-inset rounded-full px-3 py-1 text-xs font-mono font-600 text-primary">
+            Privacy Fencing Active
+          </span>
+        </div>
+
+        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4 pt-2">
+          {[
+            { title: "Tenant Data Fencing", desc: "Strict database isolation per company ID", status: "Enforced" },
+            { title: "Platform Access Tier", desc: "Free open multi-tenant platform mode", status: "Active Mode" },
+            { title: "Automated Backups", desc: "System snapshots taken every 6 hours", status: "Operational" },
+            { title: "TLS / SSL Encryption", desc: "All data encrypted in transit & at rest", status: "Active (256-bit)" },
+          ].map((item) => (
+            <div key={item.title} className="neu-flat rounded-2xl p-4">
+              <div className="font-display font-600 text-xs text-foreground">{item.title}</div>
+              <div className="mt-1 text-[11px] text-muted-foreground">{item.desc}</div>
+              <div className="mt-3 font-mono text-[11px] font-700 text-primary">{item.status}</div>
+            </div>
+          ))}
+        </div>
+      </Card>
+    </div>
+  )
+}
+
+export default function Analytics({
+  tickets,
+  role,
+}: {
+  tickets: Ticket[]
+  role?: Role
+}) {
+  if (role === "platform_admin") {
+    return <PlatformAnalytics tickets={tickets} />
+  }
   const byCategory = CATEGORIES.map((c) => ({
     name: c,
     value: tickets.filter((t) => t.category === c).length,

@@ -9,6 +9,7 @@ import {
   ChevronDown,
   LogIn,
   UserPlus,
+  AlertTriangle,
 } from "lucide-react"
 import { Button, Logo } from "./primitives"
 import type { Role } from "../data"
@@ -18,9 +19,11 @@ type Mode = "signin" | "signup"
 export default function Login({
   onBack,
   onLogin,
+  allowSelfReg = true,
 }: {
   onBack: () => void
   onLogin: (role: Role) => void
+  allowSelfReg?: boolean
 }) {
   const [mode, setMode] = useState<Mode>("signin")
   const [name, setName] = useState("")
@@ -33,6 +36,11 @@ export default function Login({
 
   function submit(e: React.FormEvent) {
     e.preventDefault()
+    if (mode === "signup" && !allowSelfReg) {
+      return setError(
+        "Company self-registration is currently disabled by Caytori Platform Administrators. Please request an invite.",
+      )
+    }
     if (mode === "signup" && name.trim().length < 2)
       return setError("Please enter your full name.")
     if (mode === "signup" && company.trim().length < 2)
@@ -208,13 +216,24 @@ export default function Login({
             </div>
           </div>
 
+          {isUp && !allowSelfReg && (
+            <div className="rounded-2xl p-4 neu-inset border-l-4 border-[var(--warning)]">
+              <div className="flex items-center gap-2 text-xs font-700 text-[var(--warning)]">
+                <AlertTriangle size={15} /> Company Self-Registration Disabled
+              </div>
+              <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+                Self-registration is currently turned off by Caytori Platform Administrators. New companies require an invitation from support@caytori.com.
+              </p>
+            </div>
+          )}
+
           {error && (
             <p className="text-sm" style={{ color: "var(--danger)" }}>
               {error}
             </p>
           )}
 
-          <Button type="submit" className="w-full">
+          <Button type="submit" className="w-full" disabled={isUp && !allowSelfReg}>
             {isUp ? "Create company workspace" : "Sign in"}
           </Button>
         </form>

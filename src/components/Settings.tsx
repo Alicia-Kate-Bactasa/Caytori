@@ -4,14 +4,21 @@ import { Plus, X, ShieldCheck, CheckCircle2, Info } from "lucide-react"
 import { Button, Card, Field, Section, SettingRow, Toggle, Toast } from "./primitives"
 import { CATEGORIES, type Role } from "../data"
 
-export default function Settings({ role }: { role: Role }) {
+export default function Settings({
+  role,
+  allowSelfReg = true,
+  onToggleSelfReg,
+}: {
+  role: Role
+  allowSelfReg?: boolean
+  onToggleSelfReg?: (val: boolean) => void
+}) {
   const isPlatform = role === "platform_admin"
   const [toast, setToast] = useState("")
   const [cats, setCats] = useState<string[]>([...CATEGORIES])
   const [newCat, setNewCat] = useState("")
 
   // toggles
-  const [selfReg, setSelfReg] = useState(false)
   const [enforce2fa, setEnforce2fa] = useState(true)
   const [allowReopen, setAllowReopen] = useState(true)
   const [autoClose, setAutoClose] = useState(true)
@@ -56,10 +63,12 @@ export default function Settings({ role }: { role: Role }) {
           {isPlatform ? (
             <>
               <Section title="Platform identity">
-                <Field label="Platform name">
+                <Field label="Platform name (Final / Read-only)">
                   <input
-                    defaultValue="Caytori"
-                    className="w-full bg-transparent text-sm outline-none"
+                    value="Caytori"
+                    readOnly
+                    disabled
+                    className="w-full bg-transparent text-sm text-muted-foreground font-600 outline-none cursor-not-allowed select-none"
                   />
                 </Field>
                 <Field label="Support email">
@@ -78,7 +87,14 @@ export default function Settings({ role }: { role: Role }) {
                   label="Allow self-registration"
                   hint="Companies can sign up without an invite from Caytori."
                 >
-                  <Toggle on={selfReg} onChange={setSelfReg} />
+                  <Toggle
+                    on={allowSelfReg}
+                    onChange={(val) => {
+                      if (onToggleSelfReg) onToggleSelfReg(val)
+                      setToast(`Self-registration is now ${val ? "enabled" : "disabled"}.`)
+                      setTimeout(() => setToast(""), 3000)
+                    }}
+                  />
                 </SettingRow>
                 <SettingRow
                   label="Default trial length"
