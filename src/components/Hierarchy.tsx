@@ -47,14 +47,14 @@ interface ITRoleDefinition {
 
 const INITIAL_IT_ROLES: ITRoleDefinition[] = [
   {
-    id: "head",
-    title: "Head of IT",
-    levelLabel: "Level 4 — Lead Executive",
-    badgeColor: "var(--danger)",
-    icon: Crown,
-    description: "Overall IT department leader and company administrator.",
-    handlesWhat: "Handles critical outages, security breaches, and Level 4 escalations.",
-    members: [{ name: "John Doe", email: "john@abccorp.com", isPrimary: true }],
+    id: "helpdesk",
+    title: "IT Help Desk Specialist",
+    levelLabel: "Level 1 — Frontline Support",
+    badgeColor: "var(--primary)",
+    icon: Headphones,
+    description: "First point of contact for employee IT requests.",
+    handlesWhat: "Handles Level 1 initial triage, password resets, and account access.",
+    members: [{ name: "Mark Villanueva", email: "mark@abccorp.com" }],
   },
   {
     id: "senior",
@@ -70,14 +70,14 @@ const INITIAL_IT_ROLES: ITRoleDefinition[] = [
     ],
   },
   {
-    id: "helpdesk",
-    title: "IT Help Desk Specialist",
-    levelLabel: "Level 1 — Frontline Support",
-    badgeColor: "var(--primary)",
-    icon: Headphones,
-    description: "First point of contact for employee IT requests.",
-    handlesWhat: "Handles Level 1 initial triage, password resets, and account access.",
-    members: [{ name: "Mark Villanueva", email: "mark@abccorp.com" }],
+    id: "head",
+    title: "Head of IT",
+    levelLabel: "Level 4 — Lead Executive",
+    badgeColor: "var(--danger)",
+    icon: Crown,
+    description: "Overall IT department leader and company administrator.",
+    handlesWhat: "Handles critical outages, security breaches, and Level 4 escalations.",
+    members: [{ name: "John Doe", email: "john@abccorp.com", isPrimary: true }],
   },
 ]
 
