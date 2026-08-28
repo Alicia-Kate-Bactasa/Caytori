@@ -273,20 +273,6 @@ export default function Directory({
           {title}
         </h1>
         <div className="flex items-center gap-2">
-          {kind === "departments" && (
-            <Button
-              variant="surface"
-              onClick={() => setShowInactiveModal(true)}
-              className="relative"
-            >
-              <Archive size={15} /> Inactive Accounts
-              {inactiveEmployees.length > 0 && (
-                <span className="ml-1.5 neu-inset rounded-full px-2 py-0.5 font-mono text-[10px] font-700 text-warning">
-                  {inactiveEmployees.length}
-                </span>
-              )}
-            </Button>
-          )}
           <Button onClick={() => setCreating(true)}>{ACTIONS[kind]}</Button>
         </div>
       </div>
@@ -1124,7 +1110,7 @@ function DepartmentDetailModal({
           </div>
         </div>
 
-        {/* Sliding Vertical Drawer Panel for Inactive Accounts (Height matches modal, right side) */}
+        {/* Sliding Vertical Drawer Panel for Inactive Accounts (Full height, rounded-2xl border radius) */}
         <AnimatePresence>
           {showDeptInactiveDrawer && (
             <motion.div
@@ -1132,7 +1118,7 @@ function DepartmentDetailModal({
               animate={{ x: 0, opacity: 1 }}
               exit={{ x: "100%", opacity: 0 }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
-              className="absolute inset-y-0 right-0 w-80 sm:w-96 neu bg-[var(--background)] z-30 p-6 flex flex-col border-l border-[var(--border)] shadow-2xl rounded-r-[var(--radius)]"
+              className="absolute inset-y-0 right-0 w-80 sm:w-96 neu bg-[var(--background)] z-30 p-6 flex flex-col border-l border-[var(--border)] shadow-2xl rounded-2xl"
             >
               <div className="flex items-center justify-between gap-3 pb-3 border-b border-[var(--border)] shrink-0">
                 <div>
@@ -1192,72 +1178,98 @@ function DepartmentDetailModal({
             </motion.div>
           )}
         </AnimatePresence>
+
+        {/* Sliding Vertical Drawer Panel for Invite Member (Full height, rounded-2xl border radius) */}
+        <AnimatePresence>
+          {inviting && (
+            <motion.div
+              initial={{ x: "100%", opacity: 0 }}
+              animate={{ x: 0, opacity: 1 }}
+              exit={{ x: "100%", opacity: 0 }}
+              transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              className="absolute inset-y-0 right-0 w-80 sm:w-[420px] neu bg-[var(--background)] z-30 p-6 flex flex-col border-l border-[var(--border)] shadow-2xl rounded-2xl"
+            >
+              <div className="flex items-center justify-between gap-3 pb-3 border-b border-[var(--border)] shrink-0">
+                <div>
+                  <h3 className="font-display font-700 text-sm text-foreground">
+                    Invite Member
+                  </h3>
+                  <p className="text-[11px] text-muted-foreground">
+                    Add new employee to {department.name} Department
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setInviting(false)}
+                  className="neu-sm neu-press grid h-7 w-7 place-items-center rounded-full text-muted-foreground hover:text-foreground cursor-pointer"
+                >
+                  <X size={14} />
+                </button>
+              </div>
+
+              <form onSubmit={handleInvite} className="flex-1 flex flex-col overflow-y-auto pt-4 space-y-4">
+                <div className="flex-1 space-y-4 pr-1">
+                  <Field label="Employee Full Name">
+                    <input
+                      required
+                      value={inviteName}
+                      onChange={(e) => setInviteName(e.target.value)}
+                      placeholder="e.g. Carlos Mendoza"
+                      className="w-full neu-inset rounded-xl bg-transparent px-3.5 py-2.5 text-sm outline-none"
+                    />
+                  </Field>
+
+                  <Field label="Work Email Address">
+                    <input
+                      required
+                      type="email"
+                      value={inviteEmail}
+                      onChange={(e) => setInviteEmail(e.target.value)}
+                      placeholder="e.g. carlos@abccorp.com"
+                      className="w-full neu-inset rounded-xl bg-transparent px-3.5 py-2.5 text-sm outline-none"
+                    />
+                  </Field>
+
+                  {/* Invitation Link Generator */}
+                  <div>
+                    <label className="block text-xs font-600 text-muted-foreground mb-1.5">
+                      Shareable Invitation Link
+                    </label>
+                    <div className="neu-inset rounded-xl p-2.5 flex items-center justify-between gap-2">
+                      <span className="font-mono text-xs text-primary truncate">
+                        {generatedInviteLink}
+                      </span>
+                      <Button
+                        type="button"
+                        size="sm"
+                        variant="surface"
+                        onClick={() => {
+                          navigator.clipboard?.writeText(generatedInviteLink)
+                          setCopiedLink(true)
+                          setTimeout(() => setCopiedLink(false), 2000)
+                        }}
+                        className="shrink-0"
+                      >
+                        {copiedLink ? <Check size={14} className="text-accent" /> : <Copy size={14} />}
+                        {copiedLink ? "Copied!" : "Copy"}
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex justify-end gap-3 pt-3 border-t border-[var(--border)] shrink-0">
+                  <Button type="button" variant="ghost" onClick={() => setInviting(false)}>
+                    Cancel
+                  </Button>
+                  <Button type="submit">
+                    <UserPlus size={15} /> Send Invite & Add Member
+                  </Button>
+                </div>
+              </form>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
-
-      {/* Invite Member Modal */}
-      <Modal
-        open={inviting}
-        onClose={() => setInviting(false)}
-        title={`Invite Member to ${department.name}`}
-        subtitle="Send an invitation email and generate a shareable registration link for this department."
-      >
-        <form onSubmit={handleInvite} className="space-y-4 pt-2">
-          <Field label="Employee Full Name">
-            <input
-              required
-              value={inviteName}
-              onChange={(e) => setInviteName(e.target.value)}
-              placeholder="e.g. Carlos Mendoza"
-              className="w-full neu-inset rounded-xl bg-transparent px-3.5 py-2.5 text-sm outline-none"
-            />
-          </Field>
-
-          <Field label="Work Email Address">
-            <input
-              required
-              type="email"
-              value={inviteEmail}
-              onChange={(e) => setInviteEmail(e.target.value)}
-              placeholder="e.g. carlos@abccorp.com"
-              className="w-full neu-inset rounded-xl bg-transparent px-3.5 py-2.5 text-sm outline-none"
-            />
-          </Field>
-
-          {/* Invitation Link Generator */}
-          <div>
-            <label className="block text-xs font-600 text-muted-foreground mb-1.5">
-              Generated Shareable Invitation Link
-            </label>
-            <div className="neu-inset rounded-xl p-2.5 flex items-center justify-between gap-2">
-              <span className="font-mono text-xs text-primary truncate">
-                {generatedInviteLink}
-              </span>
-              <Button
-                type="button"
-                size="sm"
-                variant="surface"
-                onClick={() => {
-                  navigator.clipboard?.writeText(generatedInviteLink)
-                  setCopiedLink(true)
-                  setTimeout(() => setCopiedLink(false), 2000)
-                }}
-              >
-                {copiedLink ? <Check size={14} className="text-accent" /> : <Copy size={14} />}
-                {copiedLink ? "Copied!" : "Copy Link"}
-              </Button>
-            </div>
-          </div>
-
-          <div className="flex justify-end gap-3 pt-3">
-            <Button type="button" variant="ghost" onClick={() => setInviting(false)}>
-              Cancel
-            </Button>
-            <Button type="submit">
-              <UserPlus size={15} /> Send Invite & Add Member
-            </Button>
-          </div>
-        </form>
-      </Modal>
 
       <Toast text={modalToast} />
     </Modal>

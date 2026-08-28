@@ -61,7 +61,7 @@ export function Modal({
           className="fixed inset-0 z-50 grid place-items-center overflow-y-auto p-4"
           style={{
             background:
-              "color-mix(in srgb, var(--foreground) 35%, transparent)",
+              "color-mix(in srgb, var(--foreground) 16%, transparent)",
           }}
           onClick={onClose}
         >
