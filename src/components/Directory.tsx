@@ -87,7 +87,7 @@ const INITIAL: Record<Kind, Row[]> = {
   ],
   it_team: STAFF.map((s) => ({
     name: s.name,
-    dept: `IT Support ${s.tier ?? "Tier 1"} · ${s.specialty ?? "General Triage"}`,
+    dept: `IT Support ${s.tier ?? "Level 1"}, ${s.specialty ?? "General Support"}`,
     email: s.email,
     status: "Active",
   })),
@@ -637,7 +637,7 @@ export default function Directory({
                         {m.name}
                       </div>
                       <div className="text-[11px] text-muted-foreground">
-                        {m.email} · {m.dept} Department
+                        {m.email} ({m.dept} Department)
                       </div>
                     </div>
                   </div>
@@ -723,7 +723,7 @@ function CompanyDetail({
               {company.name}
             </h1>
             <div className="mt-1 flex items-center gap-2 text-sm text-muted-foreground">
-              <Pill text={company.status} /> · {company.email}
+              <Pill text={company.status} /> <span>({company.email})</span>
             </div>
           </div>
         </div>
@@ -1081,8 +1081,8 @@ function DepartmentDetailModal({
                           <span className="font-600 text-foreground font-display text-sm">{t.subject}</span>
                         </div>
                         <div className="text-xs text-muted-foreground">
-                          Reported by <span className="font-500 text-foreground">{t.reporter}</span> · Category: {t.category}
-                        </div>
+                        Reported by <span className="font-500 text-foreground">{t.reporter}</span> ({t.category})
+                      </div>
                       </div>
                       <div className="flex items-center gap-2 shrink-0">
                         <PriorityBadge priority={t.priority} />

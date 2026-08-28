@@ -269,7 +269,7 @@ export default function Tickets({
               <div className="min-w-[180px] flex-1">
                 <div className="font-display font-600">{t.subject}</div>
                 <div className="mt-0.5 text-xs text-muted-foreground">
-                  {t.reporter} · {t.department} · {t.category}
+                  {t.reporter} ({t.department}) — {t.category}
                 </div>
               </div>
               <PriorityBadge priority={t.priority} />
@@ -390,14 +390,14 @@ export function EscalateModal({
     <Modal
       open={open}
       onClose={onClose}
-      title="Escalate IT Support Issue"
-      subtitle={`Hand over ticket ${ticket.id} to a higher IT Support Tier`}
+      title="Escalate Issue"
+      subtitle={`Hand over ticket ${ticket.id} to a higher support level`}
     >
       <div className="space-y-4 pt-2">
         {/* Tier Visual Pathway */}
         <div className="rounded-2xl p-4 neu-inset">
           <span className="text-xs font-600 text-muted-foreground uppercase tracking-wider font-mono">
-            IT Support Escalation Pathway
+            Support Level
           </span>
           <div className="mt-3 grid grid-cols-4 gap-2 text-center">
             {IT_HIERARCHY_TIERS.map((t) => {
@@ -440,12 +440,12 @@ export function EscalateModal({
         {/* Target Specialist Assignment */}
         <div>
           <label className="block text-xs font-600 text-muted-foreground mb-1.5">
-            Assign Designated Specialist ({selectedTier})
+            Assign To Specialist ({selectedTier})
           </label>
           <select
             value={targetAssignee}
             onChange={(e) => setTargetAssignee(e.target.value)}
-            className="w-full neu-inset rounded-2xl bg-transparent px-4 py-3 text-sm outline-none font-500"
+            className="w-full neu-inset rounded-2xl bg-transparent px-4 py-3 text-sm outline-none font-500 cursor-pointer"
           >
             {eligibleTechs.map((s) => (
               <option key={s.id} value={s.name}>
@@ -458,7 +458,7 @@ export function EscalateModal({
         {/* Adjust Priority */}
         <div>
           <label className="block text-xs font-600 text-muted-foreground mb-1.5">
-            Escalated Priority Level
+            Priority Level
           </label>
           <div className="flex gap-2">
             {PRIORITIES.map((p) => (
@@ -481,13 +481,13 @@ export function EscalateModal({
         {/* Escalation Handover Note */}
         <div>
           <label className="block text-xs font-600 text-muted-foreground mb-1.5">
-            Escalation Handover Reason & Technical Notes *
+            Reason for Escalation *
           </label>
           <textarea
             value={reason}
             onChange={(e) => setReason(e.target.value)}
-            placeholder="Describe technical troubleshooting performed, findings, and why this requires higher-tier intervention..."
-            className="w-full neu-inset rounded-2xl bg-transparent p-3 text-sm outline-none h-24 resize-none"
+            placeholder="Explain why this issue is being escalated..."
+            className="w-full neu-inset rounded-2xl bg-transparent p-3 text-sm outline-none h-20 resize-none"
           />
         </div>
 
@@ -503,7 +503,7 @@ export function EscalateModal({
               onClose()
             }}
           >
-            Confirm Escalation & Handoff
+            Escalate Ticket
           </Button>
         </div>
       </div>
@@ -537,7 +537,7 @@ export function TicketModal({
       open={!!ticket}
       onClose={onClose}
       title={ticket.subject}
-      subtitle={`${ticket.id} · ${ticket.reporter} (${ticket.department}) · ${ticket.category}`}
+      subtitle={`${ticket.id} — ${ticket.reporter} (${ticket.department}), ${ticket.category}`}
       width="max-w-5xl"
     >
       <TicketDetail

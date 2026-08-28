@@ -99,38 +99,38 @@ interface TierConfig {
 const INITIAL_TIERS: TierConfig[] = [
   {
     id: "L1",
-    name: "Tier 1 — Help Desk & Triage",
+    name: "Level 1 — Basic Support",
     level: 1,
     slaMinutes: 15,
-    description: "First line of support. Basic troubleshooting, password resets, and issue logging.",
+    description: "Password resets, account access, and general help.",
     specialists: ["Mark Villanueva", "Leo Tan"],
     color: "var(--primary)",
   },
   {
     id: "L2",
-    name: "Tier 2 — Senior Tech & Infrastructure",
+    name: "Level 2 — Advanced IT",
     level: 2,
     slaMinutes: 45,
-    description: "Advanced troubleshooting, network infrastructure, hardware diagnostics, and software configs.",
+    description: "Software glitches, hardware diagnostics, and network issues.",
     specialists: ["Elena Vance", "John Doe"],
     color: "var(--accent)",
   },
   {
     id: "L3",
-    name: "Tier 3 — Systems Architect & Security",
+    name: "Level 3 — IT Experts",
     level: 3,
     slaMinutes: 120,
-    description: "Specialized infrastructure, database anomalies, cyber security incidents, and root-cause engineering.",
+    description: "Complex system problems, databases, and security alerts.",
     specialists: ["John Doe", "Sam Ortega"],
     color: "var(--warning)",
   },
   {
     id: "LEAD",
-    name: "IT Lead — Head of IT Executive Escalation",
+    name: "Level 4 — Head of IT",
     level: 4,
     slaMinutes: 30,
-    description: "Executive incident command, company-wide service outages, and final policy decisions.",
-    specialists: ["John Doe (Head of IT)"],
+    description: "Urgent company outages and high-priority escalation.",
+    specialists: ["John Doe"],
     color: "var(--danger)",
   },
 ]
@@ -232,7 +232,7 @@ export default function Hierarchy({ role }: { role: Role }) {
           : t,
       ),
     )
-    flash(`Escalation settings for ${showEditTier.name} updated successfully!`)
+    flash(`Settings for ${showEditTier.name} updated successfully!`)
     setShowEditTier(null)
   }
 
@@ -252,7 +252,7 @@ export default function Hierarchy({ role }: { role: Role }) {
       ),
     )
 
-    flash(`${newHeadName.trim()} is now the Department Head of ${showChangeHead.department}!`)
+    flash(`${newHeadName.trim()} is now the Head of ${showChangeHead.department}!`)
     setShowChangeHead(null)
     setNewHeadName("")
   }
@@ -267,22 +267,17 @@ export default function Hierarchy({ role }: { role: Role }) {
       {/* Header Banner */}
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <div className="flex items-center gap-2">
-            <h1 className="font-display text-2xl font-700 tracking-tight">
-              Roles & Escalation Hierarchy
-            </h1>
-            <span className="neu-inset rounded-full px-3 py-1 text-xs font-mono font-700 text-primary">
-              Universal Hierarchy
-            </span>
-          </div>
+          <h1 className="font-display text-2xl font-700 tracking-tight">
+            Roles & IT Support Levels
+          </h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            Configure company administrators, IT team leaders, department heads, and multi-tier escalation pathways.
+            Manage admins, support escalation levels, and department heads.
           </p>
         </div>
 
         <div className="flex items-center gap-2">
           <Button size="sm" onClick={() => setShowAddAdmin(true)}>
-            <UserPlus size={15} /> Assign / Add Admin
+            <UserPlus size={15} /> Add Admin
           </Button>
         </div>
       </div>
@@ -298,7 +293,7 @@ export default function Hierarchy({ role }: { role: Role }) {
               : "text-muted-foreground hover:text-foreground"
           }`}
         >
-          👑 Company Admins & IT Leaders ({admins.length})
+          Admins & IT Leaders ({admins.length})
         </button>
         <button
           type="button"
@@ -309,7 +304,7 @@ export default function Hierarchy({ role }: { role: Role }) {
               : "text-muted-foreground hover:text-foreground"
           }`}
         >
-          ⚡ Escalation Matrix (4 Tiers)
+          Support Levels (4 Levels)
         </button>
         <button
           type="button"
@@ -320,7 +315,7 @@ export default function Hierarchy({ role }: { role: Role }) {
               : "text-muted-foreground hover:text-foreground"
           }`}
         >
-          🏢 Department Heads ({deptHeads.length})
+          Department Heads ({deptHeads.length})
         </button>
       </div>
 
@@ -330,9 +325,9 @@ export default function Hierarchy({ role }: { role: Role }) {
           <div className="neu-flat rounded-2xl p-5 border border-[var(--border)] space-y-4">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="font-display font-700 text-base">Active Company Administrators</h3>
+                <h3 className="font-display font-700 text-base">Company Administrators</h3>
                 <p className="text-xs text-muted-foreground">
-                  Head of IT and designated administrators authorized to manage organization policies and user accounts.
+                  Head of IT and designated company administrators.
                 </p>
               </div>
               <Button size="sm" variant="surface" onClick={() => setShowAddAdmin(true)}>
@@ -351,7 +346,7 @@ export default function Hierarchy({ role }: { role: Role }) {
                           {adm.name}
                           {adm.isPrimary && (
                             <span className="neu-flat text-[10px] font-700 font-mono px-2 py-0.5 rounded-full text-accent">
-                              Primary Head
+                              Head of IT
                             </span>
                           )}
                         </div>
@@ -362,7 +357,7 @@ export default function Hierarchy({ role }: { role: Role }) {
 
                   <div className="pt-2 border-t border-[var(--border)] flex items-center justify-between text-xs">
                     <div>
-                      <span className="text-[11px] text-muted-foreground block">Assigned Role</span>
+                      <span className="text-[11px] text-muted-foreground block">Role</span>
                       <span className="font-700 text-primary font-display">{adm.role}</span>
                     </div>
                     {!adm.isPrimary && (
@@ -372,7 +367,7 @@ export default function Hierarchy({ role }: { role: Role }) {
                         className="text-[11px] text-muted-foreground hover:text-danger p-1 h-auto"
                         onClick={() => handleDemoteAdmin(adm.id, adm.name)}
                       >
-                        <UserX size={13} className="mr-1 text-danger" /> Revoke Admin
+                        <UserX size={13} className="mr-1 text-danger" /> Remove Admin
                       </Button>
                     )}
                   </div>
@@ -383,14 +378,14 @@ export default function Hierarchy({ role }: { role: Role }) {
         </div>
       )}
 
-      {/* TAB 2: IT Escalation Hierarchy Matrix */}
+      {/* TAB 2: IT Escalation Levels */}
       {tab === "matrix" && (
         <div className="space-y-4">
           <div className="neu-flat rounded-2xl p-5 border border-[var(--border)] space-y-4">
             <div>
-              <h3 className="font-display font-700 text-base">Universal 4-Tier IT Escalation Matrix</h3>
+              <h3 className="font-display font-700 text-base">IT Support Escalation Levels</h3>
               <p className="text-xs text-muted-foreground">
-                Automatic response pathways from Tier 1 triage to Head of IT executive escalation.
+                Automatic response levels from Level 1 to Head of IT.
               </p>
             </div>
 
@@ -419,7 +414,7 @@ export default function Hierarchy({ role }: { role: Role }) {
 
                     <div className="pt-2 border-t border-[var(--border)]">
                       <span className="text-[11px] font-600 text-muted-foreground block mb-1">
-                        Designated Tier Specialists:
+                        Assigned Staff:
                       </span>
                       <div className="flex flex-wrap gap-1.5">
                         {t.specialists.map((s) => (
@@ -441,7 +436,7 @@ export default function Hierarchy({ role }: { role: Role }) {
                     }}
                     className="w-full text-xs"
                   >
-                    <Sliders size={13} /> Configure SLA & Specialists
+                    <Sliders size={13} /> Edit Support Level
                   </Button>
                 </div>
               ))}
@@ -455,9 +450,9 @@ export default function Hierarchy({ role }: { role: Role }) {
         <div className="space-y-4">
           <div className="neu-flat rounded-2xl p-5 border border-[var(--border)] space-y-4">
             <div>
-              <h3 className="font-display font-700 text-base">Department Leadership Roster</h3>
+              <h3 className="font-display font-700 text-base">Department Heads</h3>
               <p className="text-xs text-muted-foreground">
-                Assigned department heads responsible for member management and ticket approvals.
+                Assigned leaders for each department.
               </p>
             </div>
 
