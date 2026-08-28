@@ -191,7 +191,7 @@ export default function AppShell({
       case "profile":
         return <Profile role={role} onSignOut={onSignOut} />
       case "help":
-        return <Help onNavigate={go} />
+        return <Help onNavigate={go} role={role} />
       default:
         return null
     }
