@@ -23,6 +23,7 @@ import {
   Field,
   Toast,
   StatusBadge,
+  PriorityBadge,
 } from "./primitives"
 import { DEPARTMENTS, STAFF, TICKETS } from "../data"
 
@@ -855,6 +856,7 @@ function DepartmentDetailModal({
   onClose: () => void
   onToggleStatus: () => void
 }) {
+  const [mainTab, setMainTab] = useState<"members" | "tickets">("members")
   const [ticketTab, setTicketTab] = useState<"ACTIVE" | "RESOLVED" | "CLOSED" | "ALL">("ACTIVE")
   const [inviting, setInviting] = useState(false)
   const [showDeptInactiveDrawer, setShowDeptInactiveDrawer] = useState(false)
@@ -947,130 +949,167 @@ function DepartmentDetailModal({
       subtitle={`Department Head: ${department.head ?? "Unassigned"}`}
       width="max-w-3xl"
     >
-      <div className="space-y-6 pt-2">
-        {/* Metric Cards Banner */}
-        <div className="grid grid-cols-3 gap-3">
-          <div className="neu-inset rounded-2xl p-4 text-center">
-            <div className="text-xs font-600 text-muted-foreground">Active Members</div>
-            <div className="mt-1 font-display text-2xl font-800">{activeDeptMembers.length}</div>
+      <div className="space-y-5 pt-1">
+        {/* Clean Segmented Header Switcher */}
+        <div className="neu-flat rounded-2xl p-4 flex flex-wrap items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="grid h-12 w-12 place-items-center rounded-2xl neu-inset font-display font-800 text-primary text-xl">
+              {department.name.charAt(0)}
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h3 className="font-display text-lg font-700 text-foreground">{department.name}</h3>
+                <Pill text={department.status} />
+              </div>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Department Head: <span className="font-600 text-foreground">{department.head ?? "Unassigned"}</span>
+              </p>
+            </div>
           </div>
-          <div className="neu-inset rounded-2xl p-4 text-center">
-            <div className="text-xs font-600 text-muted-foreground font-mono">Active IT Tickets</div>
-            <div className="mt-1 font-display text-2xl font-800 text-warning">{activeTickets.length}</div>
-          </div>
-          <div className="neu-inset rounded-2xl p-4 text-center">
-            <div className="text-xs font-600 text-muted-foreground">Department Status</div>
-            <div className="mt-1 font-display text-sm font-700 text-primary">{department.status}</div>
+
+          {/* Segmented Main Navigation Tabs */}
+          <div className="flex items-center gap-1 neu-inset rounded-full p-1 text-xs">
+            <button
+              type="button"
+              onClick={() => setMainTab("members")}
+              className={`rounded-full px-4 py-1.5 font-600 transition-all cursor-pointer ${
+                mainTab === "members"
+                  ? "neu-flat text-primary font-700"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              👥 Members ({activeDeptMembers.length})
+            </button>
+            <button
+              type="button"
+              onClick={() => setMainTab("tickets")}
+              className={`rounded-full px-4 py-1.5 font-600 transition-all cursor-pointer ${
+                mainTab === "tickets"
+                  ? "neu-flat text-primary font-700"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
+            >
+              🎫 IT Tickets ({deptTickets.length})
+            </button>
           </div>
         </div>
 
-        {/* Department Members List with Deactivate & Invite Controls */}
-        <div>
-          <div className="flex flex-wrap items-center justify-between gap-2 mb-2.5">
-            <h4 className="font-display text-sm font-700">
-              Department Members ({activeDeptMembers.length})
-            </h4>
-            <div className="flex items-center gap-2">
-              {inactiveDeptMembers.length > 0 && (
-                <Button
-                  size="sm"
-                  variant="surface"
-                  onClick={() => setShowDeptInactiveDrawer(true)}
-                >
-                  <Archive size={14} /> Inactive ({inactiveDeptMembers.length})
+        {/* Tab 1: Members View */}
+        {mainTab === "members" && (
+          <div className="space-y-4">
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-xs font-600 text-muted-foreground uppercase tracking-wider font-mono">
+                Active Department Members ({activeDeptMembers.length})
+              </span>
+              <div className="flex items-center gap-2">
+                {inactiveDeptMembers.length > 0 && (
+                  <Button
+                    size="sm"
+                    variant="surface"
+                    onClick={() => setShowDeptInactiveDrawer(true)}
+                  >
+                    <Archive size={13} /> Inactive ({inactiveDeptMembers.length})
+                  </Button>
+                )}
+                <Button size="sm" onClick={() => setInviting(true)}>
+                  <UserPlus size={14} /> Invite Member
                 </Button>
+              </div>
+            </div>
+
+            <div className="space-y-2 max-h-64 overflow-y-auto">
+              {activeDeptMembers.length > 0 ? (
+                activeDeptMembers.map((m) => (
+                  <div key={m.name} className="flex items-center justify-between p-3 rounded-2xl neu-flat text-xs">
+                    <div className="flex items-center gap-3">
+                      <Avatar name={m.name} size={32} />
+                      <div>
+                        <div className="font-600 text-foreground font-display text-sm">{m.name}</div>
+                        <div className="text-xs text-muted-foreground">{m.email}</div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Pill text={m.status} />
+                      <Button
+                        size="sm"
+                        variant="ghost"
+                        className="text-xs text-muted-foreground hover:text-danger"
+                        onClick={() => setMemberStatus(m.name, "Inactive")}
+                      >
+                        <UserX size={13} className="mr-1 text-danger" /> Deactivate
+                      </Button>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="neu-inset rounded-2xl p-6 text-center text-xs text-muted-foreground italic">
+                  No active members in this department.
+                </div>
               )}
-              <Button size="sm" onClick={() => setInviting(true)}>
-                <UserPlus size={14} /> Invite Member
-              </Button>
             </div>
           </div>
+        )}
 
-          <div className="neu-flat rounded-2xl p-3 space-y-2 max-h-48 overflow-y-auto">
-            {activeDeptMembers.length > 0 ? (
-              activeDeptMembers.map((m) => (
-                <div key={m.name} className="flex items-center justify-between p-2.5 rounded-xl neu-inset text-xs">
-                  <div className="flex items-center gap-2.5 min-w-0 pr-2">
-                    <Avatar name={m.name} size={28} />
-                    <div className="min-w-0">
-                      <div className="font-600 text-foreground truncate">{m.name}</div>
-                      <div className="text-[11px] text-muted-foreground truncate">{m.email}</div>
+        {/* Tab 2: IT Tickets View */}
+        {mainTab === "tickets" && (
+          <div className="space-y-4">
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <span className="text-xs font-600 text-muted-foreground uppercase tracking-wider font-mono">
+                Department IT Tickets ({deptTickets.length})
+              </span>
+              <div className="flex items-center gap-1 neu-inset rounded-full p-1 text-[11px]">
+                {[
+                  { key: "ACTIVE", label: `Active (${activeTickets.length})` },
+                  { key: "RESOLVED", label: `Resolved (${resolvedTickets.length})` },
+                  { key: "CLOSED", label: `Closed (${closedTickets.length})` },
+                  { key: "ALL", label: `All (${deptTickets.length})` },
+                ].map((tab) => (
+                  <button
+                    key={tab.key}
+                    type="button"
+                    onClick={() => setTicketTab(tab.key as any)}
+                    className={`rounded-full px-3 py-1 font-600 transition-all duration-200 cursor-pointer ${
+                      ticketTab === tab.key
+                        ? "neu-flat text-primary font-700"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="space-y-2.5 max-h-64 overflow-y-auto">
+              {displayTickets.length > 0 ? (
+                displayTickets.map((t) => (
+                  <div
+                    key={t.id}
+                    className="neu-flat rounded-2xl p-3.5 flex items-center justify-between text-xs hover:bg-[color-mix(in_srgb,var(--primary)_4%,transparent)] transition-colors"
+                  >
+                    <div className="min-w-0 pr-2 space-y-1">
+                      <div className="flex items-center gap-2">
+                        <span className="font-mono font-700 text-primary">{t.id}</span>
+                        <span className="font-600 text-foreground font-display text-sm">{t.subject}</span>
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        Reported by <span className="font-500 text-foreground">{t.reporter}</span> · Category: {t.category}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                      <PriorityBadge priority={t.priority} />
+                      <StatusBadge status={t.status} />
                     </div>
                   </div>
-                  <div className="flex items-center gap-2 shrink-0">
-                    <Pill text={m.status} />
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="text-[11px] text-muted-foreground hover:text-danger p-1.5 h-auto"
-                      onClick={() => setMemberStatus(m.name, "Inactive")}
-                    >
-                      <UserX size={13} className="mr-1 text-danger" /> Deactivate
-                    </Button>
-                  </div>
+                ))
+              ) : (
+                <div className="neu-inset rounded-2xl p-6 text-center text-xs text-muted-foreground italic">
+                  No {ticketTab.toLowerCase()} tickets found for this department.
                 </div>
-              ))
-            ) : (
-              <div className="text-xs text-muted-foreground p-3 text-center italic">
-                No active members in this department.
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Categorized Department IT Tickets */}
-        <div>
-          <div className="flex flex-wrap items-center justify-between gap-2 mb-2.5">
-            <h4 className="font-display text-sm font-700">Associated IT Tickets ({deptTickets.length})</h4>
-
-            {/* Neumorphic Categorization Pills */}
-            <div className="flex items-center gap-1 neu-inset rounded-full p-1 text-[11px]">
-              {[
-                { key: "ACTIVE", label: `Active (${activeTickets.length})` },
-                { key: "RESOLVED", label: `Resolved (${resolvedTickets.length})` },
-                { key: "CLOSED", label: `Closed (${closedTickets.length})` },
-                { key: "ALL", label: `All (${deptTickets.length})` },
-              ].map((tab) => (
-                <button
-                  key={tab.key}
-                  type="button"
-                  onClick={() => setTicketTab(tab.key as any)}
-                  className={`rounded-full px-3 py-1 font-600 transition-all duration-200 cursor-pointer ${
-                    ticketTab === tab.key
-                      ? "neu-flat text-primary font-700"
-                      : "text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  {tab.label}
-                </button>
-              ))}
+              )}
             </div>
           </div>
-
-          <div className="space-y-2 max-h-48 overflow-y-auto pt-1">
-            {displayTickets.length > 0 ? (
-              displayTickets.map((t) => (
-                <div
-                  key={t.id}
-                  className="neu-flat rounded-xl p-3 flex items-center justify-between text-xs hover:bg-[color-mix(in_srgb,var(--primary)_4%,transparent)] transition-colors"
-                >
-                  <div className="min-w-0 pr-2">
-                    <span className="font-mono font-700 text-primary mr-2">{t.id}</span>
-                    <span className="font-600 text-foreground">{t.subject}</span>
-                    <div className="mt-0.5 text-[11px] text-muted-foreground">
-                      Reported by {t.reporter} · Category: {t.category} · Priority: {t.priority}
-                    </div>
-                  </div>
-                  <StatusBadge status={t.status} />
-                </div>
-              ))
-            ) : (
-              <div className="text-xs text-muted-foreground neu-inset rounded-xl p-4 text-center italic">
-                No {ticketTab.toLowerCase()} tickets found for this department.
-              </div>
-            )}
-          </div>
-        </div>
+        )}
 
         {/* Footer controls */}
         <div className="flex justify-between items-center pt-3 border-t border-[var(--border)]">

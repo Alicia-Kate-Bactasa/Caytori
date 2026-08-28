@@ -709,157 +709,201 @@ function TicketDetail({
     )
   }
 
+  const [showAllActivity, setShowAllActivity] = useState(false)
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.35 }}
+      className="space-y-6"
     >
       <button
         onClick={onBack}
-        className="inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground"
+        className="inline-flex items-center gap-2 text-sm text-muted-foreground transition-colors hover:text-foreground cursor-pointer"
       >
         <ArrowLeft size={16} /> Back to tickets
       </button>
 
-      <div className="mt-5 grid gap-6 lg:grid-cols-[1.6fr_1fr]">
-        <div className="space-y-6">
-          <Card className="p-6">
-            <div className="flex flex-wrap items-center justify-between gap-3">
-              <span className="font-mono text-sm font-600 text-primary">
-                {ticket.id}
-              </span>
-              <div className="flex items-center gap-2">
-                <PriorityBadge priority={ticket.priority} />
-                <StatusBadge status={ticket.status} />
-              </div>
-            </div>
-            <h1 className="mt-3 font-display text-xl font-700">
-              {ticket.subject}
-            </h1>
-            <p className="mt-3 leading-relaxed text-muted-foreground">
-              {ticket.description}
-            </p>
-
-            {ticket.escalationTier && (
-              <div className="mt-4 neu-flat rounded-2xl p-3.5 flex items-start gap-3 border-l-4 border-[var(--warning)]">
-                <AlertTriangle size={18} className="text-warning shrink-0 mt-0.5" />
-                <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <span className="text-xs font-700 text-foreground font-display">Escalated Support Level:</span>
-                    <span className="neu-inset rounded-full px-2.5 py-0.5 font-mono text-[11px] font-700 text-warning">
-                      {IT_HIERARCHY_TIERS.find((t) => t.id === ticket.escalationTier)?.title ?? ticket.escalationTier}
-                    </span>
-                  </div>
-                  {ticket.escalationReason && (
-                    <p className="mt-1 text-xs text-muted-foreground leading-relaxed italic">
-                      "{ticket.escalationReason}" — Handover by {ticket.escalatedBy ?? "IT Staff"}
-                    </p>
-                  )}
-                </div>
-              </div>
-            )}
-            {actions.length > 0 && (
-              <div
-                className="mt-5 flex flex-wrap items-center gap-2.5 border-t pt-5"
-                style={{ borderColor: "var(--border)" }}
-              >
-                {actions}
-              </div>
-            )}
-          </Card>
-
-          {/* Comments */}
-          <Card className="p-6">
-            <h3 className="font-display text-base font-600">Conversation</h3>
-            <div className="mt-4 space-y-4">
-              {ticket.comments.map((c) => (
-                <div key={c.id} className="flex gap-3">
-                  <Avatar name={c.author} size={34} />
-                  <div className="flex-1">
-                    <div className="flex items-baseline gap-2">
-                      <span className="text-sm font-600">{c.author}</span>
-                      <span className="text-xs text-muted-foreground">
-                        {fmt(c.at)}
-                      </span>
-                    </div>
-                    <div className="neu-inset mt-1.5 rounded-2xl px-4 py-2.5 text-sm leading-relaxed">
-                      {c.text}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-            {ticket.status !== "CLOSED" && (
-              <form
-                className="mt-5 flex items-center gap-2"
-                onSubmit={(e) => {
-                  e.preventDefault()
-                  if (draft.trim()) {
-                    onComment(ticket.id, draft.trim())
-                    setDraft("")
-                  }
-                }}
-              >
-                <div className="neu-inset flex flex-1 items-center gap-2.5 rounded-full px-4 py-2.5">
-                  <input
-                    value={draft}
-                    onChange={(e) => setDraft(e.target.value)}
-                    placeholder="Write a comment…"
-                    className="w-full bg-transparent text-sm outline-none"
-                  />
-                </div>
-                <Button type="submit" size="sm">
-                  <Send size={15} />
-                </Button>
-              </form>
-            )}
-          </Card>
+      {/* Main Ticket Card Header */}
+      <Card className="p-6 space-y-4">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <span className="font-mono text-sm font-700 text-primary">
+            {ticket.id}
+          </span>
+          <div className="flex items-center gap-2">
+            <PriorityBadge priority={ticket.priority} />
+            <StatusBadge status={ticket.status} />
+          </div>
         </div>
 
-        {/* Meta + activity */}
-        <div className="space-y-6">
-          <Card className="p-6">
-            <h3 className="font-display text-base font-600">Details</h3>
-            <dl className="mt-4 space-y-3 text-sm">
-              {[
-                ["Reporter", ticket.reporter],
-                ["Department", ticket.department],
-                ["Category", ticket.category],
-                ["Assignee", ticket.assignee ?? "Unassigned"],
-                ["Created", fmt(ticket.createdAt)],
-                ["Updated", fmt(ticket.updatedAt)],
-                [
-                  "Resolution",
-                  ticket.resolutionHours != null
-                    ? `${ticket.resolutionHours} hrs`
-                    : "—",
-                ],
-              ].map(([k, v]) => (
-                <div
-                  key={k}
-                  className="flex items-center justify-between gap-4"
-                >
-                  <dt className="text-muted-foreground">{k}</dt>
-                  <dd className="text-right font-500">{v}</dd>
+        <div>
+          <h1 className="font-display text-2xl font-700 text-foreground">
+            {ticket.subject}
+          </h1>
+          <div className="mt-2.5 flex flex-wrap items-center gap-3 text-xs text-muted-foreground">
+            <div className="flex items-center gap-2 neu-inset rounded-full px-3 py-1 text-foreground font-500">
+              <Avatar name={ticket.reporter} size={20} />
+              <span>{ticket.reporter}</span>
+              <span className="text-muted-foreground">({ticket.department})</span>
+            </div>
+            <span className="neu-flat rounded-full px-3 py-1 font-mono text-foreground font-600">
+              Category: {ticket.category}
+            </span>
+            <span className="flex items-center gap-1 font-mono">
+              <Clock size={13} /> {fmt(ticket.createdAt)}
+            </span>
+          </div>
+        </div>
+
+        <div className="neu-inset rounded-2xl p-4 text-sm leading-relaxed text-foreground">
+          {ticket.description}
+        </div>
+
+        {ticket.escalationTier && (
+          <div className="neu-flat rounded-2xl p-3.5 flex items-start gap-3 border-l-4 border-[var(--warning)]">
+            <AlertTriangle size={18} className="text-warning shrink-0 mt-0.5" />
+            <div className="min-w-0 flex-1">
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-xs font-700 text-foreground font-display">Escalated Support Level:</span>
+                <span className="neu-inset rounded-full px-2.5 py-0.5 font-mono text-[11px] font-700 text-warning">
+                  {IT_HIERARCHY_TIERS.find((t) => t.id === ticket.escalationTier)?.title ?? ticket.escalationTier}
+                </span>
+              </div>
+              {ticket.escalationReason && (
+                <p className="mt-1 text-xs text-muted-foreground leading-relaxed italic">
+                  "{ticket.escalationReason}" — Handover by {ticket.escalatedBy ?? "IT Staff"}
+                </p>
+              )}
+            </div>
+          </div>
+        )}
+
+        {actions.length > 0 && (
+          <div
+            className="flex flex-wrap items-center gap-2.5 border-t pt-4"
+            style={{ borderColor: "var(--border)" }}
+          >
+            {actions}
+          </div>
+        )}
+      </Card>
+
+      {/* 2-Column Section: Conversation & Metadata Grid */}
+      <div className="grid gap-6 lg:grid-cols-[1.6fr_1fr] items-start">
+        {/* Left Column: Conversation */}
+        <Card className="p-6">
+          <h3 className="font-display text-base font-600 flex items-center justify-between">
+            <span>Conversation</span>
+            <span className="text-xs font-mono text-muted-foreground neu-inset rounded-full px-2.5 py-0.5">
+              {ticket.comments.length} updates
+            </span>
+          </h3>
+
+          <div className="mt-4 space-y-4">
+            {ticket.comments.map((c) => (
+              <div key={c.id} className="flex gap-3">
+                <Avatar name={c.author} size={32} />
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-sm font-600 text-foreground">{c.author}</span>
+                    <span className="text-[11px] text-muted-foreground font-mono">
+                      {fmt(c.at)}
+                    </span>
+                  </div>
+                  <div className="neu-inset mt-1.5 rounded-2xl px-4 py-3 text-sm leading-relaxed text-foreground">
+                    {c.text}
+                  </div>
                 </div>
-              ))}
-            </dl>
+              </div>
+            ))}
+          </div>
+
+          {ticket.status !== "CLOSED" && (
+            <form
+              className="mt-5 flex items-center gap-2"
+              onSubmit={(e) => {
+                e.preventDefault()
+                if (draft.trim()) {
+                  onComment(ticket.id, draft.trim())
+                  setDraft("")
+                }
+              }}
+            >
+              <div className="neu-inset flex flex-1 items-center gap-2.5 rounded-full px-4 py-2.5">
+                <input
+                  value={draft}
+                  onChange={(e) => setDraft(e.target.value)}
+                  placeholder="Write a response or note…"
+                  className="w-full bg-transparent text-sm outline-none"
+                />
+              </div>
+              <Button type="submit" size="sm">
+                <Send size={15} />
+              </Button>
+            </form>
+          )}
+        </Card>
+
+        {/* Right Column: Quick Details & Collapsible Activity Timeline */}
+        <div className="space-y-6">
+          {/* Quick Details Chips */}
+          <Card className="p-6">
+            <h3 className="font-display text-base font-600 mb-4">Ticket Details</h3>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="neu-inset rounded-2xl p-3">
+                <span className="text-[11px] text-muted-foreground block font-500">Assignee</span>
+                <span className="text-xs font-700 text-foreground font-display mt-0.5 block truncate">
+                  {ticket.assignee ?? "Unassigned"}
+                </span>
+              </div>
+              <div className="neu-inset rounded-2xl p-3">
+                <span className="text-[11px] text-muted-foreground block font-500">Category</span>
+                <span className="text-xs font-700 text-foreground font-display mt-0.5 block truncate">
+                  {ticket.category}
+                </span>
+              </div>
+              <div className="neu-inset rounded-2xl p-3">
+                <span className="text-[11px] text-muted-foreground block font-500">Created</span>
+                <span className="text-xs font-600 text-foreground font-mono mt-0.5 block truncate">
+                  {fmt(ticket.createdAt)}
+                </span>
+              </div>
+              <div className="neu-inset rounded-2xl p-3">
+                <span className="text-[11px] text-muted-foreground block font-500">Fix Time SLA</span>
+                <span className="text-xs font-600 text-foreground font-mono mt-0.5 block truncate">
+                  {ticket.resolutionHours != null ? `${ticket.resolutionHours} hrs` : "In SLA"}
+                </span>
+              </div>
+            </div>
           </Card>
 
+          {/* Activity Timeline (Clean & Truncated) */}
           <Card className="p-6">
-            <h3 className="font-display text-base font-600">Activity</h3>
-            <ol className="mt-4 space-y-4">
-              {ticket.activity.map((a) => (
-                <li key={a.id} className="relative flex gap-3 pl-1">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-display text-base font-600">Activity History</h3>
+              {ticket.activity.length > 3 && (
+                <button
+                  type="button"
+                  onClick={() => setShowAllActivity(!showAllActivity)}
+                  className="text-xs text-primary font-600 hover:underline cursor-pointer"
+                >
+                  {showAllActivity ? "Show Less" : `View All (${ticket.activity.length})`}
+                </button>
+              )}
+            </div>
+
+            <ol className="space-y-3">
+              {(showAllActivity ? ticket.activity : ticket.activity.slice(-3)).map((a) => (
+                <li key={a.id} className="relative flex gap-3 text-xs">
                   <span
-                    className="mt-1.5 h-2 w-2 shrink-0 rounded-full"
+                    className="mt-1 h-2 w-2 shrink-0 rounded-full"
                     style={{ background: "var(--primary)" }}
                   />
-                  <div className="text-sm">
-                    <span className="font-500">{a.actor}</span>{" "}
+                  <div>
+                    <span className="font-600 text-foreground">{a.actor}</span>{" "}
                     <span className="text-muted-foreground">{a.action}</span>
-                    <div className="text-xs text-muted-foreground">
+                    <div className="text-[10px] text-muted-foreground font-mono mt-0.5">
                       {fmt(a.at)}
                     </div>
                   </div>
