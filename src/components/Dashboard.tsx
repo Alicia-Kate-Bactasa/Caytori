@@ -252,11 +252,11 @@ export default function Dashboard({
     .slice(0, 5)
   const avg = avgResolution(tickets)
 
-  const isEmployeeView = role === "normal_employee" || role === "normal_head"
+  const isEmployeeView = role === "normal_employee"
   const isITHead = role === "it_head" || role === "company_admin"
 
   return (
-    <div>
+    <div className="space-y-6">
       <div>
         <h1 className="font-display text-2xl font-700 tracking-tight">
           Good day, {me.name.split(" ")[0]}
@@ -274,7 +274,7 @@ export default function Dashboard({
         </p>
       </div>
 
-      <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {cards.map((c, i) => (
           <StatCard key={c.label} {...c} delay={i * 0.06} />
         ))}

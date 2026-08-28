@@ -4,7 +4,6 @@ export type Role =
   | "platform_admin"
   | "company_admin"
   | "it_head"
-  | "normal_head"
   | "it_employee"
   | "normal_employee"
 
@@ -24,32 +23,27 @@ export const ROLES: { id: Role; label: string; blurb: string }[] = [
   {
     id: "platform_admin",
     label: "Caytori Admin",
-    blurb: "Manages Caytori & tenant companies",
+    blurb: "Manages Caytori platform & tenant companies",
   },
   {
     id: "company_admin",
     label: "Company Admin",
-    blurb: "Runs the company organization",
+    blurb: "Runs the company organization & departments",
   },
   {
     id: "it_head",
-    label: "DEPT IT (Dept Head)",
-    blurb: "Head of IT Dept — manages ticket routing & queue",
-  },
-  {
-    id: "normal_head",
-    label: "NORMAL DEPT (Dept Head)",
-    blurb: "Head of Finance Dept — views own reported issues",
+    label: "IT Help Desk Lead",
+    blurb: "Reviews, prioritizes & assigns tickets to IT technicians",
   },
   {
     id: "it_employee",
-    label: "IT Employee",
-    blurb: "Member of IT Dept — resolves assigned tickets",
+    label: "IT Technician",
+    blurb: "Investigates, communicates & resolves assigned IT issues",
   },
   {
     id: "normal_employee",
-    label: "Normal Employee",
-    blurb: "Member of Finance Dept — reports & tracks IT issues",
+    label: "Employee",
+    blurb: "Reports IT issues/requests & confirms resolutions",
   },
 ]
 
@@ -107,14 +101,6 @@ export const CURRENT_USER: Record<Role, Person> = {
     email: "john@abccorp.com",
     isHead: true,
   },
-  normal_head: {
-    id: "u7",
-    name: "Elena Vance",
-    role: "normal_head",
-    department: "Finance",
-    email: "elena@abccorp.com",
-    isHead: true,
-  },
   it_employee: {
     id: "u3",
     name: "Mark Villanueva",
@@ -135,23 +121,87 @@ export const STAFF: Person[] = [
   {
     id: "u3",
     name: "Mark Villanueva",
-    role: "it_staff",
+    role: "it_employee",
     department: "IT",
     email: "mark@abccorp.com",
   },
   {
     id: "u4",
     name: "Anna Cruz",
-    role: "it_staff",
+    role: "it_employee",
     department: "IT",
     email: "anna@abccorp.com",
   },
   {
     id: "u6",
     name: "Leo Tan",
-    role: "it_staff",
+    role: "it_employee",
     department: "IT",
     email: "leo@abccorp.com",
+  },
+]
+
+export interface WorkflowStep {
+  step: number
+  title: string
+  description: string
+  shortLabel: string
+}
+
+export const IT_WORKFLOW_STEPS: WorkflowStep[] = [
+  {
+    step: 1,
+    title: "Employee Reports Issue/Request",
+    shortLabel: "Reported",
+    description: "Employee identifies an IT issue or service request and initiates submission.",
+  },
+  {
+    step: 2,
+    title: "Ticket Created & Categorized",
+    shortLabel: "Created & Categorized",
+    description: "Ticket is logged in Caytori with appropriate category and initial description.",
+  },
+  {
+    step: 3,
+    title: "IT Help Desk Reviews & Prioritizes",
+    shortLabel: "Help Desk Review",
+    description: "IT Help Desk Lead reviews details and assigns appropriate priority level.",
+  },
+  {
+    step: 4,
+    title: "Assigned to IT Team / Technician",
+    shortLabel: "Technician Assigned",
+    description: "Ticket is dispatched to a dedicated IT Technician.",
+  },
+  {
+    step: 5,
+    title: "Technician Investigates & Communicates",
+    shortLabel: "Investigation & Comm",
+    description: "Technician actively troubleshoots and communicates with employee.",
+  },
+  {
+    step: 6,
+    title: "Issue Resolved or Escalated",
+    shortLabel: "Resolved / Escalated",
+    description: "Technician resolves the issue or escalates to senior tech/specialist if needed.",
+  },
+  {
+    step: 7,
+    title: "Employee Confirms Resolution",
+    shortLabel: "Employee Confirms",
+    description: "Employee verifies fix or reopens if problem persists.",
+  },
+  {
+    step: 8,
+    title: "Ticket Closed",
+    shortLabel: "Closed",
+    description: "Ticket lifecycle is completed and locked.",
+  },
+  {
+    step: 9,
+    title: "Recorded for Reporting & Analysis",
+    shortLabel: "Recorded & Analyzed",
+    description: "Ticket data feeds into IT performance metrics and analytics.",
   },
 ]
 
@@ -217,7 +267,7 @@ function mk(
       {
         id: id + "c1",
         author: reporter,
-        role: "employee",
+        role: "normal_employee",
         text: "This is blocking my work — happy to help troubleshoot.",
         at: createdAt,
       },
@@ -226,7 +276,7 @@ function mk(
             {
               id: id + "c2",
               author: assignee,
-              role: "it_staff" as Role,
+              role: "it_employee" as Role,
               text: "Taking a look now. I'll follow up shortly.",
               at: createdAt,
             },
@@ -460,7 +510,7 @@ export function ticketsFor(role: Role, tickets = TICKETS): Ticket[] {
     return tickets
   if (role === "it_employee")
     return tickets.filter((t) => t.assignee === me.name)
-  // Non-IT roles (normal_head, normal_employee) only see their own submitted tickets
+  // Employee sees only their own submitted tickets
   return tickets.filter((t) => t.reporter === me.name)
 }
 
@@ -470,14 +520,29 @@ export function avgResolution(tickets: Ticket[]): number {
   return done.reduce((s, t) => s + (t.resolutionHours ?? 0), 0) / done.length
 }
 
+export function getWorkflowStep(ticket: Ticket): number {
+  if (ticket.status === "CLOSED") return 8 // Step 8 (and recorded in Step 9)
+  if (ticket.status === "RESOLVED") return 6 // Step 6 (Heading to Step 7 confirmation)
+  if (ticket.status === "IN_PROGRESS") {
+    const hasEscalated = ticket.activity.some((a) => a.action.toLowerCase().includes("escalat"))
+    if (hasEscalated) return 6
+    const hasComments = ticket.comments.some((c) => c.role === "it_employee")
+    if (hasComments) return 5
+    return 4 // Assigned to technician
+  }
+  const reviewedByHelpDesk = ticket.activity.some((a) => a.action.toLowerCase().includes("priorit") || a.action.toLowerCase().includes("review"))
+  if (reviewedByHelpDesk) return 3
+  return 2 // Created & categorized
+}
+
 export const FAQS: { q: string; a: string }[] = [
   {
     q: "How do employees join a company?",
     a: "Employees never self-select a company. A Company Admin sends a secure email invitation; the employee sets a password and is automatically linked to the correct company and department.",
   },
   {
-    q: "What does the ticket lifecycle look like?",
-    a: "Every ticket flows through four clear stages: Open → In Progress → Resolved → Closed. IT Staff mark a ticket Resolved, and the employee confirms the fix to Close it. If it isn't fixed, it returns to In Progress.",
+    q: "What is the 9-Step IT Ticketing Business Process?",
+    a: "1) Employee reports issue → 2) Ticket created & categorized → 3) Help Desk reviews & prioritizes → 4) Assigned to IT Technician → 5) Technician investigates & communicates → 6) Issue resolved or escalated → 7) Employee confirms resolution → 8) Ticket closed → 9) Recorded for IT performance analysis.",
   },
   {
     q: "Is my company's data isolated from others?",
@@ -485,14 +550,14 @@ export const FAQS: { q: string; a: string }[] = [
   },
   {
     q: "Who can see and assign tickets?",
-    a: "Employees see only their own tickets. IT Staff work on tickets assigned to them. IT Admins view all company tickets and handle assignment and reassignment.",
+    a: "Employees see only their own tickets. IT Technicians work on tickets assigned to them. IT Help Desk Leads view all company tickets, handle prioritization, and dispatch assignments.",
   },
   {
     q: "What analytics and metrics are available?",
-    a: "Caytori provides real-time visibility into ticket volumes, status breakdowns, category distributions, and average resolution times across departments.",
+    a: "Caytori provides real-time visibility into ticket volumes, status breakdowns, category distributions, IT technician workload, and resolution times for performance analysis.",
   },
   {
     q: "Can a company run with just one IT person?",
-    a: "Absolutely. Caytori doesn't force a fixed IT structure. A company can operate with a single IT Staff member or scale up to a full IT department.",
+    a: "Absolutely. Caytori doesn't force a fixed IT structure. A company can operate with a single IT technician or scale up to a full IT department with Help Desk leads and specialists.",
   },
 ]

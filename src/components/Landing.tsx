@@ -18,7 +18,7 @@ import {
 } from "lucide-react"
 import type { LucideIcon } from "lucide-react"
 import { Button, Card, Avatar, Logo } from "./primitives"
-import { FAQS, type Role } from "../data"
+import { FAQS, IT_WORKFLOW_STEPS, type Role } from "../data"
 
 export const DEMO_KEY = "ishieSoGwapa"
 
@@ -38,26 +38,20 @@ const DEMO_ROLES: { id: Role; label: string; scope: string; icon: LucideIcon }[]
     },
     {
       id: "it_head",
-      label: "DEPT IT (Dept Head)",
-      scope: "Head of IT",
+      label: "IT Help Desk Lead",
+      scope: "Reviews & assigns queue",
       icon: Server,
     },
     {
-      id: "normal_head",
-      label: "NORMAL DEPT (Dept Head)",
-      scope: "Finance Head",
-      icon: Users,
-    },
-    {
       id: "it_employee",
-      label: "IT Employee",
-      scope: "IT Staff",
+      label: "IT Technician",
+      scope: "Investigates & resolves",
       icon: Wrench,
     },
     {
       id: "normal_employee",
-      label: "Normal Employee",
-      scope: "Finance Employee",
+      label: "Employee",
+      scope: "Reports & confirms fix",
       icon: User,
     },
   ]
@@ -471,7 +465,7 @@ export default function Landing({
         </div>
       </section>
 
-      {/* Lifecycle */}
+      {/* IT Support Workflow Section */}
       <section className="py-16">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -480,34 +474,70 @@ export default function Landing({
           transition={{ duration: 0.5 }}
           className="text-center"
         >
+          <div className="inline-flex items-center gap-2 rounded-full px-3.5 py-1 text-xs font-600 neu-inset text-primary mb-3">
+            <Workflow size={14} /> End-to-End IT Support Process
+          </div>
           <h2 className="font-display text-3xl font-700 tracking-tight sm:text-4xl">
-            A ticket's journey
+            How IT Support Works in Caytori
           </h2>
           <p className="mx-auto mt-3 max-w-md text-muted-foreground">
-            Four clear stages keep everyone aligned.
+            A seamless, transparent workflow designed for employees and IT teams.
           </p>
         </motion.div>
+
         <div className="mt-12 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {lifecycle.map((s, i) => (
+          {[
+            {
+              phase: "01",
+              title: "Report & Categorize",
+              sub: "Steps 1–2",
+              desc: "Employee submits an issue or request. The ticket is immediately categorized and logged in Caytori.",
+            },
+            {
+              phase: "02",
+              title: "Review & Dispatch",
+              sub: "Steps 3–4",
+              desc: "IT Help Desk reviews request details, sets priority, and dispatches the ticket to a technician.",
+            },
+            {
+              phase: "03",
+              title: "Investigate & Resolve",
+              sub: "Steps 5–6",
+              desc: "Technician troubleshoots, communicates with employee, and resolves the issue (or escalates if needed).",
+            },
+            {
+              phase: "04",
+              title: "Confirm & Analyze",
+              sub: "Steps 7–9",
+              desc: "Employee verifies resolution to close the ticket. Performance data is automatically recorded for reporting.",
+            },
+          ].map((p, i) => (
             <motion.div
-              key={s.step}
+              key={p.phase}
               initial={{ opacity: 0, y: 24 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ amount: 0.2 }}
               transition={{ duration: 0.4, delay: i * 0.08 }}
             >
-              <Card className="relative h-full p-6">
-                <span
-                  className="font-mono text-4xl font-600"
-                  style={{
-                    color:
-                      "color-mix(in srgb, var(--primary) 35%, transparent)",
-                  }}
-                >
-                  0{i + 1}
-                </span>
-                <h3 className="mt-3 font-display text-lg font-600">{s.step}</h3>
-                <p className="mt-1 text-sm text-muted-foreground">{s.desc}</p>
+              <Card className="relative h-full p-6 flex flex-col justify-between neu-hover">
+                <div>
+                  <div className="flex items-center justify-between">
+                    <span
+                      className="font-mono text-3xl font-800"
+                      style={{
+                        color:
+                          "color-mix(in srgb, var(--primary) 40%, transparent)",
+                      }}
+                    >
+                      {p.phase}
+                    </span>
+                    <span className="text-[11px] font-mono font-600 text-muted-foreground neu-inset px-2.5 py-0.5 rounded-full">
+                      {p.sub}
+                    </span>
+                  </div>
+                  <h3 className="mt-4 font-display text-base font-700">{p.title}</h3>
+                  <p className="mt-2 text-xs leading-relaxed text-muted-foreground">{p.desc}</p>
+                </div>
               </Card>
             </motion.div>
           ))}
