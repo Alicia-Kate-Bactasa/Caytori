@@ -35,6 +35,7 @@ Centralized dashboard tracking open ticket volume, category distribution, depart
 
 ### Modern UI & Experience
 Neumorphic design system built with Tailwind CSS, featuring full dark and light mode support and responsive layouts.
+
 ---
 
 ## Ticket Business Rules
