@@ -3,7 +3,7 @@ import { AnimatePresence, motion } from "motion/react"
 import Landing from "./components/Landing"
 import Login from "./components/Login"
 import AppShell from "./components/AppShell"
-import { TICKETS, type Role, type Ticket } from "./data"
+import { TICKETS, CATEGORIES, type Category, type Role, type Ticket } from "./data"
 
 type View = "landing" | "login" | "app"
 
@@ -19,6 +19,8 @@ export default function App() {
   const [demoMode, setDemoMode] = useState(false)
   const [tickets, setTickets] = useState<Ticket[]>(TICKETS)
   const [allowSelfReg, setAllowSelfReg] = useState(true)
+  const [allowReopen, setAllowReopen] = useState(true)
+  const [categories, setCategories] = useState<Category[]>([...CATEGORIES])
 
   useEffect(() => {
     document.documentElement.classList.toggle("dark", theme === "dark")
@@ -84,6 +86,10 @@ export default function App() {
               setTickets={setTickets}
               allowSelfReg={allowSelfReg}
               onToggleSelfReg={setAllowSelfReg}
+              allowReopen={allowReopen}
+              onToggleReopen={setAllowReopen}
+              categories={categories}
+              onCategoriesChange={setCategories}
               onSignOut={() => setView("landing")}
               onSwitchRole={setRole}
               demoMode={demoMode}

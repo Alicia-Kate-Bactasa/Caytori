@@ -1,26 +1,35 @@
 import { useState } from "react"
 import { motion } from "motion/react"
-import { Plus, X, ShieldCheck, CheckCircle2, Info } from "lucide-react"
+import { Plus, X, ShieldCheck, CheckCircle2, Info, ArrowRight } from "lucide-react"
 import { Button, Card, Field, Section, SettingRow, Toggle, Toast } from "./primitives"
-import { CATEGORIES, IT_HIERARCHY_TIERS, type Role } from "../data"
+import { CATEGORIES as FALLBACK_CATEGORIES, type Category, type Role } from "../data"
 
 export default function Settings({
   role,
   allowSelfReg = true,
   onToggleSelfReg,
+  allowReopen = true,
+  onToggleReopen,
+  categories,
+  onCategoriesChange,
+  onNavigate,
 }: {
   role: Role
   allowSelfReg?: boolean
   onToggleSelfReg?: (val: boolean) => void
+  allowReopen?: boolean
+  onToggleReopen?: (val: boolean) => void
+  categories?: Category[]
+  onCategoriesChange?: (cats: Category[]) => void
+  onNavigate?: (key: string) => void
 }) {
   const isPlatform = role === "platform_admin"
   const [toast, setToast] = useState("")
-  const [cats, setCats] = useState<string[]>([...CATEGORIES])
+  const cats = (categories ?? FALLBACK_CATEGORIES) as string[]
   const [newCat, setNewCat] = useState("")
 
   // toggles
   const [enforce2fa, setEnforce2fa] = useState(true)
-  const [allowReopen, setAllowReopen] = useState(true)
   const [autoClose, setAutoClose] = useState(true)
   const [emailNotif, setEmailNotif] = useState(true)
   const [digest, setDigest] = useState(false)
@@ -31,9 +40,12 @@ export default function Settings({
   }
 
   function addCat() {
-    const c = newCat.trim()
-    if (c && !cats.includes(c)) setCats([...cats, c])
+    const c = newCat.trim() as Category
+    if (c && !cats.includes(c)) onCategoriesChange?.([...cats, c] as Category[])
     setNewCat("")
+  }
+  function removeCat(c: string) {
+    onCategoriesChange?.(cats.filter((x) => x !== c) as Category[])
   }
 
   return (
@@ -152,7 +164,7 @@ export default function Settings({
                     >
                       {c}
                       <button
-                        onClick={() => setCats(cats.filter((x) => x !== c))}
+                        onClick={() => removeCat(c)}
                         aria-label={`Remove ${c}`}
                         className="grid h-4 w-4 place-items-center rounded-full text-muted-foreground hover:text-foreground"
                       >
@@ -180,43 +192,6 @@ export default function Settings({
               </Section>
 
               <Section
-                title="IT Support Escalation Hierarchy Matrix"
-                description="Universal IT Support Escalation levels pre-configured for your organization."
-              >
-                <div className="space-y-3">
-                  {IT_HIERARCHY_TIERS.map((tier) => (
-                    <div
-                      key={tier.id}
-                      className="neu-flat rounded-2xl p-4 flex flex-wrap items-center justify-between gap-3"
-                    >
-                      <div className="min-w-0">
-                        <div className="flex items-center gap-2">
-                          <span
-                            className="px-2 py-0.5 rounded-full font-mono text-[10px] font-700 uppercase"
-                            style={{
-                              background: `color-mix(in srgb, ${tier.token} 15%, transparent)`,
-                              color: tier.token,
-                            }}
-                          >
-                            {tier.label}
-                          </span>
-                          <span className="font-display text-sm font-600 text-foreground">
-                            {tier.title.split(" — ")[1] ?? tier.title}
-                          </span>
-                        </div>
-                        <p className="mt-1 text-xs text-muted-foreground">
-                          {tier.description}
-                        </p>
-                      </div>
-                      <span className="neu-inset rounded-full px-3 py-1 text-[11px] font-mono font-600 text-muted-foreground">
-                        Level {tier.level} Target
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </Section>
-
-              <Section
                 title="Ticket rules"
                 description="Defaults and behavior for the ticket lifecycle."
               >
@@ -239,7 +214,7 @@ export default function Settings({
                   label="Allow employees to reopen"
                   hint="Reopen a resolved ticket if it isn't actually fixed."
                 >
-                  <Toggle on={allowReopen} onChange={setAllowReopen} />
+                  <Toggle on={allowReopen} onChange={(v) => onToggleReopen?.(v)} />
                 </SettingRow>
                 <SettingRow
                   label="Auto-close resolved tickets"
@@ -247,6 +222,23 @@ export default function Settings({
                 >
                   <Toggle on={autoClose} onChange={setAutoClose} />
                 </SettingRow>
+              </Section>
+
+              <Section
+                title="IT Support Escalation"
+                description="Levels L1–L4 and SLA are managed in one place to avoid drift between pages."
+              >
+                <div className="neu-flat rounded-2xl p-4 flex items-center justify-between gap-3">
+                  <div>
+                    <div className="font-display text-sm font-600">Roles & Hierarchy — single source of truth</div>
+                    <p className="mt-1 text-xs text-muted-foreground">Edit levels, SLA minutes, and members under Roles & Hierarchy. This page only shows the link to prevent duplicate edits.</p>
+                  </div>
+                  {onNavigate && (
+                    <Button size="sm" variant="surface" onClick={() => onNavigate("hierarchy")}>
+                      Open Hierarchy <ArrowRight size={14} />
+                    </Button>
+                  )}
+                </div>
               </Section>
             </>
           )}

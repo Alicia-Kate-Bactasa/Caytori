@@ -1,0 +1,10 @@
+name: Caytori Globals
+values:
+  - key: baseUrl
+    value: http://localhost:8443/api
+    enabled: true
+    type: text
+  - key: companyId
+    value: abc-corp
+    enabled: true
+    type: text

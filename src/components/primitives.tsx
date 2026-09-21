@@ -58,7 +58,7 @@ export function Modal({
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          className="fixed inset-0 z-50 grid place-items-center overflow-y-auto p-4"
+          className="fixed inset-0 z-50 grid place-items-center overflow-y-auto overscroll-contain p-4"
           style={{
             background:
               "color-mix(in srgb, var(--foreground) 16%, transparent)",
@@ -71,11 +71,11 @@ export function Modal({
             exit={{ scale: 0.95, opacity: 0 }}
             transition={{ type: "spring", stiffness: 320, damping: 28 }}
             onClick={(e) => e.stopPropagation()}
-            className={`w-full ${width} my-auto`}
+            className={`w-full ${width} my-auto max-h-[92vh] flex flex-col`}
           >
-            <div className="rounded-[var(--radius)] neu p-7">
-              <div className="flex items-start justify-between gap-4">
-                <div>
+            <div className="rounded-[var(--radius)] neu p-7 flex max-h-[92vh] flex-col overflow-hidden">
+              <div className="flex shrink-0 items-start justify-between gap-4">
+                <div className="min-w-0">
                   <h2 className="font-display text-xl font-700">{title}</h2>
                   {subtitle && (
                     <p className="mt-1 text-sm text-muted-foreground">
@@ -91,9 +91,13 @@ export function Modal({
                   <X size={16} />
                 </button>
               </div>
-              <div className="mt-6">{children}</div>
+              <div className="mt-6 flex-1 overflow-y-auto overscroll-contain pr-1 -mr-1 [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent]">
+                {children}
+              </div>
               {footer && (
-                <div className="mt-6 flex justify-end gap-2">{footer}</div>
+                <div className="mt-6 flex shrink-0 justify-end gap-2 border-t border-[var(--border)] pt-4">
+                  {footer}
+                </div>
               )}
             </div>
           </motion.div>

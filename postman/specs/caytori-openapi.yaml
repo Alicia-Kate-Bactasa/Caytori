@@ -1,0 +1,86 @@
+openapi: 3.0.3
+info:
+  title: Caytori API
+  description: Multi-tenant IT Ticketing — isolate by company_id, RBAC 5 roles, lifecycle OPEN→IN_PROGRESS→RESOLVED→CLOSED
+  version: 1.0.0
+servers:
+  - url: http://localhost:8443/api
+    description: Local (Vite preview)
+  - url: https://api.caytori.com/api
+    description: Production
+paths:
+  /auth/login:
+    post:
+      summary: Login (returns token + user with role and company_id)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email: { type: string, example: priya@abccorp.com }
+                password: { type: string }
+      responses:
+        '200': { description: Token + user }
+  /auth/register-company:
+    post:
+      summary: Self-registration (gated by platform allowSelfReg)
+  /companies:
+    get:
+      summary: List companies (platform_admin)
+  /companies/{id}:
+    get: { summary: Get company }
+    put: { summary: Update company (company_admin) }
+  /companies/{id}/status:
+    patch: { summary: Suspend/Activate (platform_admin) }
+  /departments:
+    get: { summary: List by company_id }
+    post: { summary: Create department (company_admin) }
+  /departments/{id}:
+    put: { summary: Update head }
+  /departments/{id}/status:
+    patch: { summary: Deactivate }
+  /users:
+    get: { summary: List users filtered by company_id/role }
+  /users/invite:
+    post: { summary: Invite employee or IT staff (creates token, sends email) }
+  /users/accept-invite:
+    post: { summary: Set password, locks company_id (no picker) }
+  /users/{id}/status:
+    patch: { summary: Deactivate/Reactivate (history retained) }
+  /tickets:
+    get: { summary: List scoped (employee own, it_employee assigned, lead/company_admin all) }
+    post: { summary: Create ticket (employee) }
+  /tickets/{id}:
+    get: { summary: Get with comments+activity }
+  /tickets/{id}/assign:
+    patch: { summary: Assign/Review & Reassign (it_head or company_admin fallback) }
+  /tickets/{id}/status:
+    patch: { summary: Status transition per role (resolve, close, reopen gated by allowReopen) }
+  /tickets/{id}/escalate:
+    post: { summary: Escalate monotonically L1→L2→L3→LEAD with handover comment }
+  /tickets/{id}/comments:
+    get: { summary: List comments }
+    post: { summary: Add comment }
+  /tickets/{id}/activity:
+    get: { summary: Activity history }
+  /companies/{id}/settings:
+    get: { summary: Company settings }
+    put: { summary: Update categories, allowReopen, etc. }
+  /platform/settings:
+    get: { summary: Platform settings (platform_admin) }
+    patch: { summary: Update allowSelfReg }
+  /hierarchy/tiers:
+    get: { summary: List L1–LEAD tiers }
+  /hierarchy/tiers/{tier}:
+    put: { summary: Update SLA + members }
+  /analytics/tickets:
+    get: { summary: Company scoped stats (category/status/priority/dept, avg) }
+  /analytics/platform:
+    get: { summary: Platform aggregate only (platform_admin) }
+components:
+  securitySchemes:
+    bearerAuth: { type: http, scheme: bearer }
+security: [{ bearerAuth: [] }]

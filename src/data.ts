@@ -23,27 +23,27 @@ export const ROLES: { id: Role; label: string; blurb: string }[] = [
   {
     id: "platform_admin",
     label: "Caytori Admin",
-    blurb: "Manages Caytori platform & tenant companies",
+    blurb: "Platform operator · tenant isolation & self-reg policy (outside company data)",
   },
   {
     id: "company_admin",
-    label: "Head of IT / Company Admin",
-    blurb: "Runs company organization, departments & IT hierarchy",
+    label: "Company Admin",
+    blurb: "Company owner · org, departments, employees, IT roster & analytics (audit, not daily dispatch)",
   },
   {
     id: "it_head",
-    label: "IT Team Lead",
-    blurb: "Reviews, prioritizes & assigns tickets to IT technicians",
+    label: "IT Lead",
+    blurb: "Owns ticket queue, prioritization, assignment & SLA",
   },
   {
     id: "it_employee",
     label: "IT Technician",
-    blurb: "Investigates, communicates & resolves assigned IT issues",
+    blurb: "Works assigned tickets · investigates, communicates & resolves",
   },
   {
     id: "normal_employee",
     label: "Employee",
-    blurb: "Reports IT issues/requests & confirms resolutions",
+    blurb: "Reports issues & confirms fix before close",
   },
 ]
 
@@ -557,6 +557,28 @@ export const priorityMeta: Record<Priority, { token: string }> = {
   Medium: { token: "var(--primary)" },
   High: { token: "var(--warning)" },
   Critical: { token: "var(--danger)" },
+}
+
+// ---------- SLA & overdue (senior-tester addition) ----------
+export const SLA_HOURS: Record<Priority, number> = {
+  Low: 72,
+  Medium: 48,
+  High: 24,
+  Critical: 8,
+}
+
+export function isOverdue(ticket: Ticket, nowMs = Date.now()): boolean {
+  if (ticket.status === "CLOSED" || ticket.status === "RESOLVED") return false
+  const ageHours = (nowMs - new Date(ticket.createdAt).getTime()) / 36e5
+  return ageHours > SLA_HOURS[ticket.priority]
+}
+
+export function nextTicketId(existing: Ticket[]): string {
+  const max = existing.reduce((m, t) => {
+    const n = parseInt(t.id.replace("CT-", ""), 10)
+    return isNaN(n) ? m : Math.max(m, n)
+  }, 113)
+  return `CT-${String(max + 1).padStart(6, "0")}`
 }
 
 export function countBy<T extends string>(items: string[], keys: T[]) {

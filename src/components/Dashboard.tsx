@@ -18,6 +18,7 @@ import {
   CURRENT_USER,
   STAFF,
   avgResolution,
+  isOverdue,
 } from "../data"
 import { TicketModal } from "./Tickets"
 
@@ -166,7 +167,8 @@ export default function Dashboard({
         token: "var(--muted-foreground)",
       },
     ]
-  } else if (role === "it_head") {
+  } else if (role === "it_head" || role === "company_admin") {
+    const overdue = tickets.filter((t) => isOverdue(t)).length
     cards = [
       {
         icon: Inbox,
@@ -182,8 +184,8 @@ export default function Dashboard({
       },
       {
         icon: AlertTriangle,
-        label: "Critical open",
-        value: crit,
+        label: overdue > 0 ? "Overdue" : "Critical open",
+        value: overdue > 0 ? overdue : crit,
         token: "var(--danger)",
       },
       {

@@ -1,0 +1,316 @@
+{
+  "info": {
+    "name": "Caytori API",
+    "description": "Multi-tenant IT Ticketing — frontend roles mirror backend RBAC (platform_admin, company_admin, it_head, it_employee, normal_employee). Server enforces company_id isolation and lifecycle OPEN→IN_PROGRESS→RESOLVED→CLOSED. Use Local env by default.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "{{baseUrl}}" },
+    { "key": "companyId", "value": "{{companyId}}" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/auth/login", "host": ["{{baseUrl}}"], "path": ["auth", "login"] },
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"priya@abccorp.com\",\n  \"password\": \"••••••••\"\n}" }
+          },
+          "event": [{ "listen": "test", "script": { "exec": ["pm.test('200 has token and role', function(){ pm.response.to.have.status(200); var j=pm.response.json(); pm.expect(j.token).to.be.a('string'); pm.expect(j.user.role).to.be.oneOf(['platform_admin','company_admin','it_head','it_employee','normal_employee']); pm.environment.set('token', j.token); pm.environment.set('userId', j.user.id); pm.environment.set('companyId', j.user.company_id); })"], "type": "text/javascript" } }]
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{baseUrl}}/auth/logout", "host": ["{{baseUrl}}"], "path": ["auth", "logout"] }
+          }
+        },
+        {
+          "name": "Register Company (self-registration, gated by allowSelfReg)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/auth/register-company", "host": ["{{baseUrl}}"], "path": ["auth", "register-company"] },
+            "body": { "mode": "raw", "raw": "{\n  \"company_name\": \"ABC Corporation\",\n  \"admin_name\": \"Priya Nair\",\n  \"admin_email\": \"priya@abccorp.com\",\n  \"password\": \"Str0ngPass!\"\n}" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Platform — Companies (platform_admin only)",
+      "item": [
+        {
+          "name": "List Companies",
+          "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": { "raw": "{{baseUrl}}/companies", "host": ["{{baseUrl}}"], "path": ["companies"] } }
+        },
+        {
+          "name": "Get Company",
+          "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": { "raw": "{{baseUrl}}/companies/{{companyId}}", "host": ["{{baseUrl}}"], "path": ["companies", "{{companyId}}"] } }
+        },
+        {
+          "name": "Update Company",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/companies/{{companyId}}", "host": ["{{baseUrl}}"], "path": ["companies", "{{companyId}}"] },
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"ABC Corporation\",\n  \"contact_email\": \"it@abccorp.com\",\n  \"contact_number\": \"+63 917 555 0134\",\n  \"address\": \"128 Ayala Ave, Makati City\"\n}" }
+          }
+        },
+        {
+          "name": "Suspend / Activate Company",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/companies/{{companyId}}/status", "host": ["{{baseUrl}}"], "path": ["companies", "{{companyId}}", "status"] },
+            "body": { "mode": "raw", "raw": "{\n  \"status\": \"Suspended\"\n}" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Company — Departments (company_admin)",
+      "item": [
+        {
+          "name": "List Departments",
+          "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": { "raw": "{{baseUrl}}/departments?company_id={{companyId}}", "host": ["{{baseUrl}}"], "path": ["departments"], "query": [{ "key": "company_id", "value": "{{companyId}}" }] } }
+        },
+        {
+          "name": "Create Department",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/departments", "host": ["{{baseUrl}}"], "path": ["departments"] },
+            "body": { "mode": "raw", "raw": "{\n  \"company_id\": \"{{companyId}}\",\n  \"name\": \"Customer Success\",\n  \"head_user_id\": null\n}" }
+          }
+        },
+        {
+          "name": "Update Department Head",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/departments/:id", "host": ["{{baseUrl}}"], "path": ["departments", ":id"] },
+            "body": { "mode": "raw", "raw": "{\n  \"head_user_id\": \"u9\"\n}" }
+          }
+        },
+        {
+          "name": "Deactivate Department",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/departments/:id/status", "host": ["{{baseUrl}}"], "path": ["departments", ":id", "status"] },
+            "body": { "mode": "raw", "raw": "{\n  \"status\": \"Inactive\"\n}" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Company — Users & Invitations (company_admin)",
+      "item": [
+        {
+          "name": "List Users (filter by role/department)",
+          "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": { "raw": "{{baseUrl}}/users?company_id={{companyId}}&role=normal_employee", "host": ["{{baseUrl}}"], "path": ["users"], "query": [{ "key": "company_id", "value": "{{companyId}}" }, { "key": "role", "value": "normal_employee" }] } }
+        },
+        {
+          "name": "Invite Employee",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/users/invite", "host": ["{{baseUrl}}"], "path": ["users", "invite"] },
+            "body": { "mode": "raw", "raw": "{\n  \"company_id\": \"{{companyId}}\",\n  \"email\": \"carlos@abccorp.com\",\n  \"role\": \"normal_employee\",\n  \"department\": \"Finance\",\n  \"full_name\": \"Carlos Rivera\"\n}" }
+          }
+        },
+        {
+          "name": "Invite IT Staff (tier-aware)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/users/invite", "host": ["{{baseUrl}}"], "path": ["users", "invite"] },
+            "body": { "mode": "raw", "raw": "{\n  \"company_id\": \"{{companyId}}\",\n  \"email\": \"leo@abccorp.com\",\n  \"role\": \"it_employee\",\n  \"tier\": \"L3\",\n  \"specialty\": \"Cybersecurity & Database\"\n}" }
+          }
+        },
+        {
+          "name": "Accept Invitation (sets password, no company picker)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/users/accept-invite", "host": ["{{baseUrl}}"], "path": ["users", "accept-invite"] },
+            "body": { "mode": "raw", "raw": "{\n  \"token\": \"inv-{{companyId}}-xxxx\",\n  \"password\": \"Str0ngPass!\"\n}" }
+          }
+        },
+        {
+          "name": "Deactivate / Reactivate User (history retained)",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/users/:id/status", "host": ["{{baseUrl}}"], "path": ["users", ":id", "status"] },
+            "body": { "mode": "raw", "raw": "{\n  \"status\": \"Inactive\"\n}" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Tickets — Lifecycle (RBAC enforced)",
+      "item": [
+        {
+          "name": "List Tickets (scoped: employee sees own, it_employee sees assigned, lead/company_admin sees all)",
+          "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": { "raw": "{{baseUrl}}/tickets?company_id={{companyId}}&status=OPEN&priority=High", "host": ["{{baseUrl}}"], "path": ["tickets"], "query": [{ "key": "company_id", "value": "{{companyId}}" }, { "key": "status", "value": "OPEN" }, { "key": "priority", "value": "High" }] } }
+        },
+        {
+          "name": "Create Ticket (employee)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/tickets", "host": ["{{baseUrl}}"], "path": ["tickets"] },
+            "body": { "mode": "raw", "raw": "{\n  \"company_id\": \"{{companyId}}\",\n  \"subject\": \"Unable to access company network\",\n  \"description\": \"Cannot connect since 9:00 AM. Restart did not help.\",\n  \"department\": \"Finance\",\n  \"category\": \"Network\",\n  \"priority\": \"High\"\n}" }
+          }
+        },
+        {
+          "name": "Get Ticket + Comments + Activity",
+          "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": { "raw": "{{baseUrl}}/tickets/CT-000124", "host": ["{{baseUrl}}"], "path": ["tickets", "CT-000124"] } }
+        },
+        {
+          "name": "Assign / Review (it_head or company_admin fallback) — OPEN→IN_PROGRESS",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/tickets/CT-000124/assign", "host": ["{{baseUrl}}"], "path": ["tickets", "CT-000124", "assign"] },
+            "body": { "mode": "raw", "raw": "{\n  \"assignee\": \"Mark Villanueva\",\n  \"status\": \"IN_PROGRESS\"\n}" }
+          }
+        },
+        {
+          "name": "Reassign (it_head)",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/tickets/CT-000124/assign", "host": ["{{baseUrl}}"], "path": ["tickets", "CT-000124", "assign"] },
+            "body": { "mode": "raw", "raw": "{\n  \"assignee\": \"Anna Cruz\"\n}" }
+          }
+        },
+        {
+          "name": "Start Work (it_employee claims OPEN)",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/tickets/CT-000123/status", "host": ["{{baseUrl}}"], "path": ["tickets", "CT-000123", "status"] },
+            "body": { "mode": "raw", "raw": "{\n  \"status\": \"IN_PROGRESS\"\n}" }
+          }
+        },
+        {
+          "name": "Mark Resolved (it_employee, IN_PROGRESS→RESOLVED)",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/tickets/CT-000124/status", "host": ["{{baseUrl}}"], "path": ["tickets", "CT-000124", "status"] },
+            "body": { "mode": "raw", "raw": "{\n  \"status\": \"RESOLVED\",\n  \"resolutionHours\": 2.0\n}" }
+          }
+        },
+        {
+          "name": "Escalate (it_employee, monotonically up L1→L2→L3→LEAD, creates handover comment)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/tickets/CT-000124/escalate", "host": ["{{baseUrl}}"], "path": ["tickets", "CT-000124", "escalate"] },
+            "body": { "mode": "raw", "raw": "{\n  \"targetTier\": \"L2\",\n  \"assignee\": \"Anna Cruz\",\n  \"priority\": \"High\",\n  \"reason\": \"Network diagnostics requires L2 — switch port suspected faulty.\"\n}" }
+          }
+        },
+        {
+          "name": "Confirm Fix (employee, RESOLVED→CLOSED)",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/tickets/CT-000119/status", "host": ["{{baseUrl}}"], "path": ["tickets", "CT-000119", "status"] },
+            "body": { "mode": "raw", "raw": "{\n  \"status\": \"CLOSED\"\n}" }
+          }
+        },
+        {
+          "name": "Reopen — Not Fixed (employee, gated by allowReopen)",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/tickets/CT-000119/status", "host": ["{{baseUrl}}"], "path": ["tickets", "CT-000119", "status"] },
+            "body": { "mode": "raw", "raw": "{\n  \"status\": \"IN_PROGRESS\"\n}" }
+          }
+        },
+        {
+          "name": "Add Comment (all except CLOSED immutable for comments via UI, but API appends)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/tickets/CT-000124/comments", "host": ["{{baseUrl}}"], "path": ["tickets", "CT-000124", "comments"] },
+            "body": { "mode": "raw", "raw": "{\n  \"text\": \"On it now — checking the switch port on your floor.\"\n}" }
+          }
+        },
+        {
+          "name": "List Comments",
+          "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": { "raw": "{{baseUrl}}/tickets/CT-000124/comments", "host": ["{{baseUrl}}"], "path": ["tickets", "CT-000124", "comments"] } }
+        },
+        {
+          "name": "List Activity History",
+          "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": { "raw": "{{baseUrl}}/tickets/CT-000124/activity", "host": ["{{baseUrl}}"], "path": ["tickets", "CT-000124", "activity"] } }
+        }
+      ]
+    },
+    {
+      "name": "Settings & Hierarchy",
+      "item": [
+        {
+          "name": "Get Company Settings (categories, ticket rules, security)",
+          "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": { "raw": "{{baseUrl}}/companies/{{companyId}}/settings", "host": ["{{baseUrl}}"], "path": ["companies", "{{companyId}}", "settings"] } }
+        },
+        {
+          "name": "Update Company Settings",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/companies/{{companyId}}/settings", "host": ["{{baseUrl}}"], "path": ["companies", "{{companyId}}", "settings"] },
+            "body": { "mode": "raw", "raw": "{\n  \"categories\": [\"Hardware\",\"Software\",\"Network\",\"Account & Access\",\"Email\",\"Printer\",\"Security\",\"Other\"],\n  \"defaultPriority\": \"Medium\",\n  \"allowReopen\": true,\n  \"autoCloseDays\": 7,\n  \"enforce2FA\": true,\n  \"sessionTimeout\": \"30 min\"\n}" }
+          }
+        },
+        {
+          "name": "Get Platform Settings (platform_admin)",
+          "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": { "raw": "{{baseUrl}}/platform/settings", "host": ["{{baseUrl}}"], "path": ["platform", "settings"] } }
+        },
+        {
+          "name": "Update Platform Settings allowSelfReg",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/platform/settings", "host": ["{{baseUrl}}"], "path": ["platform", "settings"] },
+            "body": { "mode": "raw", "raw": "{\n  \"allowSelfReg\": true,\n  \"defaultTrialDays\": 30\n}" }
+          }
+        },
+        {
+          "name": "Get IT Hierarchy Tiers L1–LEAD",
+          "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": { "raw": "{{baseUrl}}/hierarchy/tiers?company_id={{companyId}}", "host": ["{{baseUrl}}"], "path": ["hierarchy", "tiers"], "query": [{ "key": "company_id", "value": "{{companyId}}" }] } }
+        },
+        {
+          "name": "Update Tier SLA + Members",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "url": { "raw": "{{baseUrl}}/hierarchy/tiers/L2", "host": ["{{baseUrl}}"], "path": ["hierarchy", "tiers", "L2"] },
+            "body": { "mode": "raw", "raw": "{\n  \"slaMinutes\": 45,\n  \"assignedStaff\": [\"Anna Cruz\"]\n}" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Analytics & Reports",
+      "item": [
+        {
+          "name": "Company Reports (category/status/priority/dept + avg resolution)",
+          "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": { "raw": "{{baseUrl}}/analytics/tickets?company_id={{companyId}}", "host": ["{{baseUrl}}"], "path": ["analytics", "tickets"], "query": [{ "key": "company_id", "value": "{{companyId}}" }] } }
+        },
+        {
+          "name": "Platform Throughput & Lifecycle (platform_admin)",
+          "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": { "raw": "{{baseUrl}}/analytics/platform", "host": ["{{baseUrl}}"], "path": ["analytics", "platform"] } }
+        }
+      ]
+    }
+  ]
+}

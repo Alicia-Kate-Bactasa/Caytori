@@ -30,6 +30,11 @@ build/
 .env.test.local
 .env.production.local
 *.env.local
+*.pem
+*.key
+*.crt
+*.p12
+secrets/
 
 # IDEs & Editors
 .vscode/*
@@ -63,3 +68,15 @@ coverage/
 .temp/
 .tmp/
 tmp/
+.opencode/
+.cursor/
+
+# Figma Make sync artifacts (removed, keep ignored if regenerated)
+.figma/
+
+# Postman local runtime cache (keep specs/collections tracked, ignore local sync)
+.postman/cache/
+.postman/sync/
+
+# Local dev overrides
+.local/

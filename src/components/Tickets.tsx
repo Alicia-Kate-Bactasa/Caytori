@@ -18,18 +18,19 @@ import {
 } from "lucide-react"
 import { Modal, Button, Card, Avatar, StatusBadge, PriorityBadge, InlineError } from "./primitives"
 import {
-  CATEGORIES,
+  CATEGORIES as FALLBACK_CATEGORIES,
   PRIORITIES,
   STAFF,
   CURRENT_USER,
   IT_HIERARCHY_TIERS,
+  isOverdue,
+  nextTicketId,
   type Ticket,
   type Role,
   type Status,
   type Priority,
   type Category,
   type EscalationTier,
-  type Person,
 } from "../data"
 import { validateEscalationReason } from "../utils/validation"
 
@@ -51,21 +52,30 @@ const fmt = (iso: string) =>
 
 export default function Tickets({
   tickets,
+  allTickets,
   role,
   title,
+  allowReopen = true,
+  categories,
   onChange,
 }: {
   tickets: Ticket[]
+  allTickets?: Ticket[]
   role: Role
   title: string
+  allowReopen?: boolean
+  categories?: Category[]
   onChange: (t: Ticket[]) => void
 }) {
+  const CATEGORIES = (categories ?? FALLBACK_CATEGORIES) as Category[]
   const [selected, setSelected] = useState<string | null>(null)
   const [query, setQuery] = useState("")
   const [status, setStatus] = useState<Status | "ALL">("ALL")
   const [creating, setCreating] = useState(false)
   const [queueTab, setQueueTab] = useState<"all" | "unassigned">("all")
   const [escalating, setEscalating] = useState(false)
+  const [page, setPage] = useState(1)
+  const PAGE_SIZE = 6
 
   const isITManager =
     role === "it_head" || role === "company_admin" || role === "platform_admin"
@@ -88,6 +98,18 @@ export default function Tickets({
         return matchesQ && matchesS && matchesQueue
       }),
     [tickets, query, status, queueTab],
+  )
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / PAGE_SIZE))
+  useEffect(() => {
+    setPage((p) => Math.min(p, totalPages))
+  }, [filtered.length, totalPages])
+  useEffect(() => {
+    setPage(1)
+  }, [query, status, queueTab])
+  const paginated = useMemo(
+    () => filtered.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE),
+    [filtered, page],
   )
 
   const active = tickets.find((t) => t.id === selected) ?? null
@@ -255,7 +277,7 @@ export default function Tickets({
             No tickets match your filters.
           </Card>
         )}
-        {filtered.map((t, i) => (
+        {paginated.map((t, i) => (
           <motion.button
             key={t.id}
             initial={{ opacity: 0, y: 8 }}
@@ -276,6 +298,17 @@ export default function Tickets({
               </div>
               <PriorityBadge priority={t.priority} />
               <StatusBadge status={t.status} />
+              {isOverdue(t) && (
+                <span
+                  className="inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-700"
+                  style={{
+                    background: "color-mix(in srgb, var(--danger) 14%, transparent)",
+                    color: "var(--danger)",
+                  }}
+                >
+                  <AlertTriangle size={12} /> Overdue
+                </span>
+              )}
               <div className="hidden items-center gap-2 text-xs text-muted-foreground sm:flex">
                 <Clock size={13} /> {fmt(t.createdAt)}
               </div>
@@ -284,9 +317,36 @@ export default function Tickets({
         ))}
       </div>
 
+      {filtered.length > PAGE_SIZE && (
+        <div className="mt-6 flex items-center justify-between gap-3">
+          <span className="text-xs text-muted-foreground font-mono">
+            Page {page} of {totalPages} · {filtered.length} tickets
+          </span>
+          <div className="flex items-center gap-2">
+            <Button
+              size="sm"
+              variant="surface"
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              disabled={page === 1}
+            >
+              Previous
+            </Button>
+            <Button
+              size="sm"
+              variant="surface"
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              disabled={page === totalPages}
+            >
+              Next
+            </Button>
+          </div>
+        </div>
+      )}
+
       <TicketModal
         ticket={active}
         role={role}
+        allowReopen={allowReopen}
         onClose={() => setSelected(null)}
         onUpdate={update}
         onComment={addComment}
@@ -325,6 +385,8 @@ export default function Tickets({
           <CreateTicket
             reporter={me.name}
             department={me.department}
+            categories={CATEGORIES as Category[]}
+            existingTickets={allTickets ?? tickets}
             onClose={() => setCreating(false)}
             onCreate={(t) => {
               onChange([t, ...tickets])
@@ -430,17 +492,26 @@ export function EscalateModal({
             {IT_HIERARCHY_TIERS.map((t) => {
               const isCurrent = (ticket.escalationTier ?? "L1") === t.id
               const isSelected = selectedTier === t.id
+              const isDisabled = t.level <= currentTierLevel
               return (
                 <button
                   type="button"
                   key={t.id}
-                  onClick={() => setSelectedTier(t.id)}
-                  className={`rounded-xl p-2 text-xs transition-all duration-300 cursor-pointer ${
+                  disabled={isDisabled}
+                  onClick={() => !isDisabled && setSelectedTier(t.id)}
+                  title={isDisabled ? "Cannot escalate to same or lower level" : undefined}
+                  className={`rounded-xl p-2 text-xs transition-all duration-300 ${
+                    isDisabled
+                      ? "opacity-40 cursor-not-allowed neu-sm text-muted-foreground"
+                      : "cursor-pointer"
+                  } ${
                     isSelected
                       ? "neu-flat text-foreground font-700 ring-2 ring-primary"
                       : isCurrent
                       ? "neu-inset text-primary font-600"
-                      : "neu-sm text-muted-foreground"
+                      : !isDisabled
+                      ? "neu-sm text-muted-foreground"
+                      : ""
                   }`}
                 >
                   <div className="font-mono text-[10px] font-700">{t.label}</div>
@@ -539,6 +610,7 @@ export function EscalateModal({
 export function TicketModal({
   ticket,
   role,
+  allowReopen = true,
   onClose,
   onUpdate,
   onComment,
@@ -546,6 +618,7 @@ export function TicketModal({
 }: {
   ticket: Ticket | null
   role: Role
+  allowReopen?: boolean
   onClose: () => void
   onUpdate: (
     id: string,
@@ -568,6 +641,7 @@ export function TicketModal({
       <TicketDetail
         ticket={ticket}
         role={role}
+        allowReopen={allowReopen}
         onBack={onClose}
         onUpdate={onUpdate}
         onComment={onComment}
@@ -580,6 +654,7 @@ export function TicketModal({
 function TicketDetail({
   ticket,
   role,
+  allowReopen = true,
   onBack,
   onUpdate,
   onComment,
@@ -587,6 +662,7 @@ function TicketDetail({
 }: {
   ticket: Ticket
   role: Role
+  allowReopen?: boolean
   onBack: () => void
   onUpdate: (
     id: string,
@@ -604,6 +680,7 @@ function TicketDetail({
   const isITEmployee = role === "it_employee" || isITHead
   const isReporter = me.name === ticket.reporter || role === "normal_employee"
 
+  const canReopen = allowReopen
   const actions: React.ReactNode[] = []
   if (isITHead && ticket.status === "OPEN") {
     actions.push(
@@ -721,17 +798,21 @@ function TicketDetail({
       >
         <CheckCircle2 size={15} /> Confirm fix
       </Button>,
-      <Button
-        key="reopen"
-        size="sm"
-        variant="surface"
-        onClick={() =>
-          onUpdate(ticket.id, { status: "IN_PROGRESS" }, "reopened — issue persists")
-        }
-      >
-        <RotateCcw size={15} /> Not fixed
-      </Button>,
     )
+    if (canReopen) {
+      actions.push(
+        <Button
+          key="reopen"
+          size="sm"
+          variant="surface"
+          onClick={() =>
+            onUpdate(ticket.id, { status: "IN_PROGRESS" }, "reopened — issue persists")
+          }
+        >
+          <RotateCcw size={15} /> Not fixed
+        </Button>,
+      )
+    }
   }
 
   const [showAllActivity, setShowAllActivity] = useState(false)
@@ -784,6 +865,19 @@ function TicketDetail({
         <div className="neu-inset rounded-2xl p-4 text-sm leading-relaxed text-foreground">
           {ticket.description}
         </div>
+
+        {isOverdue(ticket) && (
+          <div className="neu-flat rounded-2xl p-3.5 flex items-center gap-3 border-l-4 border-[var(--danger)]">
+            <AlertTriangle size={18} className="text-danger shrink-0" />
+            <div>
+              <span className="text-xs font-700 text-foreground font-display">SLA Breach — Overdue</span>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Exceeded {ticket.priority} SLA ({ticket.priority === "Critical" ? "8h" : ticket.priority === "High" ? "24h" : ticket.priority === "Medium" ? "48h" : "72h"}). IT Lead should prioritize or escalate.
+              </p>
+            </div>
+            <span className="ml-auto neu-inset rounded-full px-2.5 py-1 text-[11px] font-700 text-danger shrink-0">Overdue</span>
+          </div>
+        )}
 
         {ticket.escalationTier && (
           <div className="neu-flat rounded-2xl p-3.5 flex items-start gap-3 border-l-4 border-[var(--warning)]">
@@ -945,17 +1039,22 @@ function TicketDetail({
 function CreateTicket({
   reporter,
   department,
+  categories,
+  existingTickets,
   onClose,
   onCreate,
 }: {
   reporter: string
   department: string
+  categories?: Category[]
+  existingTickets?: Ticket[]
   onClose: () => void
   onCreate: (t: Ticket) => void
 }) {
+  const cats = (categories ?? FALLBACK_CATEGORIES) as Category[]
   const [subject, setSubject] = useState("")
   const [description, setDescription] = useState("")
-  const [category, setCategory] = useState<Category>("Hardware")
+  const [category, setCategory] = useState<Category>(cats[0] ?? "Hardware")
   const [priority, setPriority] = useState<Priority>("Medium")
   const [error, setError] = useState("")
 
@@ -965,9 +1064,7 @@ function CreateTicket({
       return setError("Please add a clear subject (at least 5 characters).")
     if (description.trim().length < 10)
       return setError("Please describe the issue in a little more detail.")
-    const id =
-      "CT-" +
-      String(Math.floor(100000 + Math.random() * 899999)).padStart(6, "0")
+    const id = nextTicketId(existingTickets ?? [])
     onCreate({
       id,
       subject: subject.trim(),
@@ -998,7 +1095,7 @@ function CreateTicket({
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      className="fixed inset-0 z-50 grid place-items-center p-4"
+      className="fixed inset-0 z-50 grid place-items-center overflow-y-auto overscroll-contain p-4"
       style={{
         background: "color-mix(in srgb, var(--foreground) 35%, transparent)",
       }}
@@ -1010,9 +1107,9 @@ function CreateTicket({
         exit={{ scale: 0.95, opacity: 0 }}
         transition={{ type: "spring", stiffness: 320, damping: 28 }}
         onClick={(e) => e.stopPropagation()}
-        className="w-full max-w-lg"
+        className="w-full max-w-lg my-auto max-h-[92vh] flex flex-col"
       >
-        <Card className="p-7">
+        <Card className="p-7 max-h-[92vh] overflow-y-auto overscroll-contain [scrollbar-width:thin] [scrollbar-color:var(--border)_transparent]">
           <div className="flex items-center justify-between">
             <h2 className="font-display text-xl font-700">
               Report an IT issue

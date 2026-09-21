@@ -39,11 +39,12 @@ import {
   CURRENT_USER,
   ticketsFor,
   FAQS,
+  type Category,
   type Role,
   type Ticket,
 } from "../data"
 
-const NOTIFICATIONS = [
+const FALLBACK_NOTIFICATIONS = [
   {
     text: "CT-000120 (Critical) — Suspicious login alert was assigned to you.",
     time: "4 min ago",
@@ -87,9 +88,11 @@ const NAV: Record<Role, NavItem[]> = {
   ],
   company_admin: [
     { key: "dashboard", label: "Dashboard", icon: LayoutDashboard },
+    { key: "tickets", label: "All Tickets", icon: TicketIcon },
     { key: "departments", label: "Departments", icon: Network },
     { key: "it_team", label: "IT Team", icon: UserCog },
     { key: "hierarchy", label: "Roles & Hierarchy", icon: ShieldCheck },
+    { key: "reports", label: "Reports & Analytics", icon: BarChart3 },
     { key: "settings", label: "Company Settings", icon: SettingsIcon },
     { key: "help", label: "Help & FAQ", icon: HelpCircle },
   ],
@@ -121,6 +124,10 @@ export default function AppShell({
   setTickets,
   allowSelfReg = true,
   onToggleSelfReg,
+  allowReopen = true,
+  onToggleReopen,
+  categories,
+  onCategoriesChange,
   onSignOut,
   onSwitchRole,
   demoMode = false,
@@ -132,6 +139,10 @@ export default function AppShell({
   setTickets: (t: Ticket[]) => void
   allowSelfReg?: boolean
   onToggleSelfReg?: (val: boolean) => void
+  allowReopen?: boolean
+  onToggleReopen?: (val: boolean) => void
+  categories?: Category[]
+  onCategoriesChange?: (cats: Category[]) => void
   onSignOut: () => void
   onSwitchRole: (r: Role) => void
   demoMode?: boolean
@@ -144,6 +155,24 @@ export default function AppShell({
   const [drawer, setDrawer] = useState(false)
   const me = CURRENT_USER[role]
   const scoped = ticketsFor(role, tickets)
+  const notifications = (() => {
+    const recent = [...tickets]
+      .sort((a, b) => +new Date(b.updatedAt) - +new Date(a.updatedAt))
+      .slice(0, 5)
+      .map((t) => ({
+        text:
+          t.status === "OPEN" && !t.assignee
+            ? `New ticket ${t.id} — ${t.subject}`
+            : t.status === "RESOLVED"
+              ? `${t.id} marked as resolved by ${t.assignee ?? "IT Staff"}.`
+              : t.status === "CLOSED"
+                ? `${t.id} was confirmed and closed by the reporter.`
+                : `${t.assignee ? t.assignee + " is handling " : ""}${t.id} (${t.priority}) — ${t.subject}`,
+        time: new Date(t.updatedAt).toLocaleTimeString(undefined, { hour: "2-digit", minute: "2-digit" }),
+        unread: t.status !== "CLOSED",
+      }))
+    return recent.length ? recent : FALLBACK_NOTIFICATIONS
+  })()
 
   function render() {
     switch (page) {
@@ -156,12 +185,17 @@ export default function AppShell({
         return (
           <Tickets
             tickets={scoped}
+            allTickets={tickets}
             role={role}
+            allowReopen={allowReopen}
+            categories={categories}
             title={
               role === "it_head"
                 ? "Ticket Queue & Dispatch"
                 : role === "it_employee"
                 ? "My Assigned Tickets"
+                : role === "company_admin"
+                ? "All Tickets — Audit View"
                 : "My Tickets"
             }
             onChange={setTickets}
@@ -192,6 +226,11 @@ export default function AppShell({
             role={role}
             allowSelfReg={allowSelfReg}
             onToggleSelfReg={onToggleSelfReg}
+            allowReopen={allowReopen}
+            onToggleReopen={onToggleReopen}
+            categories={categories}
+            onCategoriesChange={onCategoriesChange}
+            onNavigate={go}
           />
         )
       case "profile":
@@ -379,7 +418,7 @@ export default function AppShell({
                           style={{ background: "var(--border)" }}
                         />
                         <div className="max-h-72 space-y-1 overflow-y-auto">
-                          {NOTIFICATIONS.map((nt, i) => (
+                          {notifications.map((nt, i) => (
                             <div
                               key={i}
                               className="flex gap-3 rounded-xl px-2 py-2.5 transition-colors hover:bg-[color-mix(in_srgb,var(--primary)_6%,transparent)]"
