@@ -52,8 +52,8 @@ export default function Login({
     if (mode === "signup" && password !== confirm)
       return setError("Passwords do not match.")
     setError("")
-    // Registering a company makes you its Company Admin; returning users resolve their own role server-side.
-    onLogin(mode === "signup" ? "company_admin" : "normal_employee")
+    // Registering a company makes you its IT Lead & Admin; returning users resolve their own role server-side.
+    onLogin(mode === "signup" ? "it_head" : "normal_employee")
   }
 
   const isUp = mode === "signup"

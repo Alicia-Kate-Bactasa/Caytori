@@ -167,7 +167,7 @@ export default function Dashboard({
         token: "var(--muted-foreground)",
       },
     ]
-  } else if (role === "it_head" || role === "company_admin") {
+  } else if (role === "it_head") {
     const overdue = tickets.filter((t) => isOverdue(t)).length
     cards = [
       {
@@ -255,7 +255,7 @@ export default function Dashboard({
   const avg = avgResolution(tickets)
 
   const isEmployeeView = role === "normal_employee"
-  const isITHead = role === "it_head" || role === "company_admin"
+  const isITHead = role === "it_head"
 
   return (
     <div className="space-y-6">

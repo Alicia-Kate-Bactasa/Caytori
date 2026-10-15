@@ -86,22 +86,14 @@ const NAV: Record<Role, NavItem[]> = {
     { key: "settings", label: "Caytori Settings", icon: SettingsIcon },
     { key: "help", label: "Help & FAQ", icon: HelpCircle },
   ],
-  company_admin: [
-    { key: "dashboard", label: "Dashboard", icon: LayoutDashboard },
-    { key: "tickets", label: "All Tickets", icon: TicketIcon },
-    { key: "departments", label: "Departments", icon: Network },
-    { key: "it_team", label: "IT Team", icon: UserCog },
-    { key: "hierarchy", label: "Roles & Hierarchy", icon: ShieldCheck },
-    { key: "reports", label: "Reports & Analytics", icon: BarChart3 },
-    { key: "settings", label: "Company Settings", icon: SettingsIcon },
-    { key: "help", label: "Help & FAQ", icon: HelpCircle },
-  ],
   it_head: [
     { key: "dashboard", label: "Dashboard", icon: LayoutDashboard },
     { key: "tickets", label: "Ticket Queue", icon: TicketIcon },
+    { key: "departments", label: "Departments", icon: Network },
     { key: "it_team", label: "IT Staff", icon: UserCog },
     { key: "hierarchy", label: "Roles & Hierarchy", icon: ShieldCheck },
     { key: "reports", label: "Reports & Analytics", icon: BarChart3 },
+    { key: "settings", label: "Company Settings", icon: SettingsIcon },
     { key: "help", label: "Help & FAQ", icon: HelpCircle },
   ],
   it_employee: [
@@ -194,8 +186,6 @@ export default function AppShell({
                 ? "Ticket Queue & Dispatch"
                 : role === "it_employee"
                 ? "My Assigned Tickets"
-                : role === "company_admin"
-                ? "All Tickets — Audit View"
                 : "My Tickets"
             }
             onChange={setTickets}
@@ -510,7 +500,7 @@ export default function AppShell({
                           <UserCircle size={16} /> Profile & account
                         </button>
                         {(role === "platform_admin" ||
-                          role === "company_admin") && (
+                          role === "it_head") && (
                           <button
                             onClick={() => {
                               go("settings")

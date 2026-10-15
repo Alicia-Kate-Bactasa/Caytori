@@ -31,15 +31,9 @@ const DEMO_ROLES: { id: Role; label: string; scope: string; icon: LucideIcon }[]
       icon: ShieldCheck,
     },
     {
-      id: "company_admin",
-      label: "Company Admin",
-      scope: "One company",
-      icon: Building2,
-    },
-    {
       id: "it_head",
       label: "IT Help Desk Lead",
-      scope: "Reviews & assigns queue",
+      scope: "Queue, staff, departments & settings",
       icon: Server,
     },
     {
