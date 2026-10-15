@@ -2,7 +2,6 @@
 
 export type Role =
   | "platform_admin"
-  | "company_admin"
   | "it_head"
   | "it_employee"
   | "normal_employee"
@@ -26,14 +25,9 @@ export const ROLES: { id: Role; label: string; blurb: string }[] = [
     blurb: "Platform operator · tenant isolation & self-reg policy (outside company data)",
   },
   {
-    id: "company_admin",
-    label: "Company Admin",
-    blurb: "Company owner · org, departments, employees, IT roster & analytics (audit, not daily dispatch)",
-  },
-  {
     id: "it_head",
     label: "IT Lead",
-    blurb: "Owns ticket queue, prioritization, assignment & SLA",
+    blurb: "Queue dispatch, IT staff, departments, hierarchy & company settings",
   },
   {
     id: "it_employee",
@@ -132,14 +126,6 @@ export const CURRENT_USER: Record<Role, Person> = {
     role: "platform_admin",
     department: "Caytori",
     email: "alex@caytori.com",
-  },
-  company_admin: {
-    id: "u1",
-    name: "Priya Nair",
-    role: "company_admin",
-    department: "Operations",
-    email: "priya@abccorp.com",
-    isHead: true,
   },
   it_head: {
     id: "u2",
@@ -589,7 +575,7 @@ export function countBy<T extends string>(items: string[], keys: T[]) {
 
 export function ticketsFor(role: Role, tickets = TICKETS): Ticket[] {
   const me = CURRENT_USER[role]
-  if (role === "platform_admin" || role === "company_admin" || role === "it_head")
+  if (role === "platform_admin" || role === "it_head")
     return tickets
   if (role === "it_employee")
     return tickets.filter((t) => t.assignee === me.name)

@@ -78,7 +78,7 @@ export default function Tickets({
   const PAGE_SIZE = 6
 
   const isITManager =
-    role === "it_head" || role === "company_admin" || role === "platform_admin"
+    role === "it_head" || role === "platform_admin"
 
   const unassignedCount = useMemo(
     () => tickets.filter((t) => !t.assignee).length,
@@ -676,7 +676,7 @@ function TicketDetail({
   const [draft, setDraft] = useState("")
   const [assignee, setAssignee] = useState(ticket.assignee ?? STAFF[0].name)
   const me = CURRENT_USER[role]
-  const isITHead = role === "it_head" || role === "company_admin"
+  const isITHead = role === "it_head"
   const isITEmployee = role === "it_employee" || isITHead
   const isReporter = me.name === ticket.reporter || role === "normal_employee"
 
