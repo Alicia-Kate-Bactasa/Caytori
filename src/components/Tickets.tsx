@@ -1154,7 +1154,7 @@ function CreateTicket({
                   onChange={(e) => setCategory(e.target.value as Category)}
                   className="w-full bg-transparent text-sm outline-none"
                 >
-                  {CATEGORIES.map((c) => (
+                  {cats.map((c) => (
                     <option key={c} value={c}>
                       {c}
                     </option>
