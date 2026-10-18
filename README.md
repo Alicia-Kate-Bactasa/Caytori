@@ -2,14 +2,6 @@
 
 > Centralize IT Support. Resolve Issues. Keep Business Moving.
 
----
-
-## Name of System and Description
-
-### Name
-**Caytori — IT Services Ticketing & Support Management Platform**
-
-### Description
 Caytori is a multi-company web application designed to centralize and streamline IT support workflows. In many organizations, employees report technical issues through scattered channels such as personal messages, emails, chat apps, or verbal requests. This informal approach causes support teams to lose track of ticket owners, severity levels, resolution times, and recurring equipment faults.
 
 Caytori replaces scattered communication with a structured support workflow:
@@ -25,48 +17,41 @@ The platform is built to support organizations of all sizes, from small companie
 
 ## Tech Stack
 
-All integrated and planned technologies for Caytori are organized below by layer:
-
 ### Frontend
 
-| Technology | Badge | Status | Description |
-|---|---|---|---|
-| **React 19** | ![React](https://img.shields.io/badge/React_19-20232A?style=for-the-badge&logo=react&logoColor=61DAFB) | Integrated | Core user interface library with component-driven architecture |
-| **TypeScript** | ![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white) | Integrated | Static typing for type safety, models, and interfaces |
-| **Vite 8** | ![Vite](https://img.shields.io/badge/Vite_8-646CFF?style=for-the-badge&logo=vite&logoColor=white) | Integrated | Next-generation frontend tooling and fast development server |
-| **Tailwind CSS 4** | ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS_v4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white) | Integrated | Utility-first CSS framework powering the clean neumorphic design |
-| **Motion** | ![Motion](https://img.shields.io/badge/Motion-0055FF?style=for-the-badge&logo=framer&logoColor=white) | Integrated | Animation library for smooth transitions, drawers, and modal overlays |
-| **Lucide Icons** | ![Lucide](https://img.shields.io/badge/Lucide_Icons-F56565?style=for-the-badge&logo=feather&logoColor=white) | Integrated | Consistent, modern icon set across all views and navigation |
-| **Recharts** | ![Recharts](https://img.shields.io/badge/Recharts-22B5BF?style=for-the-badge&logo=chartdotjs&logoColor=white) | Integrated | Charting library for ticket distributions and resolution metrics |
+![React](https://img.shields.io/badge/React_19-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
+![TypeScript](https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=typescript&logoColor=white)
+![Vite](https://img.shields.io/badge/Vite_8-646CFF?style=for-the-badge&logo=vite&logoColor=white)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS_v4-06B6D4?style=for-the-badge&logo=tailwindcss&logoColor=white)
+![Motion](https://img.shields.io/badge/Motion-0055FF?style=for-the-badge&logo=framer&logoColor=white)
+![Lucide Icons](https://img.shields.io/badge/Lucide_Icons-F56565?style=for-the-badge&logo=lucide&logoColor=white)
+![Recharts](https://img.shields.io/badge/Recharts-22B5BF?style=for-the-badge&logo=chartdotjs&logoColor=white)
 
 ### Backend
 
-| Technology | Badge | Status | Description |
-|---|---|---|---|
-| **Node.js** | ![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white) | Planned | Scalable JavaScript runtime for server-side API processing |
-| **Express.js** | ![Express.js](https://img.shields.io/badge/Express.js-000000?style=for-the-badge&logo=express&logoColor=white) | Planned | Web framework for routing, middleware, and request validation |
-| **REST API** | ![REST API](https://img.shields.io/badge/REST_API-02569B?style=for-the-badge&logo=fastapi&logoColor=white) | Planned | RESTful endpoint architecture specified in Postman & OpenAPI |
-| **OpenAPI 3.0** | ![OpenAPI](https://img.shields.io/badge/OpenAPI_3.0-6BA539?style=for-the-badge&logo=openapiinitiative&logoColor=white) | Integrated (Spec) | Complete contract specification (`postman/specs/caytori-openapi.yaml`) |
+![.NET](https://img.shields.io/badge/.NET-512BD4?style=for-the-badge&logo=dotnet&logoColor=white)
+![C#](https://img.shields.io/badge/C%23-239120?style=for-the-badge&logo=csharp&logoColor=white)
+![ASP.NET Core](https://img.shields.io/badge/ASP.NET_Core-512BD4?style=for-the-badge&logo=dotnet&logoColor=white)
+![Entity Framework Core](https://img.shields.io/badge/Entity_Framework_Core-512BD4?style=for-the-badge&logo=dotnet&logoColor=white)
+![REST API](https://img.shields.io/badge/REST_API-02569B?style=for-the-badge&logo=fastapi&logoColor=white)
+![OpenAPI](https://img.shields.io/badge/OpenAPI_3.0-6BA539?style=for-the-badge&logo=openapiinitiative&logoColor=white)
+![Swagger](https://img.shields.io/badge/Swagger-85EA2D?style=for-the-badge&logo=swagger&logoColor=black)
 
-### Database and Storage
+### Database
 
-| Technology | Badge | Status | Description |
-|---|---|---|---|
-| **PostgreSQL** | ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&logo=postgresql&logoColor=white) | Planned | Relational database for multi-tenant data, tickets, and user records |
-| **Supabase** | ![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white) | Planned | Backend-as-a-service providing PostgreSQL hosting and database management |
-| **Supabase Auth** | ![Supabase Auth](https://img.shields.io/badge/Supabase_Auth-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white) | Planned | Secure user authentication, password management, and invitation tokens |
-| **Supabase Storage** | ![Supabase Storage](https://img.shields.io/badge/Supabase_Storage-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white) | Planned | S3-compatible cloud bucket for ticket screenshot and log file uploads |
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)
+![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)
+![Supabase Auth](https://img.shields.io/badge/Supabase_Auth-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)
+![Supabase Storage](https://img.shields.io/badge/Supabase_Storage-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)
 
-### Tools and Services
+### Tools
 
-| Technology | Badge | Status | Description |
-|---|---|---|---|
-| **Git** | ![Git](https://img.shields.io/badge/Git-F05032?style=for-the-badge&logo=git&logoColor=white) | Integrated | Distributed version control tracking all project revisions |
-| **GitHub** | ![GitHub](https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white) | Integrated | Source code repository hosting and collaborative workflows |
-| **Postman** | ![Postman](https://img.shields.io/badge/Postman-FF6C37?style=for-the-badge&logo=postman&logoColor=white) | Integrated | API testing collection with local/production environments |
-| **Vercel** | ![Vercel](https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white) | Planned | Cloud platform for frontend hosting and continuous deployment |
-| **Resend** | ![Resend](https://img.shields.io/badge/Resend-000000?style=for-the-badge&logo=resend&logoColor=white) | Planned | Transactional email delivery service for invitations and status updates |
-| **OxFmt** | ![OxFmt](https://img.shields.io/badge/OxFmt-FF5722?style=for-the-badge&logo=rust&logoColor=white) | Integrated | High-speed Rust-based code formatter for consistent styling |
+![Git](https://img.shields.io/badge/Git-F05032?style=for-the-badge&logo=git&logoColor=white)
+![GitHub](https://img.shields.io/badge/GitHub-181717?style=for-the-badge&logo=github&logoColor=white)
+![Postman](https://img.shields.io/badge/Postman-FF6C37?style=for-the-badge&logo=postman&logoColor=white)
+![Vercel](https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white)
+![Resend](https://img.shields.io/badge/Resend-000000?style=for-the-badge&logo=resend&logoColor=white)
+![OxFmt](https://img.shields.io/badge/OxFmt-FF5722?style=for-the-badge&logo=rust&logoColor=white)
 
 ---
 
@@ -212,7 +197,7 @@ Caytori/
 The development roadmap for Caytori is structured into six focused projects:
 
 ### Project 1: Database and Backend API Integration
-- Implement the Node.js and Express REST API based on the OpenAPI 3.0 specification (`postman/specs/caytori-openapi.yaml`).
+- Implement the .NET and ASP.NET Core REST API based on the OpenAPI 3.0 specification (`postman/specs/caytori-openapi.yaml`).
 - Connect the application to Supabase PostgreSQL database.
 - Implement Row Level Security (RLS) policies to enforce multi-tenant isolation at the database level.
 - Replace local state mock data with live API client queries and mutations.
