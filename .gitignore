@@ -88,4 +88,8 @@ tmp/
 *.user
 *.suo
 .vs/
+appsettings.Development.json
+appsettings.*.json
+!appsettings.json
+
 
