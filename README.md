@@ -40,9 +40,7 @@ The platform is built to support organizations of all sizes, from small companie
 ### Database
 
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?style=for-the-badge&logo=postgresql&logoColor=white)
-![Supabase](https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)
-![Supabase Auth](https://img.shields.io/badge/Supabase_Auth-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)
-![Supabase Storage](https://img.shields.io/badge/Supabase_Storage-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white)
+![Neon](https://img.shields.io/badge/Neon-00E599?style=for-the-badge&logo=neon&logoColor=black)
 
 ### Tools
 
@@ -136,7 +134,7 @@ To ensure issues are addressed promptly, Caytori enforces target resolution wind
 
 - **Postman API Collection**: Full suite of 30 ready-to-test API requests covering authentication, companies, departments, users, tickets, comments, and settings.
 - **OpenAPI 3.0 Specification**: Formal machine-readable contract defining all endpoints, request schemas, parameters, and response structures.
-- **Planned Supabase Integration**: Cloud-hosted PostgreSQL database, row-level security policies, user authentication, and file storage.
+- **Planned Neon Integration**: Cloud-hosted serverless PostgreSQL database with automatic compute wake-up, high availability, and database scaling.
 - **Planned Resend Email Service**: Automated transactional emails for employee invitation links, ticket creation receipts, technician assignments, and SLA breach notices.
 
 ---
@@ -198,7 +196,7 @@ The development roadmap for Caytori is structured into six focused projects:
 
 ### Project 1: Database and Backend API Integration
 - Implement the .NET and ASP.NET Core REST API based on the OpenAPI 3.0 specification (`postman/specs/caytori-openapi.yaml`).
-- Connect the application to Supabase PostgreSQL database.
+- Connect the application to Neon serverless PostgreSQL database.
 - Implement Row Level Security (RLS) policies to enforce multi-tenant isolation at the database level.
 - Replace local state mock data with live API client queries and mutations.
 
@@ -209,7 +207,7 @@ The development roadmap for Caytori is structured into six focused projects:
 - Implement automated email alerts when a ticket approaches or breaches its SLA deadline.
 
 ### Project 3: File and Screenshot Attachments
-- Connect Supabase Storage buckets for secure file uploads.
+- Connect cloud object storage for secure file uploads.
 - Allow employees to attach error screenshots, system crash logs, and diagnostic documents during ticket creation.
 - Add image preview and document download capabilities inside the ticket conversation view.
 
