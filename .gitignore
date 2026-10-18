@@ -80,3 +80,16 @@ tmp/
 
 # Local dev overrides
 .local/
+.neon
+
+# .NET build outputs and caches
+[Bb]in/
+[Oo]bj/
+*.user
+*.suo
+.vs/
+appsettings.Development.json
+appsettings.*.json
+!appsettings.json
+
+
