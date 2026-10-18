@@ -7,9 +7,14 @@
     "dev": "vite --host 0.0.0.0",
     "build": "vite build",
     "preview": "vite preview",
+    "test:db": "node test-neon.mjs",
     "format": "oxfmt"
   },
   "dependencies": {
+    "@neon/config": "^1.9.2",
+    "@neon/env": "^1.6.3",
+    "@neondatabase/serverless": "^1.2.0",
+    "dotenv": "^18.0.8",
     "lucide-react": "^1.33.0",
     "motion": "^13.1.0",
     "react": "^19.0.0",
